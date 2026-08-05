@@ -5,11 +5,14 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { getOrder, riskForUser, type RiskProfile } from "@/lib/store";
 import { formatTWD } from "@/lib/format";
 import { OrderStatusBadge } from "@/components/order-status-badge";
+import { OrderProgress } from "@/components/order-progress";
+import { ConfirmButton } from "@/components/confirm-button";
 import {
   adminAbandonAction,
   adminCancelAction,
   adminCompleteAction,
   adminConfirmAction,
+  adminRestoreAction,
   adminShipAction,
 } from "@/lib/order-actions";
 
@@ -51,6 +54,10 @@ export default async function AdminOrderDetailPage({
           </div>
           <div className="mt-1 text-xs text-ink/40">
             {new Date(order.createdAt).toLocaleString("zh-TW")}
+          </div>
+
+          <div className="mt-5">
+            <OrderProgress status={order.status} abandoned={order.abandoned} />
           </div>
 
           <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4">
@@ -148,9 +155,12 @@ export default async function AdminOrderDetailPage({
                       placeholder="棄單/拒收原因"
                       className="rounded-lg border border-line px-2 py-1.5 text-xs outline-none focus:border-brand"
                     />
-                    <button className="w-full rounded-lg border border-red-300 py-2 text-sm font-medium text-red-500 hover:bg-red-50">
+                    <ConfirmButton
+                      message="確定要標記為棄單／拒收嗎？此操作會取消訂單並影響客戶風險分數（之後仍可復原）。"
+                      className="w-full rounded-lg border border-red-300 py-2 text-sm font-medium text-red-500 hover:bg-red-50"
+                    >
                       標記棄單 / 拒收
-                    </button>
+                    </ConfirmButton>
                   </form>
                 </>
               )}
@@ -162,13 +172,27 @@ export default async function AdminOrderDetailPage({
                     placeholder="取消原因"
                     className="rounded-lg border border-line px-2 py-1.5 text-xs outline-none focus:border-brand"
                   />
-                  <button className="w-full rounded-lg border border-line py-2 text-sm text-ink/60 hover:border-red-400 hover:text-red-500">
+                  <ConfirmButton
+                    message="確定要取消這張訂單嗎？（之後仍可復原）"
+                    className="w-full rounded-lg border border-line py-2 text-sm text-ink/60 hover:border-red-400 hover:text-red-500"
+                  >
                     取消訂單
-                  </button>
+                  </ConfirmButton>
                 </form>
               )}
-              {(order.status === "COMPLETED" || order.status === "CANCELLED") && (
-                <p className="text-xs text-ink/40">此訂單已結束，無可用操作。</p>
+              {order.status === "CANCELLED" && (
+                <form action={adminRestoreAction}>
+                  <input type="hidden" name="orderNo" value={order.orderNo} />
+                  <button className="w-full rounded-lg border border-brand py-2 text-sm font-medium text-brand hover:bg-brand-50">
+                    ↩ 復原訂單（誤按救回）
+                  </button>
+                  <p className="mt-1 text-xs text-ink/40">
+                    會回到取消前的狀態，並還原客戶風險分數。
+                  </p>
+                </form>
+              )}
+              {order.status === "COMPLETED" && (
+                <p className="text-xs text-ink/40">此訂單已完成，無可用操作。</p>
               )}
             </div>
           </div>

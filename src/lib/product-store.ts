@@ -56,6 +56,7 @@ export type CreateProductInput = {
   price: number;
   stock: number;
   gradient: [string, string];
+  imageDataUrl?: string;
 };
 
 export function createProduct(input: CreateProductInput): string {
@@ -69,6 +70,7 @@ export function createProduct(input: CreateProductInput): string {
     description: input.description,
     price: input.price,
     gradient: input.gradient,
+    imageDataUrl: input.imageDataUrl,
     optionGroups: [],
     variants: [{ id: `${slug}-v1`, options: {}, price: input.price, stock: input.stock }],
     status: "ACTIVE",
@@ -83,6 +85,7 @@ export type UpdateProductInput = {
   categorySlug: string;
   status: ProductStatus;
   variants: { id: string; price: number; stock: number }[];
+  imageDataUrl?: string; // 有值才覆蓋（沒上傳新圖就維持原圖）
 };
 
 export function updateProduct(slug: string, input: UpdateProductInput): boolean {
@@ -92,6 +95,7 @@ export function updateProduct(slug: string, input: UpdateProductInput): boolean 
   p.description = input.description;
   p.categorySlug = input.categorySlug;
   p.status = input.status;
+  if (input.imageDataUrl !== undefined) p.imageDataUrl = input.imageDataUrl;
   for (const vi of input.variants) {
     const v = p.variants.find((x) => x.id === vi.id);
     if (v) {

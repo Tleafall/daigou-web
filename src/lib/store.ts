@@ -29,6 +29,7 @@ export type Order = {
   cancelledBy?: "customer" | "admin";
   abandoned?: boolean; // 貨到付款棄單/拒收
   cancellationReason?: string;
+  previousStatus?: OrderStatus; // 取消前的狀態，供復原用
   returnRequest?: { reason: string; createdAt: string }; // 退換貨申請
   items: OrderItem[];
   subtotal: number;
@@ -210,10 +211,25 @@ export function cancelOrder(
     if (o.status !== "PENDING" && o.status !== "CONFIRMED")
       return { ok: false, error: "此訂單狀態無法取消" };
   }
+  o.previousStatus = o.status; // 記住取消前狀態，供復原
   o.status = "CANCELLED";
   o.cancelledBy = by;
   o.cancellationReason = reason;
   o.abandoned = opts?.abandoned ?? false;
+  touch(o);
+  return { ok: true };
+}
+
+// 復原已取消/棄單的訂單，回到取消前的狀態
+export function restoreOrder(orderNo: string): TransitionResult {
+  const o = getOrder(orderNo);
+  if (!o) return { ok: false, error: "訂單不存在" };
+  if (o.status !== "CANCELLED") return { ok: false, error: "僅已取消的訂單可復原" };
+  o.status = o.previousStatus ?? "PENDING";
+  o.cancelledBy = undefined;
+  o.abandoned = false;
+  o.cancellationReason = undefined;
+  o.previousStatus = undefined;
   touch(o);
   return { ok: true };
 }

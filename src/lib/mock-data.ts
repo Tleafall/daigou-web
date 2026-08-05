@@ -27,7 +27,8 @@ export type Product = {
   categorySlug: string;
   description: string;
   price: number; // 最低規格價（列表顯示用）
-  gradient: [string, string]; // 佔位圖漸層（骨架階段無真實圖）
+  gradient: [string, string]; // 佔位圖漸層（無上傳圖時的底色）
+  imageDataUrl?: string; // 上傳的封面圖（原型用 data URL 存記憶體）
   optionGroups: OptionGroup[];
   variants: Variant[];
   status: ProductStatus;

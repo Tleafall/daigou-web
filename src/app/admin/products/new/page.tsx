@@ -52,8 +52,18 @@ export default async function NewProductPage() {
           <textarea name="description" className={`${inputClass} min-h-24`} placeholder="商品介紹、材質、代購說明…" />
         </label>
 
+        <label className="text-sm">
+          <span className="mb-1 block text-ink/70">商品圖片（選填，≤2MB）</span>
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
+          />
+        </label>
+
         <fieldset className="text-sm">
-          <span className="mb-2 block text-ink/70">封面配色</span>
+          <span className="mb-2 block text-ink/70">封面配色（未上傳圖片時的底色）</span>
           <div className="flex flex-wrap gap-2">
             {gradientPresets.map((g, i) => (
               <label key={i} className="cursor-pointer">

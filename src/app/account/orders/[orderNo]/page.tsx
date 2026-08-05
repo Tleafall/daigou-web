@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth-helpers";
 import { getOrder } from "@/lib/store";
 import { formatTWD } from "@/lib/format";
 import { OrderStatusBadge } from "@/components/order-status-badge";
+import { OrderProgress } from "@/components/order-progress";
 import {
   customerCancelOrderAction,
   customerReturnRequestAction,
@@ -46,6 +47,10 @@ export default async function OrderDetailPage({
         </div>
         <div className="mt-1 text-xs text-ink/40">
           下單時間：{new Date(order.createdAt).toLocaleString("zh-TW")}
+        </div>
+
+        <div className="mt-5">
+          <OrderProgress status={order.status} abandoned={order.abandoned} />
         </div>
 
         {/* 品項 */}

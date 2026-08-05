@@ -63,6 +63,29 @@ export default async function EditProductPage({
           <textarea name="description" defaultValue={product.description} className={`${inputClass} min-h-24`} />
         </label>
 
+        {/* 商品圖片 */}
+        <div className="text-sm">
+          <span className="mb-1 block text-ink/70">商品圖片</span>
+          <div className="flex items-center gap-3">
+            <div
+              className="h-16 w-16 shrink-0 overflow-hidden rounded-lg"
+              style={{ background: `linear-gradient(135deg, ${product.gradient[0]}, ${product.gradient[1]})` }}
+            >
+              {product.imageDataUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={product.imageDataUrl} alt={product.title} className="h-full w-full object-cover" />
+              )}
+            </div>
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              className="flex-1 rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
+            />
+          </div>
+          <p className="mt-1 text-xs text-ink/40">不選檔案＝維持原圖。≤2MB。</p>
+        </div>
+
         {/* 規格價格 / 庫存 */}
         <div className="text-sm">
           <span className="mb-2 block text-ink/70">規格價格與庫存</span>

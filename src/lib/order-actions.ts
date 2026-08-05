@@ -8,6 +8,7 @@ import {
   createOrder,
   getOrder,
   requestReturn,
+  restoreOrder,
   type CreateOrderResult,
 } from "@/lib/store";
 
@@ -120,5 +121,12 @@ export async function adminAbandonAction(formData: FormData) {
   const orderNo = String(formData.get("orderNo"));
   const reason = String(formData.get("reason") || "貨到付款棄單/拒收");
   cancelOrder(orderNo, "admin", reason, { abandoned: true });
+  revalidateAdmin(orderNo);
+}
+
+export async function adminRestoreAction(formData: FormData) {
+  await assertAdmin();
+  const orderNo = String(formData.get("orderNo"));
+  restoreOrder(orderNo);
   revalidateAdmin(orderNo);
 }

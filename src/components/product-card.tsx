@@ -12,11 +12,19 @@ export function ProductCard({ product }: { product: Product }) {
       className="group flex flex-col overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-md"
     >
       <div
-        className="relative aspect-square w-full"
+        className="relative aspect-square w-full overflow-hidden"
         style={{
           background: `linear-gradient(135deg, ${product.gradient[0]}, ${product.gradient[1]})`,
         }}
       >
+        {product.imageDataUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={product.imageDataUrl}
+            alt={product.title}
+            className="h-full w-full object-cover"
+          />
+        )}
         {totalStock === 0 && (
           <span className="absolute left-2 top-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">
             售罄
