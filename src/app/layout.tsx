@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { site } from "@/lib/site";
 import { auth } from "@/auth";
+import { CartProvider } from "@/lib/cart-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,9 +41,11 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-white">
-        <SiteHeader user={user} />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+        <CartProvider>
+          <SiteHeader user={user} />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+        </CartProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { site } from "@/lib/site";
 import { logoutAction } from "@/lib/auth-actions";
+import { useCart } from "@/lib/cart-context";
 import { CategoryBar, CategoryList } from "./category-nav";
 import { IconCart, IconClose, IconMenu, IconSearch, IconUser } from "./icons";
 
@@ -14,6 +15,7 @@ type HeaderUser = {
 
 export function SiteHeader({ user }: { user?: HeaderUser }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { count, ready } = useCart();
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white">
@@ -41,11 +43,12 @@ export function SiteHeader({ user }: { user?: HeaderUser }) {
 
         {/* 搜尋列（桌機內嵌） */}
         <form
-          onSubmit={(e) => e.preventDefault()}
+          action="/search"
           className="hidden flex-1 items-center rounded-full border border-line bg-muted px-4 py-2 focus-within:border-brand sm:flex"
         >
           <input
             type="search"
+            name="q"
             placeholder="搜尋商品…"
             className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40"
           />
@@ -66,10 +69,15 @@ export function SiteHeader({ user }: { user?: HeaderUser }) {
 
           <Link
             href="/cart"
-            className="rounded-md p-2 text-ink hover:bg-muted"
+            className="relative rounded-md p-2 text-ink hover:bg-muted"
             aria-label="購物車"
           >
             <IconCart className="h-6 w-6" />
+            {ready && count > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-bold text-white">
+                {count}
+              </span>
+            )}
           </Link>
 
           {user ? (
@@ -106,12 +114,13 @@ export function SiteHeader({ user }: { user?: HeaderUser }) {
 
       {/* 搜尋列（手機獨立一行） */}
       <form
-        onSubmit={(e) => e.preventDefault()}
+        action="/search"
         className="flex items-center gap-2 border-t border-line px-4 py-2 sm:hidden"
       >
         <div className="flex flex-1 items-center rounded-full border border-line bg-muted px-4 py-2 focus-within:border-brand">
           <input
             type="search"
+            name="q"
             placeholder="搜尋商品…"
             className="w-full bg-transparent text-sm outline-none placeholder:text-ink/40"
           />

@@ -26,22 +26,34 @@ export default async function AdminPage() {
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {[
-          { title: "商品管理", desc: "新增/編輯商品、規格與庫存、上下架" },
-          { title: "訂單管理", desc: "訂單狀態、確認、出貨、取消回補庫存" },
-          { title: "客戶風險", desc: "棄單/取消次數、風險分數、封鎖" },
-          { title: "分類管理", desc: "分類與排序" },
-          { title: "庫存異動", desc: "庫存流水與稽核" },
-          { title: "管理員權限", desc: "授權其他管理員" },
-        ].map((item) => (
-          <div
-            key={item.title}
-            className="rounded-xl border border-line bg-white p-4"
-          >
-            <div className="font-medium">{item.title}</div>
-            <div className="mt-1 text-sm text-ink/50">{item.desc}</div>
-            <div className="mt-2 text-xs text-ink/40">即將推出</div>
-          </div>
-        ))}
+          { title: "訂單管理", desc: "訂單狀態、確認、出貨、取消、客戶風險", href: "/admin/orders" },
+          { title: "商品管理", desc: "商品、規格與庫存一覽（唯讀）", href: "/admin/products" },
+          { title: "客戶風險", desc: "棄單/取消次數、風險分數、封鎖", href: undefined },
+          { title: "分類管理", desc: "分類與排序", href: undefined },
+          { title: "庫存異動", desc: "庫存流水與稽核", href: undefined },
+          { title: "管理員權限", desc: "授權其他管理員", href: undefined },
+        ].map((item) =>
+          item.href ? (
+            <Link
+              key={item.title}
+              href={item.href}
+              className="rounded-xl border border-line bg-white p-4 transition-colors hover:border-brand hover:bg-brand-50"
+            >
+              <div className="font-medium">{item.title}</div>
+              <div className="mt-1 text-sm text-ink/50">{item.desc}</div>
+              <div className="mt-2 text-xs font-medium text-brand">前往 →</div>
+            </Link>
+          ) : (
+            <div
+              key={item.title}
+              className="rounded-xl border border-line bg-white p-4"
+            >
+              <div className="font-medium">{item.title}</div>
+              <div className="mt-1 text-sm text-ink/50">{item.desc}</div>
+              <div className="mt-2 text-xs text-ink/40">即將推出</div>
+            </div>
+          ),
+        )}
       </div>
 
       <div className="mt-6">

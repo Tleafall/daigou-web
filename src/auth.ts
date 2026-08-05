@@ -37,9 +37,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) token.role = user.role;
       return token;
     },
-    // 再從 token 帶到 session，讓 server 端可讀 session.user.role
+    // 再從 token 帶到 session，讓 server 端可讀 session.user.id / role
     session: ({ session, token }) => {
       if (session.user) {
+        session.user.id = token.sub ?? "";
         session.user.role = (token.role as "CUSTOMER" | "ADMIN") ?? "CUSTOMER";
       }
       return session;

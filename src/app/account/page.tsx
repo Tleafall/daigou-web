@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireUser } from "@/lib/auth-helpers";
 import { logoutAction } from "@/lib/auth-actions";
 
@@ -28,8 +29,15 @@ export default async function AccountPage() {
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <Link
+          href="/account/orders"
+          className="rounded-xl border border-line bg-white p-4 transition-colors hover:border-brand hover:bg-brand-50"
+        >
+          <div className="font-medium">我的訂單</div>
+          <div className="mt-1 text-sm text-ink/50">查看訂單與出貨狀態</div>
+          <div className="mt-2 text-xs font-medium text-brand">前往 →</div>
+        </Link>
         {[
-          { title: "我的訂單", desc: "查看訂單與出貨狀態" },
           { title: "常用收件地址", desc: "管理宅配地址" },
           { title: "取消 / 退換貨申請", desc: "售後服務" },
           { title: "帳號設定", desc: "個資與帳號刪除" },

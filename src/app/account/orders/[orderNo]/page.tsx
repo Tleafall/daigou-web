@@ -1,0 +1,108 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { requireUser } from "@/lib/auth-helpers";
+import { getOrder } from "@/lib/store";
+import { formatTWD } from "@/lib/format";
+import { OrderStatusBadge } from "@/components/order-status-badge";
+import { customerCancelOrderAction } from "@/lib/order-actions";
+
+export const metadata: Metadata = { title: "訂單明細" };
+
+export default async function OrderDetailPage({
+  params,
+}: {
+  params: Promise<{ orderNo: string }>;
+}) {
+  const user = await requireUser();
+  const { orderNo } = await params;
+  const order = getOrder(orderNo);
+  if (!order || order.userId !== (user.id ?? user.email)) notFound();
+
+  const canCancel = order.status === "PENDING" || order.status === "CONFIRMED";
+
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-8">
+      <nav className="mb-4 text-sm text-ink/50">
+        <Link href="/account/orders" className="hover:text-brand">我的訂單</Link>
+        <span className="mx-2">/</span>
+        <span className="text-ink/80">{order.orderNo}</span>
+      </nav>
+
+      {order.status === "PENDING" && (
+        <div className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">
+          ✓ 訂單已成立，等待賣家確認。付款方式為貨到付款。
+        </div>
+      )}
+
+      <div className="rounded-xl border border-line bg-white p-5">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-sm text-ink/70">{order.orderNo}</span>
+          <OrderStatusBadge status={order.status} />
+        </div>
+        <div className="mt-1 text-xs text-ink/40">
+          下單時間：{new Date(order.createdAt).toLocaleString("zh-TW")}
+        </div>
+
+        {/* 品項 */}
+        <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4">
+          {order.items.map((it, idx) => (
+            <div key={idx} className="flex gap-3">
+              <div
+                className="h-14 w-14 shrink-0 rounded-lg"
+                style={{ background: `linear-gradient(135deg, ${it.gradient[0]}, ${it.gradient[1]})` }}
+              />
+              <div className="flex-1 text-sm">
+                <div className="font-medium">{it.productTitle}</div>
+                {it.optionLabel && <div className="text-xs text-ink/50">{it.optionLabel}</div>}
+                <div className="text-xs text-ink/50">
+                  {formatTWD(it.unitPrice)} × {it.quantity}
+                </div>
+              </div>
+              <div className="text-sm font-medium">{formatTWD(it.lineTotal)}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* 金額 */}
+        <div className="mt-4 border-t border-line pt-4 text-sm">
+          <div className="flex justify-between py-0.5">
+            <span className="text-ink/60">商品小計</span>
+            <span>{formatTWD(order.subtotal)}</span>
+          </div>
+          <div className="flex justify-between py-0.5">
+            <span className="text-ink/60">運費</span>
+            <span>{order.shippingFee === 0 ? "免運" : formatTWD(order.shippingFee)}</span>
+          </div>
+          <div className="mt-1 flex justify-between border-t border-line pt-2 font-bold">
+            <span>應付金額（貨到付款）</span>
+            <span className="text-brand">{formatTWD(order.totalAmount)}</span>
+          </div>
+        </div>
+
+        {/* 收件資料 */}
+        <div className="mt-4 border-t border-line pt-4 text-sm text-ink/70">
+          <div className="mb-1 font-medium text-ink">收件資料</div>
+          <div>{order.recipientName}　{order.recipientPhone}</div>
+          <div>{order.city}{order.district}{order.addressLine}</div>
+          {order.customerNote && <div className="mt-1 text-ink/50">備註：{order.customerNote}</div>}
+        </div>
+
+        {order.status === "CANCELLED" && order.cancellationReason && (
+          <div className="mt-4 rounded-lg bg-zinc-100 px-3 py-2 text-sm text-ink/60">
+            取消原因：{order.cancellationReason}
+          </div>
+        )}
+      </div>
+
+      {canCancel && (
+        <form action={customerCancelOrderAction} className="mt-4">
+          <input type="hidden" name="orderNo" value={order.orderNo} />
+          <button className="rounded-full border border-line px-5 py-2 text-sm text-ink/70 hover:border-red-400 hover:text-red-500">
+            取消訂單
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}

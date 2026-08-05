@@ -1,14 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Product, Variant } from "@/lib/mock-data";
 import { formatTWD } from "@/lib/format";
+import { useCart } from "@/lib/cart-context";
 
 const MAX_QTY = 10; // 單一商品購買上限（見 PLAN.md）
 
 export function VariantSelector({ product }: { product: Product }) {
+  const { addItem } = useCart();
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
 
   const hasOptions = product.optionGroups.length > 0;
   const allSelected = product.optionGroups.every((g) => selected[g.name]);
@@ -49,14 +53,25 @@ export function VariantSelector({ product }: { product: Product }) {
   }
 
   function addToCart() {
-    const desc = hasOptions
+    if (!matched) return;
+    const optionLabel = hasOptions
       ? Object.entries(selected)
           .map(([k, v]) => `${k}：${v}`)
           .join("、")
-      : product.title;
-    alert(
-      `示範骨架 🛒\n\n已選「${desc}」× ${qty}\n\n購物車與結帳功能會在後續階段接上資料庫後開通。`,
+      : "";
+    addItem(
+      {
+        productSlug: product.slug,
+        productTitle: product.title,
+        variantId: matched.id,
+        optionLabel,
+        unitPrice: matched.price,
+        gradient: product.gradient,
+      },
+      qty,
     );
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 3000);
   }
 
   return (
@@ -143,6 +158,15 @@ export function VariantSelector({ product }: { product: Product }) {
       >
         {canAdd ? "加入購物車" : hasOptions && !allSelected ? "請先選擇規格" : "已售罄"}
       </button>
+
+      {added && (
+        <div className="flex items-center gap-3 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand">
+          ✓ 已加入購物車
+          <Link href="/cart" className="font-medium underline">
+            查看購物車
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
