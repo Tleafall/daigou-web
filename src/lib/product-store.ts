@@ -4,7 +4,17 @@ import {
   seedProducts,
   type Product,
   type ProductStatus,
+  type Variant,
 } from "@/lib/mock-data";
+import { recordMovement } from "@/lib/inventory-store";
+
+function variantOptionLabel(v: Variant): string {
+  return (
+    Object.entries(v.options)
+      .map(([k, val]) => `${k}：${val}`)
+      .join("、") || "預設規格"
+  );
+}
 
 type Store = { products: Product[] };
 
@@ -46,6 +56,39 @@ export function getProduct(slug: string): Product | undefined {
 export function getActiveProduct(slug: string): Product | undefined {
   const p = getProduct(slug);
   return p && p.status === "ACTIVE" ? p : undefined;
+}
+
+export function getVariant(
+  variantId: string,
+): { product: Product; variant: Variant } | undefined {
+  for (const p of getStore().products) {
+    const variant = p.variants.find((v) => v.id === variantId);
+    if (variant) return { product: p, variant };
+  }
+  return undefined;
+}
+
+// 調整庫存並記錄異動（下單扣、取消補、盤點調整都走這裡）
+export function adjustVariantStock(
+  variantId: string,
+  delta: number,
+  type: "SALE" | "CANCEL" | "RESTOCK" | "ADJUST",
+  reason: string,
+  orderNo?: string,
+): boolean {
+  const found = getVariant(variantId);
+  if (!found) return false;
+  found.variant.stock = Math.max(0, found.variant.stock + delta);
+  recordMovement({
+    variantId,
+    productTitle: found.product.title,
+    optionLabel: variantOptionLabel(found.variant),
+    type,
+    delta,
+    reason,
+    orderNo,
+  });
+  return true;
 }
 
 // ---- 異動 ----
@@ -100,7 +143,18 @@ export function updateProduct(slug: string, input: UpdateProductInput): boolean 
     const v = p.variants.find((x) => x.id === vi.id);
     if (v) {
       v.price = vi.price;
-      v.stock = vi.stock;
+      if (vi.stock !== v.stock) {
+        const delta = vi.stock - v.stock;
+        v.stock = vi.stock;
+        recordMovement({
+          variantId: v.id,
+          productTitle: p.title,
+          optionLabel: variantOptionLabel(v),
+          type: "ADJUST",
+          delta,
+          reason: "後台庫存調整",
+        });
+      }
     }
   }
   recalcPrice(p);

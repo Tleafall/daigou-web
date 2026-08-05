@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { isBlocked } from "@/lib/customer-store";
 import {
   adminAdvance,
   cancelOrder,
@@ -28,6 +29,10 @@ export async function createOrderAction(
   const session = await auth();
   if (!session?.user) return { ok: false, error: "請先登入" };
 
+  const userId = session.user.id ?? session.user.email ?? "unknown";
+  if (isBlocked(userId))
+    return { ok: false, error: "此帳號目前無法下單，請聯繫客服。" };
+
   const name = input.recipientName?.trim();
   const phone = input.recipientPhone?.trim();
   if (!name) return { ok: false, error: "請填寫收件人姓名" };
@@ -37,7 +42,7 @@ export async function createOrderAction(
     return { ok: false, error: "請填寫完整收件地址" };
 
   return createOrder({
-    userId: session.user.id ?? session.user.email ?? "unknown",
+    userId,
     userEmail: session.user.email ?? "",
     userName: session.user.name ?? "會員",
     items: input.items,

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { getOrder, riskForUser, type RiskProfile } from "@/lib/store";
+import { getCustomerProfile } from "@/lib/customer-store";
 import { formatTWD } from "@/lib/format";
 import { OrderStatusBadge } from "@/components/order-status-badge";
 import { OrderProgress } from "@/components/order-progress";
@@ -36,6 +37,7 @@ export default async function AdminOrderDetailPage({
 
   const risk = riskForUser(order.userId);
   const rm = riskMeta[risk.level];
+  const manualFlag = getCustomerProfile(order.userId).manualFlag;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -111,6 +113,19 @@ export default async function AdminOrderDetailPage({
                 {rm.label}　分數 {risk.score}
               </span>
             </div>
+            {manualFlag !== "NORMAL" && (
+              <div className="mt-2">
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    manualFlag === "BLOCKED"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {manualFlag === "BLOCKED" ? "已封鎖" : "觀察名單"}
+                </span>
+              </div>
+            )}
             <ul className="mt-3 space-y-1 text-xs text-ink/60">
               <li>總下單：{risk.totalOrders}</li>
               <li>完成：{risk.completedOrders}</li>
@@ -119,6 +134,12 @@ export default async function AdminOrderDetailPage({
                 棄單/拒收：{risk.codAbandonCount}
               </li>
             </ul>
+            <Link
+              href={`/admin/customers/${order.userId}`}
+              className="mt-3 inline-block text-xs text-brand hover:underline"
+            >
+              客戶管理 →
+            </Link>
           </div>
 
           <div className="rounded-xl border border-line bg-white p-4">

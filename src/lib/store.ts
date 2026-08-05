@@ -1,6 +1,6 @@
 // ⚠️ 原型用「伺服器記憶體」訂單庫。重啟伺服器會清空。
 // 之後接 Neon + Prisma 後，這層會換成資料庫（介面刻意貼近未來做法）。
-import { getActiveProduct } from "@/lib/product-store";
+import { adjustVariantStock, getActiveProduct } from "@/lib/product-store";
 
 export type OrderStatus =
   | "PENDING" // 待確認
@@ -78,6 +78,19 @@ export function listOrdersByUser(userId: string): Order[] {
 
 export function getOrder(orderNo: string): Order | undefined {
   return getStore().orders.find((o) => o.orderNo === orderNo);
+}
+
+export type CustomerSummary = { userId: string; userName: string; userEmail: string };
+
+// 從訂單推導出所有下過單的顧客（去重）
+export function listCustomers(): CustomerSummary[] {
+  const map = new Map<string, CustomerSummary>();
+  for (const o of getStore().orders) {
+    if (!map.has(o.userId)) {
+      map.set(o.userId, { userId: o.userId, userName: o.userName, userEmail: o.userEmail });
+    }
+  }
+  return [...map.values()];
 }
 
 // ---- 建立訂單 ----
@@ -163,6 +176,12 @@ export function createOrder(input: CreateOrderInput): CreateOrderResult {
     createdAt: now,
     updatedAt: now,
   };
+
+  // 下單即扣庫存（並記錄異動）
+  for (const it of items) {
+    adjustVariantStock(it.variantId, -it.quantity, "SALE", "下單扣庫存", order.orderNo);
+  }
+
   store.orders.push(order);
   return { ok: true, orderNo: order.orderNo };
 }
@@ -216,6 +235,16 @@ export function cancelOrder(
   o.cancelledBy = by;
   o.cancellationReason = reason;
   o.abandoned = opts?.abandoned ?? false;
+  // 取消/棄單回補庫存
+  for (const it of o.items) {
+    adjustVariantStock(
+      it.variantId,
+      it.quantity,
+      "CANCEL",
+      opts?.abandoned ? "棄單回補庫存" : "取消回補庫存",
+      o.orderNo,
+    );
+  }
   touch(o);
   return { ok: true };
 }
@@ -230,6 +259,10 @@ export function restoreOrder(orderNo: string): TransitionResult {
   o.abandoned = false;
   o.cancellationReason = undefined;
   o.previousStatus = undefined;
+  // 復原訂單：重新扣回庫存
+  for (const it of o.items) {
+    adjustVariantStock(it.variantId, -it.quantity, "SALE", "訂單復原扣庫存", o.orderNo);
+  }
   touch(o);
   return { ok: true };
 }
