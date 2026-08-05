@@ -1,26 +1,32 @@
 @import "tailwindcss";
 
+@theme {
+  /* 品牌色（暖珊瑚橘，代購/生活風，之後可換）*/
+  --color-brand-50: #fff4ef;
+  --color-brand-100: #ffe3d7;
+  --color-brand-200: #ffc3ac;
+  --color-brand-500: #ef6042;
+  --color-brand: #ef6042;
+  --color-brand-600: #dd4c2e;
+  --color-brand-700: #b93c22;
+
+  /* 中性色 */
+  --color-ink: #241d1a;
+  --color-muted: #f7f3f1;
+  --color-line: #ece5e1;
+
+  --font-sans: var(--font-geist-sans), "Noto Sans TC", "PingFang TC",
+    "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #241d1a;
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
