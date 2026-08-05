@@ -1,0 +1,49 @@
+import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth-helpers";
+import { logoutAction } from "@/lib/auth-actions";
+
+export const metadata: Metadata = { title: "會員中心" };
+
+export default async function AccountPage() {
+  const user = await requireUser();
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">會員中心</h1>
+        <form action={logoutAction}>
+          <button className="rounded-full border border-line px-4 py-1.5 text-sm text-ink/70 hover:border-brand hover:text-brand">
+            登出
+          </button>
+        </form>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-line bg-white p-5">
+        <div className="text-sm text-ink/60">歡迎回來</div>
+        <div className="mt-1 text-lg font-semibold">{user.name}</div>
+        <div className="text-sm text-ink/60">{user.email}</div>
+        <span className="mt-3 inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand">
+          身分：{user.role === "ADMIN" ? "管理員" : "一般會員"}
+        </span>
+      </div>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {[
+          { title: "我的訂單", desc: "查看訂單與出貨狀態" },
+          { title: "常用收件地址", desc: "管理宅配地址" },
+          { title: "取消 / 退換貨申請", desc: "售後服務" },
+          { title: "帳號設定", desc: "個資與帳號刪除" },
+        ].map((item) => (
+          <div
+            key={item.title}
+            className="rounded-xl border border-line bg-white p-4"
+          >
+            <div className="font-medium">{item.title}</div>
+            <div className="mt-1 text-sm text-ink/50">{item.desc}</div>
+            <div className="mt-2 text-xs text-ink/40">即將推出</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
