@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { products } from "@/lib/mock-data";
+import { listActiveProducts } from "@/lib/product-store";
 import { ProductCard } from "@/components/product-card";
 
 export const metadata: Metadata = { title: "搜尋" };
@@ -12,7 +12,9 @@ export default async function SearchPage({
   const { q } = await searchParams;
   const query = (q ?? "").trim();
   const results = query
-    ? products.filter((p) => p.title.toLowerCase().includes(query.toLowerCase()))
+    ? listActiveProducts().filter((p) =>
+        p.title.toLowerCase().includes(query.toLowerCase()),
+      )
     : [];
 
   return (

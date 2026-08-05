@@ -8,18 +8,32 @@ import { formatTWD } from "@/lib/format";
 import { site } from "@/lib/site";
 import { createOrderAction } from "@/lib/order-actions";
 
-export function CheckoutForm({ defaultName }: { defaultName: string }) {
+type DefaultAddress = {
+  recipientName: string;
+  recipientPhone: string;
+  city: string;
+  district: string;
+  addressLine: string;
+} | null;
+
+export function CheckoutForm({
+  defaultName,
+  defaultAddress,
+}: {
+  defaultName: string;
+  defaultAddress?: DefaultAddress;
+}) {
   const { items, subtotal, ready, clear } = useCart();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    recipientName: defaultName,
-    recipientPhone: "",
-    city: "",
-    district: "",
-    addressLine: "",
+    recipientName: defaultAddress?.recipientName || defaultName,
+    recipientPhone: defaultAddress?.recipientPhone || "",
+    city: defaultAddress?.city || "",
+    district: defaultAddress?.district || "",
+    addressLine: defaultAddress?.addressLine || "",
     customerNote: "",
   });
 

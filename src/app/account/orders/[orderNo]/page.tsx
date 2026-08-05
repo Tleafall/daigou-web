@@ -5,7 +5,10 @@ import { requireUser } from "@/lib/auth-helpers";
 import { getOrder } from "@/lib/store";
 import { formatTWD } from "@/lib/format";
 import { OrderStatusBadge } from "@/components/order-status-badge";
-import { customerCancelOrderAction } from "@/lib/order-actions";
+import {
+  customerCancelOrderAction,
+  customerReturnRequestAction,
+} from "@/lib/order-actions";
 
 export const metadata: Metadata = { title: "訂單明細" };
 
@@ -20,6 +23,7 @@ export default async function OrderDetailPage({
   if (!order || order.userId !== (user.id ?? user.email)) notFound();
 
   const canCancel = order.status === "PENDING" || order.status === "CONFIRMED";
+  const canReturn = order.status === "SHIPPED" || order.status === "COMPLETED";
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -102,6 +106,30 @@ export default async function OrderDetailPage({
             取消訂單
           </button>
         </form>
+      )}
+
+      {/* 退換貨 */}
+      {order.returnRequest ? (
+        <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          已申請退換貨（{new Date(order.returnRequest.createdAt).toLocaleString("zh-TW")}）
+          <div className="mt-1 text-amber-600">原因：{order.returnRequest.reason}</div>
+          <div className="mt-1 text-xs text-amber-600/80">賣家將盡快與您聯繫。</div>
+        </div>
+      ) : (
+        canReturn && (
+          <form action={customerReturnRequestAction} className="mt-4 flex flex-col gap-2 rounded-xl border border-line bg-white p-4">
+            <div className="text-sm font-medium">申請退換貨</div>
+            <input type="hidden" name="orderNo" value={order.orderNo} />
+            <input
+              name="reason"
+              placeholder="請說明退換貨原因"
+              className="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand"
+            />
+            <button className="self-start rounded-full border border-line px-5 py-2 text-sm text-ink/70 hover:border-brand hover:text-brand">
+              送出申請
+            </button>
+          </form>
+        )
       )}
     </div>
   );

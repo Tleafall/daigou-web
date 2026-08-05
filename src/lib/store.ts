@@ -1,6 +1,6 @@
 // ⚠️ 原型用「伺服器記憶體」訂單庫。重啟伺服器會清空。
 // 之後接 Neon + Prisma 後，這層會換成資料庫（介面刻意貼近未來做法）。
-import { getProduct } from "@/lib/mock-data";
+import { getActiveProduct } from "@/lib/product-store";
 
 export type OrderStatus =
   | "PENDING" // 待確認
@@ -29,6 +29,7 @@ export type Order = {
   cancelledBy?: "customer" | "admin";
   abandoned?: boolean; // 貨到付款棄單/拒收
   cancellationReason?: string;
+  returnRequest?: { reason: string; createdAt: string }; // 退換貨申請
   items: OrderItem[];
   subtotal: number;
   shippingFee: number;
@@ -109,7 +110,7 @@ export function createOrder(input: CreateOrderInput): CreateOrderResult {
 
   const items: OrderItem[] = [];
   for (const line of input.items) {
-    const product = getProduct(line.productSlug);
+    const product = getActiveProduct(line.productSlug);
     const variant = product?.variants.find((v) => v.id === line.variantId);
     if (!product || !variant) return { ok: false, error: "商品已下架或不存在" };
     if (line.quantity < 1 || line.quantity > MAX_QTY)
@@ -213,6 +214,16 @@ export function cancelOrder(
   o.cancelledBy = by;
   o.cancellationReason = reason;
   o.abandoned = opts?.abandoned ?? false;
+  touch(o);
+  return { ok: true };
+}
+
+export function requestReturn(orderNo: string, reason: string): TransitionResult {
+  const o = getOrder(orderNo);
+  if (!o) return { ok: false, error: "訂單不存在" };
+  if (o.status !== "SHIPPED" && o.status !== "COMPLETED")
+    return { ok: false, error: "僅已出貨/已完成的訂單可申請退換貨" };
+  o.returnRequest = { reason, createdAt: new Date().toISOString() };
   touch(o);
   return { ok: true };
 }

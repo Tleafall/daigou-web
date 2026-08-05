@@ -84,6 +84,14 @@ export default async function AdminOrderDetailPage({
               {order.cancellationReason ? `：${order.cancellationReason}` : ""}
             </div>
           )}
+
+          {order.returnRequest && (
+            <div className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+              ⚠️ 顧客已申請退換貨（
+              {new Date(order.returnRequest.createdAt).toLocaleString("zh-TW")}）：
+              {order.returnRequest.reason}
+            </div>
+          )}
         </div>
 
         {/* 側欄：風險 + 操作 */}

@@ -7,6 +7,7 @@ import {
   cancelOrder,
   createOrder,
   getOrder,
+  requestReturn,
   type CreateOrderResult,
 } from "@/lib/store";
 
@@ -59,6 +60,19 @@ export async function customerCancelOrderAction(formData: FormData) {
   cancelOrder(orderNo, "customer", "會員自行取消");
   revalidatePath(`/account/orders/${orderNo}`);
   revalidatePath("/account/orders");
+}
+
+// 會員申請退換貨
+export async function customerReturnRequestAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) throw new Error("未登入");
+  const orderNo = String(formData.get("orderNo"));
+  const order = getOrder(orderNo);
+  const uid = session.user.id ?? session.user.email;
+  if (!order || order.userId !== uid) throw new Error("無權操作此訂單");
+  const reason = String(formData.get("reason") || "").trim() || "未填原因";
+  requestReturn(orderNo, reason);
+  revalidatePath(`/account/orders/${orderNo}`);
 }
 
 // ---- 後台操作（僅 ADMIN） ----

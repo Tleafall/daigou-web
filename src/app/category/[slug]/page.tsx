@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { categories, getProductsByCategory } from "@/lib/mock-data";
+import { categories } from "@/lib/mock-data";
+import { getActiveByCategory } from "@/lib/product-store";
 import { ProductCard } from "@/components/product-card";
 
 const PAGE_SIZE = 8;
@@ -29,7 +30,7 @@ export default async function CategoryPage({
   const category = categories.find((c) => c.slug === slug);
   if (!category) notFound();
 
-  const all = getProductsByCategory(slug);
+  const all = getActiveByCategory(slug);
   const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
   const page = Math.min(Math.max(1, Number(pageParam) || 1), totalPages);
   const items = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

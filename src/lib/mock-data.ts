@@ -18,6 +18,8 @@ export type Variant = {
   stock: number;
 };
 
+export type ProductStatus = "ACTIVE" | "ARCHIVED" | "DRAFT";
+
 export type Product = {
   id: string;
   slug: string;
@@ -28,6 +30,7 @@ export type Product = {
   gradient: [string, string]; // 佔位圖漸層（骨架階段無真實圖）
   optionGroups: OptionGroup[];
   variants: Variant[];
+  status: ProductStatus;
 };
 
 export const categories: Category[] = [
@@ -80,7 +83,7 @@ function slugify(title: string, i: number): string {
   return `p${i + 1}`;
 }
 
-export const products: Product[] = raw.map((item, i) => {
+export const seedProducts: Product[] = raw.map((item, i) => {
   const slug = slugify(item.title, i);
   const groups = item.opts ?? [];
   const combos = cartesian(groups);
@@ -101,6 +104,7 @@ export const products: Product[] = raw.map((item, i) => {
     gradient: item.g,
     optionGroups: groups,
     variants,
+    status: "ACTIVE",
   };
 });
 
@@ -108,12 +112,14 @@ export function categoryName(slug: string): string {
   return categories.find((c) => c.slug === slug)?.name ?? "商品";
 }
 
-export function getProduct(slug: string): Product | undefined {
-  return products.find((p) => p.slug === slug);
-}
-
-export function getProductsByCategory(slug: string): Product[] {
-  return products.filter((p) => p.categorySlug === slug);
-}
-
-export const latestProducts: Product[] = [...products].reverse();
+// 可用漸層色（新增商品挑選用）
+export const gradientPresets: [string, string][] = [
+  ["#ffd9c7", "#ff9e7d"],
+  ["#ffe0ec", "#ff9ec2"],
+  ["#e9dcff", "#b79bff"],
+  ["#d7ecff", "#8fc4ff"],
+  ["#d6f0e6", "#8fd7bd"],
+  ["#fff2c9", "#ffdd73"],
+  ["#dfe3ff", "#a2acff"],
+  ["#efeadf", "#cbbfa3"],
+];

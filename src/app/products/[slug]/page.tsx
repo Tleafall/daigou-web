@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { categoryName, getProduct } from "@/lib/mock-data";
+import { categoryName } from "@/lib/mock-data";
+import { getActiveProduct } from "@/lib/product-store";
 import { VariantSelector } from "@/components/variant-selector";
 
 export async function generateMetadata({
@@ -10,7 +11,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = getActiveProduct(slug);
   return {
     title: product ? product.title : "商品",
     description: product?.description,
@@ -23,7 +24,7 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = getActiveProduct(slug);
   if (!product) notFound();
 
   return (

@@ -1,36 +1,16 @@
 import Link from "next/link";
-import { categories, latestProducts, products } from "@/lib/mock-data";
+import { categories } from "@/lib/mock-data";
+import { latestActiveProducts, listActiveProducts } from "@/lib/product-store";
 import { ProductCard } from "@/components/product-card";
-import { IconChevronRight } from "@/components/icons";
-import { site } from "@/lib/site";
+import { HeroCarousel } from "@/components/hero-carousel";
 
 export default function Home() {
-  const featured = products.slice(0, 5);
-  const latest = latestProducts.slice(0, 10);
+  const featured = listActiveProducts().slice(0, 5);
+  const latest = latestActiveProducts().slice(0, 10);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
-      {/* Hero */}
-      <section
-        className="relative overflow-hidden rounded-2xl px-6 py-12 sm:px-12 sm:py-16"
-        style={{ background: "linear-gradient(120deg, #ffe3d7, #ffc3ac)" }}
-      >
-        <div className="max-w-md">
-          <h1 className="text-2xl font-bold text-ink sm:text-3xl">
-            海外好物，替你嚴選
-          </h1>
-          <p className="mt-3 text-ink/70">
-            {site.tagline}。安心下單，支援貨到付款，滿 NT$
-            {site.freeShippingThreshold.toLocaleString("zh-TW")} 免運。
-          </p>
-          <Link
-            href="/category/beauty"
-            className="mt-6 inline-flex items-center gap-1 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600"
-          >
-            開始選購 <IconChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
+      <HeroCarousel />
 
       {/* 分類入口 */}
       <section className="mt-8">
