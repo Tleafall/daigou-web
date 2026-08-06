@@ -16,14 +16,19 @@ function toInt(v: FormDataEntryValue | null, fallback = 0): number {
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
-// 讀取上傳圖片轉成 data URL（原型作法；正式版改用 Cloudinary signed upload）
-async function readImageDataUrl(formData: FormData): Promise<string | undefined> {
-  const file = formData.get("image");
-  if (!(file instanceof File) || file.size === 0) return undefined;
-  if (!file.type.startsWith("image/")) return undefined;
-  if (file.size > 2_000_000) return undefined; // 2MB 上限
-  const buf = Buffer.from(await file.arrayBuffer());
-  return `data:${file.type};base64,${buf.toString("base64")}`;
+// 讀取多張上傳圖片轉成 data URL（原型作法；正式版改用 Cloudinary signed upload）
+async function readImageDataUrls(formData: FormData): Promise<string[]> {
+  const files = formData.getAll("images");
+  const out: string[] = [];
+  for (const file of files) {
+    if (!(file instanceof File) || file.size === 0) continue;
+    if (!file.type.startsWith("image/")) continue;
+    if (file.size > 2_000_000) continue; // 每張 2MB 上限
+    if (out.length >= 6) break; // 最多 6 張
+    const buf = Buffer.from(await file.arrayBuffer());
+    out.push(`data:${file.type};base64,${buf.toString("base64")}`);
+  }
+  return out;
 }
 
 export async function createProductAction(formData: FormData) {
@@ -35,7 +40,7 @@ export async function createProductAction(formData: FormData) {
   const stock = toInt(formData.get("stock"));
   const gIndex = toInt(formData.get("gradient"));
   const gradient = gradientPresets[gIndex] ?? gradientPresets[0];
-  const imageDataUrl = await readImageDataUrl(formData);
+  const images = await readImageDataUrls(formData);
 
   if (!title || !categorySlug || price <= 0) {
     // 基本驗證不過就退回列表（前端亦有 required 屬性）
@@ -49,7 +54,7 @@ export async function createProductAction(formData: FormData) {
     price,
     stock,
     gradient,
-    imageDataUrl,
+    images,
   });
   revalidatePath("/admin/products");
   revalidatePath("/");
@@ -72,7 +77,11 @@ export async function updateProductAction(formData: FormData) {
     price: toInt(formData.get(`price_${id}`)),
     stock: toInt(formData.get(`stock_${id}`)),
   }));
-  const imageDataUrl = await readImageDataUrl(formData);
+  const newImages = await readImageDataUrls(formData);
+  const removeImageIndexes = formData
+    .getAll("removeIndex")
+    .map((v) => Number(v))
+    .filter((n) => Number.isInteger(n));
 
   updateProduct(slug, {
     title,
@@ -80,7 +89,8 @@ export async function updateProductAction(formData: FormData) {
     categorySlug,
     status,
     variants,
-    imageDataUrl,
+    removeImageIndexes,
+    newImages,
   });
   revalidatePath("/admin/products");
   revalidatePath(`/products/${slug}`);

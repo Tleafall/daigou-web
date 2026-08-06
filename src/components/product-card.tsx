@@ -17,10 +17,10 @@ export function ProductCard({ product }: { product: Product }) {
           background: `linear-gradient(135deg, ${product.gradient[0]}, ${product.gradient[1]})`,
         }}
       >
-        {product.imageDataUrl && (
+        {product.images[0] && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={product.imageDataUrl}
+            src={product.images[0]}
             alt={product.title}
             className="h-full w-full object-cover"
           />

@@ -53,11 +53,12 @@ export default async function NewProductPage() {
         </label>
 
         <label className="text-sm">
-          <span className="mb-1 block text-ink/70">商品圖片（選填，≤2MB）</span>
+          <span className="mb-1 block text-ink/70">商品圖片（選填，可多選，每張 ≤2MB、最多 6 張）</span>
           <input
             type="file"
-            name="image"
+            name="images"
             accept="image/*"
+            multiple
             className="w-full rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
           />
         </label>

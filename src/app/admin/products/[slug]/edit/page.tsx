@@ -66,24 +66,34 @@ export default async function EditProductPage({
         {/* 商品圖片 */}
         <div className="text-sm">
           <span className="mb-1 block text-ink/70">商品圖片</span>
-          <div className="flex items-center gap-3">
-            <div
-              className="h-16 w-16 shrink-0 overflow-hidden rounded-lg"
-              style={{ background: `linear-gradient(135deg, ${product.gradient[0]}, ${product.gradient[1]})` }}
-            >
-              {product.imageDataUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={product.imageDataUrl} alt={product.title} className="h-full w-full object-cover" />
-              )}
+          {product.images.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-3">
+              {product.images.map((img, i) => (
+                <label key={i} className="relative cursor-pointer">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img} alt="" className="h-20 w-20 rounded-lg object-cover ring-1 ring-line" />
+                  <span className="mt-1 flex items-center gap-1 text-xs text-ink/60">
+                    <input type="checkbox" name="removeIndex" value={i} /> 刪除
+                  </span>
+                  {i === 0 && (
+                    <span className="absolute left-1 top-1 rounded bg-brand px-1 text-[10px] text-white">
+                      封面
+                    </span>
+                  )}
+                </label>
+              ))}
             </div>
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              className="flex-1 rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
-            />
-          </div>
-          <p className="mt-1 text-xs text-ink/40">不選檔案＝維持原圖。≤2MB。</p>
+          )}
+          <input
+            type="file"
+            name="images"
+            accept="image/*"
+            multiple
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
+          />
+          <p className="mt-1 text-xs text-ink/40">
+            新選的圖會加在後面（第一張為封面）；勾選「刪除」可移除既有圖。每張 ≤2MB。
+          </p>
         </div>
 
         {/* 規格價格 / 庫存 */}

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { categoryName } from "@/lib/mock-data";
 import { getActiveProduct } from "@/lib/product-store";
 import { VariantSelector } from "@/components/variant-selector";
+import { ProductGallery } from "@/components/product-gallery";
 
 export async function generateMetadata({
   params,
@@ -42,34 +43,11 @@ export default async function ProductPage({
 
       <div className="grid gap-8 md:grid-cols-2">
         {/* 圖片 */}
-        <div className="flex flex-col gap-3">
-          <div
-            className="aspect-square w-full overflow-hidden rounded-2xl"
-            style={{
-              background: `linear-gradient(135deg, ${product.gradient[0]}, ${product.gradient[1]})`,
-            }}
-          >
-            {product.imageDataUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.imageDataUrl}
-                alt={product.title}
-                className="h-full w-full object-cover"
-              />
-            )}
-          </div>
-          <div className="grid grid-cols-4 gap-3">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="aspect-square rounded-lg border border-line"
-                style={{
-                  background: `linear-gradient(${135 + i * 30}deg, ${product.gradient[0]}, ${product.gradient[1]})`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
+        <ProductGallery
+          images={product.images}
+          gradient={product.gradient}
+          title={product.title}
+        />
 
         {/* 資訊 + 選規格 */}
         <div className="flex flex-col gap-5">

@@ -28,7 +28,7 @@ export type Product = {
   description: string;
   price: number; // 最低規格價（列表顯示用）
   gradient: [string, string]; // 佔位圖漸層（無上傳圖時的底色）
-  imageDataUrl?: string; // 上傳的封面圖（原型用 data URL 存記憶體）
+  images: string[]; // 上傳的商品圖（原型用 data URL 存記憶體），images[0] 為封面
   optionGroups: OptionGroup[];
   variants: Variant[];
   status: ProductStatus;
@@ -103,6 +103,7 @@ export const seedProducts: Product[] = raw.map((item, i) => {
     description: `海外人氣${categoryName(item.cat)}。此為代購商品，下單後由賣家統一整理出貨；商品皆為正品，實際顏色以實物為準。運送方式為宅配，可選貨到付款。`,
     price,
     gradient: item.g,
+    images: [],
     optionGroups: groups,
     variants,
     status: "ACTIVE",

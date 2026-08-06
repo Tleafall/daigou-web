@@ -19,11 +19,9 @@ export function SiteHeader({ user }: { user?: HeaderUser }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white">
-      {/* 促銷條 */}
+      {/* 促銷條（文字可在 src/lib/site.ts 的 announcement 修改） */}
       <div className="bg-brand text-center text-xs text-white">
-        <div className="mx-auto max-w-6xl px-4 py-1.5">
-          全館滿 NT${site.freeShippingThreshold.toLocaleString("zh-TW")} 免運 · 支援貨到付款
-        </div>
+        <div className="mx-auto max-w-6xl px-4 py-1.5">{site.announcement}</div>
       </div>
 
       {/* 主列 */}
