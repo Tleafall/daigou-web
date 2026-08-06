@@ -3,10 +3,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { site } from "@/lib/site";
 import { auth } from "@/auth";
 import { CartProvider } from "@/lib/cart-context";
 import { listCategories } from "@/lib/category-store";
+import { getSettings } from "@/lib/settings-store";
+import { SettingsProvider } from "@/lib/settings-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,13 +19,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: `${site.name} — ${site.tagline}`,
-    template: `%s — ${site.name}`,
-  },
-  description: site.tagline,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = getSettings();
+  return {
+    title: {
+      default: `${settings.name} — ${settings.tagline}`,
+      template: `%s — ${settings.name}`,
+    },
+    description: settings.tagline,
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -36,6 +40,7 @@ export default async function RootLayout({
     ? { name: session.user.name, role: session.user.role }
     : null;
   const categories = listCategories();
+  const settings = getSettings();
 
   return (
     <html
@@ -43,11 +48,13 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-white">
-        <CartProvider>
-          <SiteHeader user={user} categories={categories} />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-        </CartProvider>
+        <SettingsProvider value={settings}>
+          <CartProvider>
+            <SiteHeader user={user} categories={categories} />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </CartProvider>
+        </SettingsProvider>
       </body>
     </html>
   );

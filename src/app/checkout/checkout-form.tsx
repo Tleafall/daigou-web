@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useCart } from "@/lib/cart-context";
 import { formatTWD } from "@/lib/format";
-import { site } from "@/lib/site";
+import { useSettings } from "@/lib/settings-context";
 import { createOrderAction } from "@/lib/order-actions";
 
 type DefaultAddress = {
@@ -24,6 +24,7 @@ export function CheckoutForm({
   defaultAddress?: DefaultAddress;
 }) {
   const { items, subtotal, ready, clear } = useCart();
+  const site = useSettings();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);

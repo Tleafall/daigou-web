@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { formatTWD } from "@/lib/format";
-import { site } from "@/lib/site";
+import { useSettings } from "@/lib/settings-context";
 import { IconCart } from "@/components/icons";
 
 export default function CartPage() {
   const { items, subtotal, ready, setQty, removeItem } = useCart();
+  const site = useSettings();
 
   const shippingFee =
     subtotal >= site.freeShippingThreshold || subtotal === 0 ? 0 : site.shippingFee;

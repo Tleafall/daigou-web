@@ -1,6 +1,7 @@
 // ⚠️ 原型用「伺服器記憶體」訂單庫。重啟伺服器會清空。
 // 之後接 Neon + Prisma 後，這層會換成資料庫（介面刻意貼近未來做法）。
 import { adjustVariantStock, getActiveProduct } from "@/lib/product-store";
+import { getSettings } from "@/lib/settings-store";
 
 export type OrderStatus =
   | "PENDING" // 待確認
@@ -147,8 +148,9 @@ export function createOrder(input: CreateOrderInput): CreateOrderResult {
     });
   }
 
+  const settings = getSettings();
   const subtotal = items.reduce((s, it) => s + it.lineTotal, 0);
-  const shippingFee = subtotal >= FREE_SHIPPING ? 0 : SHIPPING_FEE;
+  const shippingFee = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
   const totalAmount = subtotal + shippingFee;
 
   if (totalAmount > COD_MAX)

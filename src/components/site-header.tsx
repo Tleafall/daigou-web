@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { site } from "@/lib/site";
 import { logoutAction } from "@/lib/auth-actions";
 import { useCart } from "@/lib/cart-context";
+import { useSettings } from "@/lib/settings-context";
 import type { Category } from "@/lib/mock-data";
 import { CategoryBar, CategoryList } from "./category-nav";
 import { IconCart, IconClose, IconMenu, IconSearch, IconUser } from "./icons";
@@ -23,6 +23,7 @@ export function SiteHeader({
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { count, ready } = useCart();
+  const site = useSettings();
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white">

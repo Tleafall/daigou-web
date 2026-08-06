@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { site } from "@/lib/site";
+import { getSettings } from "@/lib/settings-store";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "會員登入" };
@@ -11,6 +11,8 @@ export default async function LoginPage() {
   // 已登入就直接回首頁
   const session = await auth();
   if (session?.user) redirect("/");
+
+  const site = getSettings();
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-12">

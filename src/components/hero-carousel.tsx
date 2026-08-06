@@ -2,43 +2,36 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { site } from "@/lib/site";
+import { useSettings } from "@/lib/settings-context";
 import { IconChevronRight } from "./icons";
 
-type Slide = {
-  title: string;
-  desc: string;
-  cta: string;
-  href: string;
-  gradient: string;
-};
-
-const slides: Slide[] = [
-  {
-    title: "海外好物，替你嚴選",
-    desc: `${site.tagline}。安心下單，支援貨到付款。`,
-    cta: "開始選購",
-    href: "/category/beauty",
-    gradient: "linear-gradient(120deg, #ffe3d7, #ffc3ac)",
-  },
-  {
-    title: `滿 NT$${site.freeShippingThreshold.toLocaleString("zh-TW")} 免運`,
-    desc: "湊單更划算，宅配到府，貨到付款免先付。",
-    cta: "看熱門商品",
-    href: "/category/fashion",
-    gradient: "linear-gradient(120deg, #dbe4ff, #b7c6ff)",
-  },
-  {
-    title: "日韓美妝・生活雜貨",
-    desc: "人氣品項持續更新，喜歡的別錯過。",
-    cta: "逛美妝保養",
-    href: "/category/beauty",
-    gradient: "linear-gradient(120deg, #ffe0ec, #ffc2d6)",
-  },
-];
-
 export function HeroCarousel() {
+  const site = useSettings();
   const [index, setIndex] = useState(0);
+
+  const slides = [
+    {
+      title: "海外好物，替你嚴選",
+      desc: `${site.tagline}。安心下單，支援貨到付款。`,
+      cta: "開始選購",
+      href: "/category/beauty",
+      gradient: "linear-gradient(120deg, #ffe3d7, #ffc3ac)",
+    },
+    {
+      title: `滿 NT$${site.freeShippingThreshold.toLocaleString("zh-TW")} 免運`,
+      desc: "湊單更划算，宅配到府，貨到付款免先付。",
+      cta: "看熱門商品",
+      href: "/category/fashion",
+      gradient: "linear-gradient(120deg, #dbe4ff, #b7c6ff)",
+    },
+    {
+      title: "日韓美妝・生活雜貨",
+      desc: "人氣品項持續更新，喜歡的別錯過。",
+      cta: "逛美妝保養",
+      href: "/category/beauty",
+      gradient: "linear-gradient(120deg, #ffe0ec, #ffc2d6)",
+    },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => {
