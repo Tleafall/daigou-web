@@ -2,6 +2,7 @@
 // 之後接 Prisma 後換成資料庫。
 import {
   seedProducts,
+  type OptionGroup,
   type Product,
   type ProductStatus,
   type Variant,
@@ -96,26 +97,32 @@ export type CreateProductInput = {
   title: string;
   description: string;
   categorySlug: string;
-  price: number;
-  stock: number;
   gradient: [string, string];
   images?: string[];
+  optionGroups: OptionGroup[];
+  variants: { options: Record<string, string>; price: number; stock: number }[];
 };
 
 export function createProduct(input: CreateProductInput): string {
   const store = getStore();
   const slug = `c${Date.now().toString(36)}`;
+  const variants: Variant[] = input.variants.map((v, i) => ({
+    id: `${slug}-v${i + 1}`,
+    options: v.options,
+    price: v.price,
+    stock: v.stock,
+  }));
   const product: Product = {
     id: slug,
     slug,
     title: input.title,
     categorySlug: input.categorySlug,
     description: input.description,
-    price: input.price,
+    price: Math.min(...variants.map((v) => v.price)),
     gradient: input.gradient,
     images: input.images ?? [],
-    optionGroups: [],
-    variants: [{ id: `${slug}-v1`, options: {}, price: input.price, stock: input.stock }],
+    optionGroups: input.optionGroups,
+    variants,
     status: "ACTIVE",
   };
   store.products.push(product);

@@ -4,12 +4,18 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { gradientPresets } from "@/lib/mock-data";
 import { listCategories } from "@/lib/category-store";
 import { createProductAction } from "@/lib/product-actions";
+import { ProductVariantBuilder } from "@/components/product-variant-builder";
 
 export const metadata: Metadata = { title: "新增商品" };
 
-export default async function NewProductPage() {
+export default async function NewProductPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   await requireAdmin();
   const categories = listCategories();
+  const { error } = await searchParams;
   const inputClass =
     "w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand";
 
@@ -21,6 +27,12 @@ export default async function NewProductPage() {
         <span className="text-ink/80">新增商品</span>
       </nav>
       <h1 className="mb-6 text-xl font-bold">新增商品</h1>
+
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          請確認已填商品名稱、分類，且至少一個規格有設定售價。
+        </div>
+      )}
 
       <form action={createProductAction} className="flex flex-col gap-4 rounded-xl border border-line bg-white p-5">
         <label className="text-sm">
@@ -38,15 +50,9 @@ export default async function NewProductPage() {
           </select>
         </label>
 
-        <div className="grid grid-cols-2 gap-4">
-          <label className="text-sm">
-            <span className="mb-1 block text-ink/70">售價（NT$）*</span>
-            <input name="price" type="number" min="1" required className={inputClass} placeholder="590" />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block text-ink/70">庫存</span>
-            <input name="stock" type="number" min="0" defaultValue={0} className={inputClass} />
-          </label>
+        <div className="text-sm">
+          <span className="mb-1 block text-ink/70">規格與定價 *</span>
+          <ProductVariantBuilder />
         </div>
 
         <label className="text-sm">

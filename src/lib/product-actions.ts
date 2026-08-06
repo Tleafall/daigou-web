@@ -3,8 +3,38 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { gradientPresets, type ProductStatus } from "@/lib/mock-data";
+import {
+  gradientPresets,
+  type OptionGroup,
+  type ProductStatus,
+} from "@/lib/mock-data";
 import { createProduct, updateProduct } from "@/lib/product-store";
+
+type VariantInput = { options: Record<string, string>; price: number; stock: number };
+
+function parseVariants(raw: FormDataEntryValue | null): {
+  optionGroups: OptionGroup[];
+  variants: VariantInput[];
+} {
+  try {
+    const parsed = JSON.parse(String(raw || "{}"));
+    const optionGroups: OptionGroup[] = Array.isArray(parsed.optionGroups)
+      ? parsed.optionGroups
+      : [];
+    const variants: VariantInput[] = Array.isArray(parsed.variants)
+      ? parsed.variants
+          .filter((v: VariantInput) => v && Number(v.price) > 0)
+          .map((v: VariantInput) => ({
+            options: v.options ?? {},
+            price: Math.floor(Number(v.price)) || 0,
+            stock: Math.max(0, Math.floor(Number(v.stock)) || 0),
+          }))
+      : [];
+    return { optionGroups, variants };
+  } catch {
+    return { optionGroups: [], variants: [] };
+  }
+}
 
 async function assertAdmin() {
   const session = await auth();
@@ -36,14 +66,13 @@ export async function createProductAction(formData: FormData) {
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const categorySlug = String(formData.get("categorySlug") || "").trim();
-  const price = toInt(formData.get("price"));
-  const stock = toInt(formData.get("stock"));
   const gIndex = toInt(formData.get("gradient"));
   const gradient = gradientPresets[gIndex] ?? gradientPresets[0];
   const images = await readImageDataUrls(formData);
+  const { optionGroups, variants } = parseVariants(formData.get("variantsJson"));
 
-  if (!title || !categorySlug || price <= 0) {
-    // 基本驗證不過就退回列表（前端亦有 required 屬性）
+  if (!title || !categorySlug || variants.length === 0) {
+    // 基本驗證不過就退回（前端亦有 required 屬性）
     redirect("/admin/products/new?error=1");
   }
 
@@ -51,10 +80,10 @@ export async function createProductAction(formData: FormData) {
     title,
     description,
     categorySlug,
-    price,
-    stock,
     gradient,
     images,
+    optionGroups,
+    variants,
   });
   revalidatePath("/admin/products");
   revalidatePath("/");
