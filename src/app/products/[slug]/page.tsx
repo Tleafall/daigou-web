@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { categoryName } from "@/lib/category-store";
 import { getActiveProduct } from "@/lib/product-store";
+import { getSettings } from "@/lib/settings-store";
+import { soldCountForProduct } from "@/lib/store";
 import { ProductView } from "@/components/product-view";
 
 export async function generateMetadata({
@@ -27,6 +29,9 @@ export default async function ProductPage({
   const product = getActiveProduct(slug);
   if (!product) notFound();
 
+  const showSold = getSettings().showSoldCount;
+  const soldCount = showSold ? soldCountForProduct(product.slug) : 0;
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       {/* 麵包屑 */}
@@ -40,7 +45,7 @@ export default async function ProductPage({
         <span className="text-ink/80">{product.title}</span>
       </nav>
 
-      <ProductView product={product} />
+      <ProductView product={product} showSold={showSold} soldCount={soldCount} />
 
       {/* 商品敘述 */}
       <section className="mt-10">

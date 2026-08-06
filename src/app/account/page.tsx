@@ -33,6 +33,7 @@ export default async function AccountPage() {
           { title: "我的訂單", desc: "查看訂單與出貨狀態", href: "/account/orders" },
           { title: "常用收件地址", desc: "管理宅配地址", href: "/account/addresses" },
           { title: "取消 / 退換貨申請", desc: "售後服務（於訂單內操作）", href: "/account/orders" },
+          { title: "客服聊聊", desc: "有問題直接問賣家", href: "/account/chat" },
           { title: "帳號設定", desc: "個資與帳號刪除", href: undefined },
         ].map((item) =>
           item.href ? (

@@ -29,6 +29,7 @@ export default async function AdminPage() {
           { title: "訂單管理", desc: "訂單狀態、確認、出貨、取消、客戶風險", href: "/admin/orders" },
           { title: "商品管理", desc: "商品、規格與庫存一覽（唯讀）", href: "/admin/products" },
           { title: "客戶風險", desc: "棄單/取消次數、風險分數、封鎖", href: "/admin/customers" },
+          { title: "客服訊息", desc: "回覆顧客的提問", href: "/admin/chats" },
           { title: "庫存異動", desc: "庫存流水與稽核", href: "/admin/inventory" },
           { title: "分類管理", desc: "分類與排序", href: "/admin/categories" },
           { title: "網站設定", desc: "店名、促銷字、運費、聯絡方式", href: "/admin/settings" },

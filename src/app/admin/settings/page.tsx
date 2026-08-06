@@ -70,6 +70,16 @@ export default async function AdminSettingsPage({
           </label>
         </div>
 
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="showSoldCount"
+            defaultChecked={s.showSoldCount}
+            className="h-4 w-4"
+          />
+          在商品旁顯示賣出數量（例：已售 12）
+        </label>
+
         <button className="self-start rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600">
           儲存設定
         </button>

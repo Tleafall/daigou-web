@@ -10,6 +10,7 @@ export type Settings = {
   shippingFee: number;
   lineId: string;
   email: string;
+  showSoldCount: boolean; // 是否在商品旁顯示賣出數量
 };
 
 const DEFAULTS: Settings = {
@@ -20,6 +21,7 @@ const DEFAULTS: Settings = {
   shippingFee: site.shippingFee,
   lineId: site.lineId,
   email: site.email,
+  showSoldCount: false,
 };
 
 const g = globalThis as unknown as { __daigouSettings?: Settings };

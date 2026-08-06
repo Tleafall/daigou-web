@@ -24,7 +24,15 @@ export default async function AdminOrdersPage() {
         <span className="mx-2">/</span>
         <span className="text-ink/80">訂單管理</span>
       </nav>
-      <h1 className="mb-6 text-xl font-bold">訂單管理</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-bold">訂單管理</h1>
+        <a
+          href="/admin/orders/export"
+          className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink/70 hover:border-brand hover:text-brand"
+        >
+          ⬇ 匯出 CSV
+        </a>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-line bg-white">
         <table className="w-full min-w-[640px] text-sm">

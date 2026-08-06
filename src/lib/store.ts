@@ -81,6 +81,16 @@ export function getOrder(orderNo: string): Order | undefined {
   return getStore().orders.find((o) => o.orderNo === orderNo);
 }
 
+// 商品累計賣出數量（不計已取消訂單）
+export function soldCountForProduct(slug: string): number {
+  let n = 0;
+  for (const o of getStore().orders) {
+    if (o.status === "CANCELLED") continue;
+    for (const it of o.items) if (it.productSlug === slug) n += it.quantity;
+  }
+  return n;
+}
+
 export type CustomerSummary = { userId: string; userName: string; userEmail: string };
 
 // 從訂單推導出所有下過單的顧客（去重）
