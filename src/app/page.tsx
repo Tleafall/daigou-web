@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { categories } from "@/lib/mock-data";
 import { latestActiveProducts, listActiveProducts } from "@/lib/product-store";
+import { listCategories } from "@/lib/category-store";
 import { ProductCard } from "@/components/product-card";
 import { HeroCarousel } from "@/components/hero-carousel";
 
 export default function Home() {
+  const categories = listCategories();
   const featured = listActiveProducts().slice(0, 5);
   const latest = latestActiveProducts().slice(0, 10);
 

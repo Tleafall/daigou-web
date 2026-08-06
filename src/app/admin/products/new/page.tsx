@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { categories, gradientPresets } from "@/lib/mock-data";
+import { gradientPresets } from "@/lib/mock-data";
+import { listCategories } from "@/lib/category-store";
 import { createProductAction } from "@/lib/product-actions";
 
 export const metadata: Metadata = { title: "新增商品" };
 
 export default async function NewProductPage() {
   await requireAdmin();
+  const categories = listCategories();
   const inputClass =
     "w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand";
 

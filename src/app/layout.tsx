@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { site } from "@/lib/site";
 import { auth } from "@/auth";
 import { CartProvider } from "@/lib/cart-context";
+import { listCategories } from "@/lib/category-store";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default async function RootLayout({
   const user = session?.user
     ? { name: session.user.name, role: session.user.role }
     : null;
+  const categories = listCategories();
 
   return (
     <html
@@ -42,7 +44,7 @@ export default async function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-white">
         <CartProvider>
-          <SiteHeader user={user} />
+          <SiteHeader user={user} categories={categories} />
           <main className="flex-1">{children}</main>
           <SiteFooter />
         </CartProvider>

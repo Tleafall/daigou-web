@@ -5,6 +5,7 @@ import { useState } from "react";
 import { site } from "@/lib/site";
 import { logoutAction } from "@/lib/auth-actions";
 import { useCart } from "@/lib/cart-context";
+import type { Category } from "@/lib/mock-data";
 import { CategoryBar, CategoryList } from "./category-nav";
 import { IconCart, IconClose, IconMenu, IconSearch, IconUser } from "./icons";
 
@@ -13,7 +14,13 @@ type HeaderUser = {
   role: "CUSTOMER" | "ADMIN";
 } | null;
 
-export function SiteHeader({ user }: { user?: HeaderUser }) {
+export function SiteHeader({
+  user,
+  categories,
+}: {
+  user?: HeaderUser;
+  categories: Category[];
+}) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { count, ready } = useCart();
 
@@ -126,7 +133,7 @@ export function SiteHeader({ user }: { user?: HeaderUser }) {
         </div>
       </form>
 
-      <CategoryBar />
+      <CategoryBar categories={categories} />
 
       {/* 手機抽屜 */}
       {drawerOpen && (
@@ -148,7 +155,7 @@ export function SiteHeader({ user }: { user?: HeaderUser }) {
               </button>
             </div>
             <div className="px-4 py-2 text-xs font-medium text-ink/50">商品分類</div>
-            <CategoryList onNavigate={() => setDrawerOpen(false)} />
+            <CategoryList categories={categories} onNavigate={() => setDrawerOpen(false)} />
             <div className="mt-2 flex flex-col border-t border-line">
               {user ? (
                 <>

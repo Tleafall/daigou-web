@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { categories } from "@/lib/mock-data";
+import { listCategories } from "@/lib/category-store";
 import { getProduct } from "@/lib/product-store";
 import { updateProductAction } from "@/lib/product-actions";
 
@@ -18,6 +18,7 @@ export default async function EditProductPage({
   const product = getProduct(slug);
   if (!product) notFound();
 
+  const categories = listCategories();
   const inputClass =
     "w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand";
 

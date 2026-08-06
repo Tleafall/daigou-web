@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { categoryName, type ProductStatus } from "@/lib/mock-data";
+import { type ProductStatus } from "@/lib/mock-data";
+import { categoryName } from "@/lib/category-store";
 import { listAllProducts } from "@/lib/product-store";
 import { formatTWD } from "@/lib/format";
 

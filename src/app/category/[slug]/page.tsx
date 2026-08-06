@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { categories } from "@/lib/mock-data";
+import { getCategory } from "@/lib/category-store";
 import { getActiveByCategory } from "@/lib/product-store";
 import { ProductCard } from "@/components/product-card";
 
@@ -13,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = categories.find((c) => c.slug === slug);
+  const category = getCategory(slug);
   return { title: category ? category.name : "分類" };
 }
 
@@ -27,7 +27,7 @@ export default async function CategoryPage({
   const { slug } = await params;
   const { page: pageParam } = await searchParams;
 
-  const category = categories.find((c) => c.slug === slug);
+  const category = getCategory(slug);
   if (!category) notFound();
 
   const all = getActiveByCategory(slug);

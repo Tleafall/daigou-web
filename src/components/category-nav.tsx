@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { categories } from "@/lib/mock-data";
+import type { Category } from "@/lib/mock-data";
 
 // 桌機：水平分類列（蝦皮式頁籤）
-export function CategoryBar() {
+export function CategoryBar({ categories }: { categories: Category[] }) {
   return (
     <nav className="hidden border-t border-line bg-white md:block">
       <div className="mx-auto flex max-w-6xl items-center gap-1 px-4">
@@ -22,7 +22,13 @@ export function CategoryBar() {
 }
 
 // 手機抽屜：垂直分類清單
-export function CategoryList({ onNavigate }: { onNavigate?: () => void }) {
+export function CategoryList({
+  categories,
+  onNavigate,
+}: {
+  categories: Category[];
+  onNavigate?: () => void;
+}) {
   return (
     <nav className="flex flex-col">
       {categories.map((c) => (

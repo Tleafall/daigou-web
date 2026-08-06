@@ -4,6 +4,7 @@ export type Category = {
   slug: string;
   name: string;
   emoji: string;
+  sortOrder: number;
 };
 
 export type OptionGroup = {
@@ -34,14 +35,18 @@ export type Product = {
   status: ProductStatus;
 };
 
-export const categories: Category[] = [
-  { slug: "beauty", name: "美妝保養", emoji: "💄" },
-  { slug: "fashion", name: "服飾配件", emoji: "👗" },
-  { slug: "home", name: "居家生活", emoji: "🏠" },
-  { slug: "food", name: "食品零食", emoji: "🍪" },
-  { slug: "baby", name: "母嬰親子", emoji: "🍼" },
-  { slug: "digital", name: "3C 周邊", emoji: "🎧" },
+export const seedCategories: Category[] = [
+  { slug: "beauty", name: "美妝保養", emoji: "💄", sortOrder: 0 },
+  { slug: "fashion", name: "服飾配件", emoji: "👗", sortOrder: 1 },
+  { slug: "home", name: "居家生活", emoji: "🏠", sortOrder: 2 },
+  { slug: "food", name: "食品零食", emoji: "🍪", sortOrder: 3 },
+  { slug: "baby", name: "母嬰親子", emoji: "🍼", sortOrder: 4 },
+  { slug: "digital", name: "3C 周邊", emoji: "🎧", sortOrder: 5 },
 ];
+
+function seedCategoryName(slug: string): string {
+  return seedCategories.find((c) => c.slug === slug)?.name ?? "商品";
+}
 
 type RawProduct = {
   title: string;
@@ -100,7 +105,7 @@ export const seedProducts: Product[] = raw.map((item, i) => {
     slug,
     title: item.title,
     categorySlug: item.cat,
-    description: `海外人氣${categoryName(item.cat)}。此為代購商品，下單後由賣家統一整理出貨；商品皆為正品，實際顏色以實物為準。運送方式為宅配，可選貨到付款。`,
+    description: `海外人氣${seedCategoryName(item.cat)}。此為代購商品，下單後由賣家統一整理出貨；商品皆為正品，實際顏色以實物為準。運送方式為宅配，可選貨到付款。`,
     price,
     gradient: item.g,
     images: [],
@@ -109,10 +114,6 @@ export const seedProducts: Product[] = raw.map((item, i) => {
     status: "ACTIVE",
   };
 });
-
-export function categoryName(slug: string): string {
-  return categories.find((c) => c.slug === slug)?.name ?? "商品";
-}
 
 // 可用漸層色（新增商品挑選用）
 export const gradientPresets: [string, string][] = [

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { categoryName } from "@/lib/mock-data";
+import { categoryName } from "@/lib/category-store";
 import { getActiveProduct } from "@/lib/product-store";
 import { VariantSelector } from "@/components/variant-selector";
 import { ProductGallery } from "@/components/product-gallery";
