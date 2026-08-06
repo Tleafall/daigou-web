@@ -11,6 +11,8 @@ export type Settings = {
   lineId: string;
   email: string;
   showSoldCount: boolean; // 是否在商品旁顯示賣出數量
+  botEnabled: boolean; // 客服自動回覆是否啟用
+  botMessage: string; // 自動回覆內容
 };
 
 const DEFAULTS: Settings = {
@@ -22,6 +24,8 @@ const DEFAULTS: Settings = {
   lineId: site.lineId,
   email: site.email,
   showSoldCount: false,
+  botEnabled: false,
+  botMessage: "您好，感謝來訊！小幫手先為您服務，賣家看到後會盡快親自回覆您 😊",
 };
 
 const g = globalThis as unknown as { __daigouSettings?: Settings };

@@ -1,10 +1,19 @@
 // ⚠️ 原型用「伺服器記憶體」客服訊息。重啟伺服器會清空。之後接 Prisma。
 
+export type ChatProduct = {
+  slug: string;
+  title: string;
+  price: number;
+  image?: string;
+  gradient: [string, string];
+};
+
 export type ChatMessage = {
   id: string;
-  sender: "customer" | "admin";
+  sender: "customer" | "admin" | "bot";
   text: string;
   createdAt: string;
+  product?: ChatProduct; // 詢問中的商品（蝦皮式）
 };
 
 export type Conversation = {
@@ -38,23 +47,28 @@ function ensure(userId: string, userName: string, userEmail: string): Conversati
 
 export function sendMessage(
   userId: string,
-  sender: "customer" | "admin",
+  sender: "customer" | "admin" | "bot",
   text: string,
-  userName = "",
-  userEmail = "",
+  meta?: { userName?: string; userEmail?: string; product?: ChatProduct },
 ) {
   const store = getStore();
-  const c = ensure(userId, userName, userEmail);
+  const c = ensure(userId, meta?.userName ?? "", meta?.userEmail ?? "");
   c.messages.push({
     id: `msg-${store.seq++}`,
     sender,
     text,
     createdAt: new Date().toISOString(),
+    product: meta?.product,
   });
 }
 
 export function getConversation(userId: string): Conversation | undefined {
   return getStore().conversations.get(userId);
+}
+
+export function hasSellerReply(userId: string): boolean {
+  const c = getStore().conversations.get(userId);
+  return !!c?.messages.some((m) => m.sender === "admin" || m.sender === "bot");
 }
 
 export function listConversations() {

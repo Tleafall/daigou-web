@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { Product } from "@/lib/mock-data";
 import { ProductGallery } from "./product-gallery";
@@ -39,6 +40,13 @@ export function ProductView({
           )}
         </div>
         <VariantSelector product={product} onOptionSelect={handleOptionSelect} />
+
+        <Link
+          href={`/account/chat?product=${product.slug}`}
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-brand px-4 py-2 text-sm font-medium text-brand hover:bg-brand-50"
+        >
+          💬 聊聊（詢問賣家）
+        </Link>
       </div>
     </div>
   );

@@ -80,6 +80,28 @@ export default async function AdminSettingsPage({
           在商品旁顯示賣出數量（例：已售 12）
         </label>
 
+        {/* 客服自動回覆 */}
+        <div className="rounded-lg border border-line p-4">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input
+              type="checkbox"
+              name="botEnabled"
+              defaultChecked={s.botEnabled}
+              className="h-4 w-4"
+            />
+            啟用客服自動回覆（客人第一次來訊時，先自動回一則）
+          </label>
+          <textarea
+            name="botMessage"
+            defaultValue={s.botMessage}
+            className="mt-2 min-h-20 w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand"
+            placeholder="自動回覆的文字…"
+          />
+          <p className="mt-1 text-xs text-ink/40">
+            例：「您好，感謝來訊！賣家看到後會盡快回覆您 😊」
+          </p>
+        </div>
+
         <button className="self-start rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600">
           儲存設定
         </button>

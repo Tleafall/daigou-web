@@ -23,6 +23,8 @@ export async function updateSettingsAction(formData: FormData) {
     lineId: String(formData.get("lineId") || "").trim(),
     email: String(formData.get("email") || "").trim(),
     showSoldCount: formData.get("showSoldCount") === "on",
+    botEnabled: formData.get("botEnabled") === "on",
+    botMessage: String(formData.get("botMessage") || "").trim(),
   });
 
   revalidatePath("/", "layout"); // 全站導覽/頁尾/促銷條即時更新

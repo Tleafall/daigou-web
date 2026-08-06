@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { getConversation } from "@/lib/chat-store";
 import { adminReplyAction } from "@/lib/chat-actions";
+import { ChatProductCard } from "@/components/chat-product-card";
 
 export const metadata: Metadata = { title: "客服對話" };
 
@@ -28,21 +29,31 @@ export default async function AdminChatThreadPage({
       <p className="mb-4 text-sm text-ink/50">{conversation.userEmail}</p>
 
       <div className="flex min-h-[300px] flex-col gap-2 rounded-xl border border-line bg-white p-4">
-        {conversation.messages.map((m) => (
-          <div key={m.id} className={m.sender === "admin" ? "self-end" : "self-start"}>
-            <div
-              className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                m.sender === "admin" ? "bg-brand text-white" : "bg-muted text-ink"
-              }`}
-            >
-              {m.text}
+        {conversation.messages.map((m) => {
+          const sellerSide = m.sender === "admin" || m.sender === "bot";
+          return (
+            <div key={m.id} className={`flex flex-col ${sellerSide ? "items-end" : "items-start"}`}>
+              {m.product && (
+                <div className="mb-1 w-56 max-w-[80%]">
+                  <ChatProductCard product={m.product} />
+                </div>
+              )}
+              {m.text && (
+                <div
+                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+                    sellerSide ? "bg-brand text-white" : "bg-muted text-ink"
+                  }`}
+                >
+                  {m.text}
+                </div>
+              )}
+              <div className="mt-0.5 text-[10px] text-ink/40">
+                {m.sender === "customer" ? "顧客 · " : m.sender === "bot" ? "自動回覆 · " : ""}
+                {new Date(m.createdAt).toLocaleString("zh-TW")}
+              </div>
             </div>
-            <div className={`mt-0.5 text-[10px] text-ink/40 ${m.sender === "admin" ? "text-right" : ""}`}>
-              {m.sender === "customer" ? "顧客 · " : ""}
-              {new Date(m.createdAt).toLocaleString("zh-TW")}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <form action={adminReplyAction} className="mt-3 flex gap-2">
