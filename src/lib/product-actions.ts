@@ -8,7 +8,8 @@ import {
   type OptionGroup,
   type ProductStatus,
 } from "@/lib/mock-data";
-import { createProduct, updateProduct } from "@/lib/product-store";
+import { createProduct, getProduct, updateProduct } from "@/lib/product-store";
+import type { ProductImage } from "@/lib/mock-data";
 
 type VariantInput = { options: Record<string, string>; price: number; stock: number };
 
@@ -106,11 +107,18 @@ export async function updateProductAction(formData: FormData) {
     price: toInt(formData.get(`price_${id}`)),
     stock: toInt(formData.get(`stock_${id}`)),
   }));
-  const newImages = await readImageDataUrls(formData);
-  const removeImageIndexes = formData
-    .getAll("removeIndex")
-    .map((v) => Number(v))
-    .filter((n) => Number.isInteger(n));
+  // 重建圖片陣列：保留未刪除的既有圖（帶上新的 tag）＋ 附加新上傳的圖
+  const existing = getProduct(slug)?.images ?? [];
+  const removeSet = new Set(
+    formData.getAll("removeIndex").map((v) => Number(v)).filter((n) => Number.isInteger(n)),
+  );
+  const images: ProductImage[] = [];
+  existing.forEach((img, i) => {
+    if (removeSet.has(i)) return;
+    const tag = String(formData.get(`tag_${i}`) || "").trim();
+    images.push({ url: img.url, tag: tag || undefined });
+  });
+  for (const url of await readImageDataUrls(formData)) images.push({ url });
 
   updateProduct(slug, {
     title,
@@ -118,8 +126,7 @@ export async function updateProductAction(formData: FormData) {
     categorySlug,
     status,
     variants,
-    removeImageIndexes,
-    newImages,
+    images,
   });
   revalidatePath("/admin/products");
   revalidatePath(`/products/${slug}`);

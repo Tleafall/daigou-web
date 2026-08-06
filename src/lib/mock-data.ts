@@ -21,6 +21,9 @@ export type Variant = {
 
 export type ProductStatus = "ACTIVE" | "ARCHIVED" | "DRAFT";
 
+// 商品圖；tag 對應某個規格選項值（如「紅色」），選到時圖庫會跳到這張
+export type ProductImage = { url: string; tag?: string };
+
 export type Product = {
   id: string;
   slug: string;
@@ -29,7 +32,7 @@ export type Product = {
   description: string;
   price: number; // 最低規格價（列表顯示用）
   gradient: [string, string]; // 佔位圖漸層（無上傳圖時的底色）
-  images: string[]; // 上傳的商品圖（原型用 data URL 存記憶體），images[0] 為封面
+  images: ProductImage[]; // 商品圖（data URL），images[0] 為封面；可標記對應規格
   optionGroups: OptionGroup[];
   variants: Variant[];
   status: ProductStatus;

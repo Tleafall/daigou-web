@@ -8,7 +8,13 @@ import { useCart } from "@/lib/cart-context";
 
 const MAX_QTY = 10; // 單一商品購買上限（見 PLAN.md）
 
-export function VariantSelector({ product }: { product: Product }) {
+export function VariantSelector({
+  product,
+  onOptionSelect,
+}: {
+  product: Product;
+  onOptionSelect?: (value: string) => void;
+}) {
   const { addItem } = useCart();
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [qty, setQty] = useState(1);
@@ -50,6 +56,7 @@ export function VariantSelector({ product }: { product: Product }) {
   function pick(groupName: string, value: string) {
     setSelected((prev) => ({ ...prev, [groupName]: value }));
     setQty(1);
+    onOptionSelect?.(value); // 通知圖庫跳到對應規格的照片
   }
 
   function addToCart() {

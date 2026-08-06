@@ -4,6 +4,7 @@ import {
   seedProducts,
   type OptionGroup,
   type Product,
+  type ProductImage,
   type ProductStatus,
   type Variant,
 } from "@/lib/mock-data";
@@ -120,7 +121,7 @@ export function createProduct(input: CreateProductInput): string {
     description: input.description,
     price: Math.min(...variants.map((v) => v.price)),
     gradient: input.gradient,
-    images: input.images ?? [],
+    images: (input.images ?? []).map((url) => ({ url })),
     optionGroups: input.optionGroups,
     variants,
     status: "ACTIVE",
@@ -135,8 +136,7 @@ export type UpdateProductInput = {
   categorySlug: string;
   status: ProductStatus;
   variants: { id: string; price: number; stock: number }[];
-  removeImageIndexes?: number[]; // 要刪除的既有圖片索引
-  newImages?: string[]; // 新上傳的圖片（附加在後）
+  images: ProductImage[]; // 更新後的完整圖片陣列（含 tag）
 };
 
 export function updateProduct(slug: string, input: UpdateProductInput): boolean {
@@ -146,9 +146,7 @@ export function updateProduct(slug: string, input: UpdateProductInput): boolean 
   p.description = input.description;
   p.categorySlug = input.categorySlug;
   p.status = input.status;
-  const remove = new Set(input.removeImageIndexes ?? []);
-  p.images = p.images.filter((_, i) => !remove.has(i));
-  if (input.newImages?.length) p.images = [...p.images, ...input.newImages];
+  p.images = input.images;
   for (const vi of input.variants) {
     const v = p.variants.find((x) => x.id === vi.id);
     if (v) {

@@ -68,20 +68,28 @@ export default async function EditProductPage({
         <div className="text-sm">
           <span className="mb-1 block text-ink/70">商品圖片</span>
           {product.images.length > 0 && (
-            <div className="mb-2 flex flex-wrap gap-3">
+            <div className="mb-3 flex flex-wrap gap-3">
               {product.images.map((img, i) => (
-                <label key={i} className="relative cursor-pointer">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" className="h-20 w-20 rounded-lg object-cover ring-1 ring-line" />
-                  <span className="mt-1 flex items-center gap-1 text-xs text-ink/60">
+                <div key={i} className="w-24">
+                  <div className="relative h-24 w-24 overflow-hidden rounded-lg ring-1 ring-line">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.url} alt="" className="h-full w-full object-cover" />
+                    {i === 0 && (
+                      <span className="absolute left-1 top-1 rounded bg-brand px-1 text-[10px] text-white">
+                        封面
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    name={`tag_${i}`}
+                    defaultValue={img.tag ?? ""}
+                    placeholder="對應規格"
+                    className="mt-1 w-24 rounded border border-line px-1.5 py-1 text-xs outline-none focus:border-brand"
+                  />
+                  <label className="mt-1 flex items-center gap-1 text-xs text-ink/50">
                     <input type="checkbox" name="removeIndex" value={i} /> 刪除
-                  </span>
-                  {i === 0 && (
-                    <span className="absolute left-1 top-1 rounded bg-brand px-1 text-[10px] text-white">
-                      封面
-                    </span>
-                  )}
-                </label>
+                  </label>
+                </div>
               ))}
             </div>
           )}
@@ -94,6 +102,8 @@ export default async function EditProductPage({
           />
           <p className="mt-1 text-xs text-ink/40">
             新選的圖會加在後面（第一張為封面）；勾選「刪除」可移除既有圖。每張 ≤2MB。
+            <br />
+            「對應規格」填規格選項（如 <span className="text-ink/60">紅色</span>），顧客選到該規格時圖庫會自動跳到這張。
           </p>
         </div>
 

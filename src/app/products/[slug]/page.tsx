@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { categoryName } from "@/lib/category-store";
 import { getActiveProduct } from "@/lib/product-store";
-import { VariantSelector } from "@/components/variant-selector";
-import { ProductGallery } from "@/components/product-gallery";
+import { ProductView } from "@/components/product-view";
 
 export async function generateMetadata({
   params,
@@ -41,20 +40,7 @@ export default async function ProductPage({
         <span className="text-ink/80">{product.title}</span>
       </nav>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        {/* 圖片 */}
-        <ProductGallery
-          images={product.images}
-          gradient={product.gradient}
-          title={product.title}
-        />
-
-        {/* 資訊 + 選規格 */}
-        <div className="flex flex-col gap-5">
-          <h1 className="text-xl font-bold sm:text-2xl">{product.title}</h1>
-          <VariantSelector product={product} />
-        </div>
-      </div>
+      <ProductView product={product} />
 
       {/* 商品敘述 */}
       <section className="mt-10">
