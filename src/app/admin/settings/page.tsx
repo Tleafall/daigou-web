@@ -70,14 +70,29 @@ export default async function AdminSettingsPage({
           </label>
         </div>
 
-        <label className="text-sm">
-          <span className="mb-1 block text-ink/70">商品旁顯示數量</span>
-          <select name="productCountDisplay" defaultValue={s.productCountDisplay} className={inputClass}>
-            <option value="none">不顯示</option>
-            <option value="sold">顯示已售數（例：已售 12）</option>
-            <option value="stock">顯示剩餘數（例：剩 5 件）</option>
-          </select>
-        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="text-sm">
+            <span className="mb-1 block text-ink/70">商品旁顯示數量</span>
+            <select name="productCountDisplay" defaultValue={s.productCountDisplay} className={inputClass}>
+              <option value="none">不顯示</option>
+              <option value="sold">顯示已售數（例：已售 12）</option>
+              <option value="stock">顯示剩餘數（例：僅剩 3 件）</option>
+            </select>
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block text-ink/70">剩餘幾件以下才顯示</span>
+            <input
+              name="lowStockThreshold"
+              type="number"
+              min="1"
+              defaultValue={s.lowStockThreshold}
+              className={inputClass}
+            />
+          </label>
+        </div>
+        <p className="-mt-2 text-xs text-ink/40">
+          「顯示剩餘數」時，只有庫存 ≤ 上面的數字才會顯示「僅剩 N 件」，避免庫存很多時反而沒急迫感。
+        </p>
 
         {/* 客服自動回覆 */}
         <div className="rounded-lg border border-line p-4">

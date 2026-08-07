@@ -26,6 +26,7 @@ export async function updateSettingsAction(formData: FormData) {
       const v = String(formData.get("productCountDisplay") || "none");
       return v === "sold" || v === "stock" ? v : "none";
     })(),
+    lowStockThreshold: toInt(formData.get("lowStockThreshold"), 5),
     botEnabled: formData.get("botEnabled") === "on",
     botMessage: String(formData.get("botMessage") || "").trim(),
   });

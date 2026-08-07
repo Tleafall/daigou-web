@@ -93,9 +93,14 @@ export function soldCountForProduct(slug: string): number {
 
 // 依後台設定，回傳商品旁要顯示的文字（已售 / 剩餘 / 不顯示）
 export function productCountLabel(slug: string, totalStock: number): string | null {
-  const mode = getSettings().productCountDisplay;
-  if (mode === "sold") return `已售 ${soldCountForProduct(slug)}`;
-  if (mode === "stock") return totalStock > 0 ? `剩 ${totalStock} 件` : null;
+  const s = getSettings();
+  if (s.productCountDisplay === "sold") return `已售 ${soldCountForProduct(slug)}`;
+  if (s.productCountDisplay === "stock") {
+    // 只在庫存低於門檻時顯示「僅剩 X 件」催單；庫存充足或 0 都不顯示
+    return totalStock > 0 && totalStock <= s.lowStockThreshold
+      ? `僅剩 ${totalStock} 件`
+      : null;
+  }
   return null;
 }
 

@@ -11,6 +11,7 @@ export type Settings = {
   lineId: string;
   email: string;
   productCountDisplay: "none" | "sold" | "stock"; // 商品旁顯示：不顯示/已售數/剩餘數
+  lowStockThreshold: number; // 「剩餘」模式：庫存 ≤ 此數才顯示（催單）
   botEnabled: boolean; // 客服自動回覆是否啟用
   botMessage: string; // 自動回覆內容
 };
@@ -24,6 +25,7 @@ const DEFAULTS: Settings = {
   lineId: site.lineId,
   email: site.email,
   productCountDisplay: "none",
+  lowStockThreshold: 5,
   botEnabled: false,
   botMessage: "您好，感謝來訊！小幫手先為您服務，賣家看到後會盡快親自回覆您 😊",
 };
