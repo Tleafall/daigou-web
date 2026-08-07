@@ -22,7 +22,10 @@ export async function updateSettingsAction(formData: FormData) {
     shippingFee: toInt(formData.get("shippingFee"), 100),
     lineId: String(formData.get("lineId") || "").trim(),
     email: String(formData.get("email") || "").trim(),
-    showSoldCount: formData.get("showSoldCount") === "on",
+    productCountDisplay: (() => {
+      const v = String(formData.get("productCountDisplay") || "none");
+      return v === "sold" || v === "stock" ? v : "none";
+    })(),
     botEnabled: formData.get("botEnabled") === "on",
     botMessage: String(formData.get("botMessage") || "").trim(),
   });

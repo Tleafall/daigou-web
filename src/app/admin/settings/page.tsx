@@ -70,14 +70,13 @@ export default async function AdminSettingsPage({
           </label>
         </div>
 
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="showSoldCount"
-            defaultChecked={s.showSoldCount}
-            className="h-4 w-4"
-          />
-          在商品旁顯示賣出數量（例：已售 12）
+        <label className="text-sm">
+          <span className="mb-1 block text-ink/70">商品旁顯示數量</span>
+          <select name="productCountDisplay" defaultValue={s.productCountDisplay} className={inputClass}>
+            <option value="none">不顯示</option>
+            <option value="sold">顯示已售數（例：已售 12）</option>
+            <option value="stock">顯示剩餘數（例：剩 5 件）</option>
+          </select>
         </label>
 
         {/* 客服自動回覆 */}

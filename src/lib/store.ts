@@ -91,6 +91,14 @@ export function soldCountForProduct(slug: string): number {
   return n;
 }
 
+// 依後台設定，回傳商品旁要顯示的文字（已售 / 剩餘 / 不顯示）
+export function productCountLabel(slug: string, totalStock: number): string | null {
+  const mode = getSettings().productCountDisplay;
+  if (mode === "sold") return `已售 ${soldCountForProduct(slug)}`;
+  if (mode === "stock") return totalStock > 0 ? `剩 ${totalStock} 件` : null;
+  return null;
+}
+
 export type CustomerSummary = { userId: string; userName: string; userEmail: string };
 
 // 從訂單推導出所有下過單的顧客（去重）

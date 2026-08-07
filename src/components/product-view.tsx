@@ -8,12 +8,10 @@ import { VariantSelector } from "./variant-selector";
 
 export function ProductView({
   product,
-  showSold,
-  soldCount,
+  countLabel,
 }: {
   product: Product;
-  showSold?: boolean;
-  soldCount?: number;
+  countLabel?: string | null;
 }) {
   const [activeImage, setActiveImage] = useState(0);
 
@@ -35,8 +33,8 @@ export function ProductView({
       <div className="flex flex-col gap-5">
         <div>
           <h1 className="text-xl font-bold sm:text-2xl">{product.title}</h1>
-          {showSold && (
-            <div className="mt-1 text-sm text-ink/40">已售 {soldCount}</div>
+          {countLabel && (
+            <div className="mt-1 text-sm text-ink/40">{countLabel}</div>
           )}
         </div>
         <VariantSelector product={product} onOptionSelect={handleOptionSelect} />

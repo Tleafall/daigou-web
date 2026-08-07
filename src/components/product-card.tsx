@@ -1,14 +1,12 @@
 import Link from "next/link";
 import type { Product } from "@/lib/mock-data";
 import { formatTWD } from "@/lib/format";
-import { getSettings } from "@/lib/settings-store";
-import { soldCountForProduct } from "@/lib/store";
+import { productCountLabel } from "@/lib/store";
 
 export function ProductCard({ product }: { product: Product }) {
   const hasOptions = product.optionGroups.length > 0;
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
-  const showSold = getSettings().showSoldCount;
-  const sold = showSold ? soldCountForProduct(product.slug) : 0;
+  const countLabel = productCountLabel(product.slug, totalStock);
 
   return (
     <Link
@@ -44,7 +42,7 @@ export function ProductCard({ product }: { product: Product }) {
             {formatTWD(product.price)}
             {hasOptions && <span className="ml-1 text-xs font-normal text-ink/40">起</span>}
           </span>
-          {showSold && <span className="text-xs text-ink/40">已售 {sold}</span>}
+          {countLabel && <span className="text-xs text-ink/40">{countLabel}</span>}
         </div>
       </div>
     </Link>

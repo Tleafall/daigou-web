@@ -10,7 +10,7 @@ export type Settings = {
   shippingFee: number;
   lineId: string;
   email: string;
-  showSoldCount: boolean; // 是否在商品旁顯示賣出數量
+  productCountDisplay: "none" | "sold" | "stock"; // 商品旁顯示：不顯示/已售數/剩餘數
   botEnabled: boolean; // 客服自動回覆是否啟用
   botMessage: string; // 自動回覆內容
 };
@@ -23,7 +23,7 @@ const DEFAULTS: Settings = {
   shippingFee: site.shippingFee,
   lineId: site.lineId,
   email: site.email,
-  showSoldCount: false,
+  productCountDisplay: "none",
   botEnabled: false,
   botMessage: "您好，感謝來訊！小幫手先為您服務，賣家看到後會盡快親自回覆您 😊",
 };
