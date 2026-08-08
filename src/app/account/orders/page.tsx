@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth-helpers";
 import { listOrdersByUser } from "@/lib/store";
 import { formatTWD } from "@/lib/format";
 import { OrderStatusBadge } from "@/components/order-status-badge";
+import { EmptyState } from "@/components/empty-state";
 
 export const metadata: Metadata = { title: "我的訂單" };
 
@@ -21,9 +22,14 @@ export default async function MyOrdersPage() {
       <h1 className="mb-6 text-xl font-bold">我的訂單</h1>
 
       {orders.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line py-16 text-center text-ink/50">
-          目前沒有訂單
-        </div>
+        <EmptyState emoji="📦" title="目前沒有訂單" subtitle="下單後就會顯示在這裡">
+          <Link
+            href="/"
+            className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+          >
+            去逛逛
+          </Link>
+        </EmptyState>
       ) : (
         <div className="flex flex-col gap-3">
           {orders.map((o) => (

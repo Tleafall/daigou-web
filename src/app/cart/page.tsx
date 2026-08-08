@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { formatTWD } from "@/lib/format";
 import { useSettings } from "@/lib/settings-context";
-import { IconCart } from "@/components/icons";
+import { EmptyState } from "@/components/empty-state";
 
 export default function CartPage() {
   const { items, subtotal, ready, setQty, removeItem } = useCart();
@@ -18,16 +18,14 @@ export default function CartPage() {
     return (
       <div className="mx-auto max-w-6xl px-4 py-6">
         <h1 className="mb-6 text-xl font-bold">購物車</h1>
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-line py-20 text-center">
-          <IconCart className="h-12 w-12 text-ink/20" />
-          <p className="mt-4 text-ink/60">購物車還是空的</p>
+        <EmptyState emoji="🛒" title="購物車還是空的" subtitle="挑幾樣喜歡的加進來吧">
           <Link
             href="/"
-            className="mt-6 rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600"
+            className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-600"
           >
             去逛逛
           </Link>
-        </div>
+        </EmptyState>
       </div>
     );
   }

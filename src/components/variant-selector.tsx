@@ -135,12 +135,12 @@ export function VariantSelector({
       {/* 數量 */}
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium text-ink/70">數量</span>
-        <div className="flex items-center rounded-lg border border-line">
+        <div className="flex items-center overflow-hidden rounded-full border border-line">
           <button
             type="button"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
             disabled={qty <= 1}
-            className="px-3 py-1.5 text-lg text-ink/60 disabled:text-ink/20"
+            className="px-3.5 py-1.5 text-lg text-ink/60 hover:bg-muted disabled:text-ink/20"
           >
             −
           </button>
@@ -149,7 +149,7 @@ export function VariantSelector({
             type="button"
             onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
             disabled={qty >= maxQty}
-            className="px-3 py-1.5 text-lg text-ink/60 disabled:text-ink/20"
+            className="px-3.5 py-1.5 text-lg text-ink/60 hover:bg-muted disabled:text-ink/20"
           >
             ＋
           </button>

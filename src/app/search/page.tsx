@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { listActiveProducts } from "@/lib/product-store";
 import { ProductCard } from "@/components/product-card";
+import { EmptyState } from "@/components/empty-state";
 
 export const metadata: Metadata = { title: "搜尋" };
 
@@ -25,9 +26,7 @@ export default async function SearchPage({
       </p>
 
       {query && results.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line py-16 text-center text-ink/50">
-          找不到符合「{query}」的商品
-        </div>
+        <EmptyState emoji="🔍" title={`找不到符合「${query}」的商品`} subtitle="換個關鍵字試試看" />
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {results.map((p) => (

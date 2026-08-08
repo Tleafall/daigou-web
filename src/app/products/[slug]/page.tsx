@@ -48,7 +48,9 @@ export default async function ProductPage({
 
       {/* 商品敘述 */}
       <section className="mt-10">
-        <h2 className="mb-3 border-b border-line pb-2 text-lg font-bold">商品敘述</h2>
+        <h2 className="mb-3 flex items-center gap-2 border-b border-line pb-2 text-lg font-bold">
+          <span className="h-5 w-1 rounded-full bg-brand" />商品敘述
+        </h2>
         <p className="whitespace-pre-line leading-7 text-ink/80">
           {product.description}
         </p>

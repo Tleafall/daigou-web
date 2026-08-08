@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Product } from "@/lib/mock-data";
 import { formatTWD } from "@/lib/format";
 import { productCountLabel } from "@/lib/store";
+import { categoryName } from "@/lib/category-store";
 
 export function ProductCard({ product }: { product: Product }) {
   const hasOptions = product.optionGroups.length > 0;
@@ -34,7 +35,10 @@ export function ProductCard({ product }: { product: Product }) {
         )}
       </div>
       <div className="flex flex-1 flex-col p-3">
-        <h3 className="line-clamp-2 text-sm text-ink/90 group-hover:text-brand">
+        <span className="mb-1 w-fit rounded bg-muted px-1.5 py-0.5 text-[10px] text-ink/40">
+          {categoryName(product.categorySlug)}
+        </span>
+        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm leading-5 text-ink/90 group-hover:text-brand">
           {product.title}
         </h3>
         <div className="mt-auto flex items-end justify-between pt-2">
