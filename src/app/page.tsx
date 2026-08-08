@@ -15,7 +15,9 @@ export default function Home() {
 
       {/* 分類入口 */}
       <section className="mt-8">
-        <h2 className="mb-4 text-lg font-bold">商品分類</h2>
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <span className="h-5 w-1 rounded-full bg-brand" />商品分類
+        </h2>
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
           {categories.map((c) => (
             <Link
@@ -32,7 +34,9 @@ export default function Home() {
 
       {/* 精選 */}
       <section className="mt-10">
-        <h2 className="mb-4 text-lg font-bold">精選推薦</h2>
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <span className="h-5 w-1 rounded-full bg-brand" />精選推薦
+        </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {featured.map((p) => (
             <ProductCard key={p.id} product={p} />
@@ -42,7 +46,9 @@ export default function Home() {
 
       {/* 最新 */}
       <section className="mt-10">
-        <h2 className="mb-4 text-lg font-bold">最新上架</h2>
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold">
+          <span className="h-5 w-1 rounded-full bg-brand" />最新上架
+        </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {latest.map((p) => (
             <ProductCard key={p.id} product={p} />

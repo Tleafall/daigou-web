@@ -11,7 +11,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-white transition duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-100"
     >
       <div
         className="relative aspect-square w-full overflow-hidden"
@@ -24,7 +24,7 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={product.images[0].url}
             alt={product.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         )}
         {totalStock === 0 && (
