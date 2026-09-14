@@ -45,8 +45,13 @@ export default async function ImportProductsPage() {
               <code className="rounded bg-muted px-1">分類</code>、
               <code className="rounded bg-muted px-1">售價</code>、
               <code className="rounded bg-muted px-1">庫存</code>、
-              <code className="rounded bg-muted px-1">商品敘述</code>。
+              <code className="rounded bg-muted px-1">商品敘述</code>、
+              <code className="rounded bg-muted px-1">圖片網址</code>。
               商品名稱、分類、售價必填。
+            </p>
+            <p className="mt-2 rounded-lg bg-muted px-3 py-2 text-ink/60">
+              🖼️ <b>圖片網址</b>（選填）：貼上商品在來源網站的圖片連結，匯入時會自動抓圖。多張可用逗號分隔。
+              有些網站會擋外部抓圖，抓不到就先沒圖、商品照樣建立，之後可在編輯頁手動上傳。
             </p>
             <p className="mt-2 text-ink/60">
               「分類」請填以下現有名稱之一：

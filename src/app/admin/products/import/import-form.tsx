@@ -53,6 +53,14 @@ export function ImportForm() {
             )}
           </div>
 
+          {(state.imagesOk > 0 || state.imagesFailed > 0) && (
+            <p className="mt-2 text-sm text-ink/60">
+              圖片：成功抓取 {state.imagesOk} 張
+              {state.imagesFailed > 0 &&
+                `，${state.imagesFailed} 張抓不到（該網站可能擋外部連結；可稍後在編輯頁手動補上）`}
+            </p>
+          )}
+
           {state.errors.length > 0 && (
             <div className="mt-4">
               <div className="mb-2 text-sm font-medium text-ink/70">未匯入的資料（請修正後重新上傳）</div>
