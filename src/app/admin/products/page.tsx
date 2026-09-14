@@ -27,12 +27,20 @@ export default async function AdminProductsPage() {
       </nav>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-bold">商品管理</h1>
-        <Link
-          href="/admin/products/new"
-          className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
-        >
-          ＋ 新增商品
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/products/import"
+            className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink/70 hover:border-brand hover:text-brand"
+          >
+            ⬆ 批次匯入
+          </Link>
+          <Link
+            href="/admin/products/new"
+            className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+          >
+            ＋ 新增商品
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-line bg-white">
