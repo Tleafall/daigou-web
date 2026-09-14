@@ -14,6 +14,7 @@ export type ImportResult =
       created: number;
       imagesOk: number;
       imagesFailed: number;
+      imageMissing: string[];
       errors: RowError[];
     }
   | { ok: false; error: string };
@@ -22,7 +23,15 @@ const MAX_ROWS = 500;
 const MAX_IMAGES_PER_PRODUCT = 4;
 const MAX_IMAGE_BYTES = 3_000_000;
 
-// 抓取外部圖片轉成 data URL（僅 admin 觸發；含格式/大小/逾時保護）
+// 上傳的圖片檔 → data URL（檢查格式與大小）
+async function uploadedFileToDataUrl(file: File): Promise<string | null> {
+  if (!file.type.startsWith("image/")) return null;
+  if (file.size === 0 || file.size > MAX_IMAGE_BYTES) return null;
+  const b64 = Buffer.from(await file.arrayBuffer()).toString("base64");
+  return `data:${file.type};base64,${b64}`;
+}
+
+// 外部圖片網址 → data URL（僅 admin；含格式/大小/逾時保護）
 async function fetchImageAsDataUrl(raw: string): Promise<string | null> {
   const url = raw.trim();
   if (!/^https?:\/\//i.test(url)) return null;
@@ -51,8 +60,8 @@ export async function importProductsAction(
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0)
-    return { ok: false, error: "請先選擇檔案" };
-  if (file.size > 3_000_000) return { ok: false, error: "檔案過大（上限 3MB）" };
+    return { ok: false, error: "請先選擇 Excel/CSV 檔案" };
+  if (file.size > 3_000_000) return { ok: false, error: "Excel 檔過大（上限 3MB）" };
 
   let rows;
   try {
@@ -61,9 +70,18 @@ export async function importProductsAction(
   } catch {
     return { ok: false, error: "無法讀取檔案，請確認是 Excel(.xlsx) 或 CSV 格式" };
   }
-
   if (rows.length === 0) return { ok: false, error: "檔案內沒有商品資料" };
   if (rows.length > MAX_ROWS) return { ok: false, error: `單次最多匯入 ${MAX_ROWS} 筆` };
+
+  // 建立「圖片檔名 → 檔案」對照表（同時支援含/不含副檔名）
+  const fileMap = new Map<string, File>();
+  for (const f of formData.getAll("imageFiles")) {
+    if (!(f instanceof File) || f.size === 0) continue;
+    const name = f.name.toLowerCase().trim();
+    fileMap.set(name, f);
+    const noExt = name.replace(/\.[^.]+$/, "");
+    if (noExt && !fileMap.has(noExt)) fileMap.set(noExt, f);
+  }
 
   const categories = listCategories();
   const catByName = new Map(categories.map((c) => [c.name, c.slug]));
@@ -71,13 +89,15 @@ export async function importProductsAction(
   let created = 0;
   let imagesOk = 0;
   let imagesFailed = 0;
+  const missingSet = new Set<string>();
   const errors: RowError[] = [];
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const rowNo = i + 2; // 表頭佔第 1 列
 
-    if (!r.title && !r.category && r.price <= 0 && !r.description && !r.imageUrl) continue;
+    if (!r.title && !r.category && r.price <= 0 && !r.description && !r.imageFile && !r.imageUrl)
+      continue;
     if (!r.title) {
       errors.push({ row: rowNo, title: "（空白）", reason: "缺少商品名稱" });
       continue;
@@ -96,21 +116,32 @@ export async function importProductsAction(
       continue;
     }
 
-    // 抓圖（可多張，用逗號/空白分隔）
+    // 圖片：優先用「上傳圖片＋檔名對應」，否則用「圖片網址」
     const imageUrls: string[] = [];
-    if (r.imageUrl) {
-      const urls = r.imageUrl
-        .split(/[,，\s]+/)
-        .filter(Boolean)
-        .slice(0, MAX_IMAGES_PER_PRODUCT);
-      for (const u of urls) {
-        const dataUrl = await fetchImageAsDataUrl(u);
-        if (dataUrl) {
-          imageUrls.push(dataUrl);
-          imagesOk++;
+    const names = (r.imageFile || r.imageUrl)
+      .split(/[,，]+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, MAX_IMAGES_PER_PRODUCT);
+
+    for (const name of names) {
+      let dataUrl: string | null = null;
+      if (r.imageFile) {
+        const key = name.toLowerCase();
+        const matched = fileMap.get(key) ?? fileMap.get(key.replace(/\.[^.]+$/, ""));
+        if (matched) {
+          dataUrl = await uploadedFileToDataUrl(matched);
         } else {
-          imagesFailed++;
+          missingSet.add(name);
         }
+      } else {
+        dataUrl = await fetchImageAsDataUrl(name);
+      }
+      if (dataUrl) {
+        imageUrls.push(dataUrl);
+        imagesOk++;
+      } else {
+        imagesFailed++;
       }
     }
 
@@ -131,5 +162,12 @@ export async function importProductsAction(
     revalidatePath("/admin/products");
     revalidatePath("/");
   }
-  return { ok: true, created, imagesOk, imagesFailed, errors };
+  return {
+    ok: true,
+    created,
+    imagesOk,
+    imagesFailed,
+    imageMissing: [...missingSet].slice(0, 12),
+    errors,
+  };
 }

@@ -17,7 +17,7 @@ export function ImportForm() {
     <div className="flex flex-col gap-4">
       <form action={action} className="flex flex-col gap-3 rounded-xl border border-line bg-white p-5">
         <label className="text-sm">
-          <span className="mb-1 block text-ink/70">選擇檔案（.xlsx 或 .csv）</span>
+          <span className="mb-1 block text-ink/70">① 商品資料檔（.xlsx 或 .csv）</span>
           <input
             type="file"
             name="file"
@@ -25,6 +25,20 @@ export function ImportForm() {
             required
             className="w-full rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
           />
+        </label>
+
+        <label className="text-sm">
+          <span className="mb-1 block text-ink/70">② 商品圖片（選填，可一次選整個資料夾的圖）</span>
+          <input
+            type="file"
+            name="imageFiles"
+            accept="image/*"
+            multiple
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
+          />
+          <span className="mt-1 block text-xs text-ink/40">
+            打開圖片資料夾後可用 Ctrl/⌘＋A 全選。系統會用 Excel「圖片檔名」欄對應到正確商品。
+          </span>
         </label>
         <button
           disabled={pending}
@@ -55,9 +69,14 @@ export function ImportForm() {
 
           {(state.imagesOk > 0 || state.imagesFailed > 0) && (
             <p className="mt-2 text-sm text-ink/60">
-              圖片：成功抓取 {state.imagesOk} 張
-              {state.imagesFailed > 0 &&
-                `，${state.imagesFailed} 張抓不到（該網站可能擋外部連結；可稍後在編輯頁手動補上）`}
+              圖片：成功 {state.imagesOk} 張
+              {state.imagesFailed > 0 && `，${state.imagesFailed} 張沒對到（可稍後在編輯頁手動補上）`}
+            </p>
+          )}
+          {state.imageMissing.length > 0 && (
+            <p className="mt-1 text-xs text-amber-700">
+              找不到這些圖片檔名：{state.imageMissing.join("、")}
+              {state.imageMissing.length >= 12 && " …"}
             </p>
           )}
 

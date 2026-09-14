@@ -46,13 +46,18 @@ export default async function ImportProductsPage() {
               <code className="rounded bg-muted px-1">售價</code>、
               <code className="rounded bg-muted px-1">庫存</code>、
               <code className="rounded bg-muted px-1">商品敘述</code>、
+              <code className="rounded bg-muted px-1">圖片檔名</code>、
               <code className="rounded bg-muted px-1">圖片網址</code>。
               商品名稱、分類、售價必填。
             </p>
-            <p className="mt-2 rounded-lg bg-muted px-3 py-2 text-ink/60">
-              🖼️ <b>圖片網址</b>（選填）：貼上商品在來源網站的圖片連結，匯入時會自動抓圖。多張可用逗號分隔。
-              有些網站會擋外部抓圖，抓不到就先沒圖、商品照樣建立，之後可在編輯頁手動上傳。
-            </p>
+            <div className="mt-2 rounded-lg bg-muted px-3 py-2 text-ink/60">
+              🖼️ 商品圖片有兩種填法（擇一，選填）：
+              <ul className="mt-1 list-disc pl-5">
+                <li><b>圖片檔名</b>（推薦）：例如 <code className="rounded bg-white px-1">A.jpg</code>，並在下方步驟一起上傳圖片資料夾，系統用檔名對應。多張可用逗號分隔。</li>
+                <li><b>圖片網址</b>：貼上來源網站的圖片連結，系統自動抓（有些網站會擋，抓不到就先沒圖）。</li>
+              </ul>
+              沒填也沒關係，商品會用漸層底色當封面，之後可在編輯頁補圖。
+            </div>
             <p className="mt-2 text-ink/60">
               「分類」請填以下現有名稱之一：
             </p>
@@ -68,8 +73,8 @@ export default async function ImportProductsPage() {
         <li className="flex gap-3">
           <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-white">3</span>
           <div className="text-sm">
-            <b>上傳檔案</b>
-            <p className="mt-1 text-ink/60">上傳後會立即建立商品，並回報哪些列成功、哪些需要修正。</p>
+            <b>上傳</b>
+            <p className="mt-1 text-ink/60">選 Excel 檔（若用檔名對應，再選整批商品圖片）→ 按開始匯入。會立即建立商品，並回報成功筆數、圖片對應結果，以及哪些列需修正。</p>
           </div>
         </li>
       </ol>
