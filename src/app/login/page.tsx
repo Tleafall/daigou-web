@@ -22,10 +22,17 @@ export default async function LoginPage() {
           登入以查看訂單、加快結帳
         </p>
 
-        {/* 帳密登入（測試用） */}
+        {/* 帳密登入 */}
         <div className="mt-6">
           <LoginForm />
         </div>
+
+        <p className="mt-4 text-center text-sm text-ink/60">
+          還沒有帳號？{" "}
+          <Link href="/register" className="font-medium text-brand hover:underline">
+            註冊會員
+          </Link>
+        </p>
 
         <div className="mt-3 rounded-lg bg-muted px-3 py-2.5 text-xs text-ink/60">
           🔧 測試帳號（帳密登入）：

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { isBlocked } from "@/lib/customer-store";
 import { getStoreById } from "@/lib/stores-711";
+import { savePickupProfile } from "@/lib/pickup-store";
 import {
   adminAdvance,
   cancelOrder,
@@ -44,7 +45,7 @@ export async function createOrderAction(
   const store = getStoreById(input.storeId?.trim() ?? "");
   if (!store) return { ok: false, error: "請選擇取貨門市" };
 
-  return await createOrder({
+  const result = await createOrder({
     userId,
     userEmail: session.user.email ?? "",
     userName: session.user.name ?? "會員",
@@ -56,6 +57,19 @@ export async function createOrderAction(
     storeAddress: store.addr,
     customerNote: input.customerNote?.trim() || undefined,
   });
+
+  // 下單成功後記住取貨資料，下次結帳自動帶入（不用重打）
+  if (result.ok) {
+    await savePickupProfile(userId, {
+      recipientName: name,
+      recipientPhone: phone,
+      storeId: store.id,
+      storeName: store.name,
+      storeAddress: store.addr,
+    });
+  }
+
+  return result;
 }
 
 // 會員取消自己的訂單

@@ -10,7 +10,15 @@ import { createOrderAction } from "@/lib/order-actions";
 import { StorePicker } from "@/components/store-picker";
 import type { Store711 } from "@/lib/stores-711";
 
-export function CheckoutForm({ defaultName }: { defaultName: string }) {
+export function CheckoutForm({
+  defaultName,
+  defaultPhone = "",
+  defaultStore = null,
+}: {
+  defaultName: string;
+  defaultPhone?: string;
+  defaultStore?: Store711 | null;
+}) {
   const { items, subtotal, ready, clear } = useCart();
   const site = useSettings();
   const router = useRouter();
@@ -18,9 +26,9 @@ export function CheckoutForm({ defaultName }: { defaultName: string }) {
   const [error, setError] = useState<string | null>(null);
 
   const [recipientName, setRecipientName] = useState(defaultName);
-  const [recipientPhone, setRecipientPhone] = useState("");
+  const [recipientPhone, setRecipientPhone] = useState(defaultPhone);
   const [customerNote, setCustomerNote] = useState("");
-  const [store, setStore] = useState<Store711 | null>(null);
+  const [store, setStore] = useState<Store711 | null>(defaultStore);
 
   const shippingFee =
     subtotal >= site.freeShippingThreshold || subtotal === 0 ? 0 : site.shippingFee;
@@ -80,6 +88,12 @@ export function CheckoutForm({ defaultName }: { defaultName: string }) {
         {/* 收件資料 */}
         <div className="flex flex-col gap-4 rounded-xl border border-line bg-white p-5">
           <h2 className="font-bold">取貨資料</h2>
+
+          {defaultStore && (
+            <div className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-ink/70">
+              已帶入您上次的取貨資料，可直接下單或修改。
+            </div>
+          )}
 
           {error && (
             <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">

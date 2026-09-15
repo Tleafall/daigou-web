@@ -188,6 +188,19 @@ model CustomerProfile {
 }
 
 // ------------------------------------------------------------------
+// 常用取貨資料（賣貨便）：記住顧客上次的取貨人/電話/門市，結帳自動帶入
+// ------------------------------------------------------------------
+model PickupProfile {
+  userId         String   @id
+  recipientName  String
+  recipientPhone String
+  storeId        String
+  storeName      String
+  storeAddress   String
+  updatedAt      DateTime @updatedAt
+}
+
+// ------------------------------------------------------------------
 // 常用收件地址（宅配用；目前結帳走賣貨便門市，保留供日後宅配選項）
 // ------------------------------------------------------------------
 model Address {

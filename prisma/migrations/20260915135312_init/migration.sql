@@ -164,6 +164,19 @@ CREATE TABLE "CustomerProfile" (
 );
 
 -- CreateTable
+CREATE TABLE "PickupProfile" (
+    "userId" TEXT NOT NULL,
+    "recipientName" TEXT NOT NULL,
+    "recipientPhone" TEXT NOT NULL,
+    "storeId" TEXT NOT NULL,
+    "storeName" TEXT NOT NULL,
+    "storeAddress" TEXT NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PickupProfile_pkey" PRIMARY KEY ("userId")
+);
+
+-- CreateTable
 CREATE TABLE "Address" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
