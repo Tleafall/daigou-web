@@ -7,6 +7,7 @@ import { createProduct } from "@/lib/product-store";
 import { gradientPresets } from "@/lib/mock-data";
 import { parseRows } from "@/lib/product-import";
 import { uploadImages } from "@/lib/cloudinary";
+import { isPublicHttpUrl } from "@/lib/ssrf";
 
 export type RowError = { row: number; title: string; reason: string };
 export type ImportResult =
@@ -32,14 +33,16 @@ async function uploadedFileToDataUrl(file: File): Promise<string | null> {
   return `data:${file.type};base64,${b64}`;
 }
 
-// 外部圖片網址 → data URL（僅 admin；含格式/大小/逾時保護）
+// 外部圖片網址 → data URL（僅 admin；含格式/大小/逾時 + 防 SSRF）
 async function fetchImageAsDataUrl(raw: string): Promise<string | null> {
   const url = raw.trim();
-  if (!/^https?:\/\//i.test(url)) return null;
+  // 只允許指向公開位址的 http/https，擋掉內網/loopback（防 SSRF）
+  if (!(await isPublicHttpUrl(url))) return null;
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(url, { signal: controller.signal, redirect: "follow" });
+    // redirect:"error"：不跟隨轉址，避免公開網址 302 跳到內網位址繞過檢查
+    const res = await fetch(url, { signal: controller.signal, redirect: "error" });
     clearTimeout(timer);
     if (!res.ok) return null;
     const ct = (res.headers.get("content-type") || "").split(";")[0].trim();

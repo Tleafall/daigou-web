@@ -35,17 +35,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           };
         }
 
-        // 再退回內建測試帳號（admin/customer）
-        const testUser = testUsers.find(
-          (u) => u.email === email && u.password === password,
-        );
-        if (!testUser) return null;
-        return {
-          id: testUser.id,
-          name: testUser.name,
-          email: testUser.email,
-          role: testUser.role,
-        };
+        // 內建測試帳號（admin/customer）：僅限本機開發模式，正式版一律停用，
+        // 避免預設帳密在上線後被拿來登入後台。
+        if (process.env.NODE_ENV !== "production") {
+          const testUser = testUsers.find(
+            (u) => u.email === email && u.password === password,
+          );
+          if (testUser) {
+            return {
+              id: testUser.id,
+              name: testUser.name,
+              email: testUser.email,
+              role: testUser.role,
+            };
+          }
+        }
+        return null;
       },
     }),
   ],

@@ -34,15 +34,17 @@ export default async function LoginPage() {
           </Link>
         </p>
 
-        <div className="mt-3 rounded-lg bg-muted px-3 py-2.5 text-xs text-ink/60">
-          🔧 測試帳號（帳密登入）：
-          <br />
-          管理員 <code className="text-ink/80">admin@test.com</code> /{" "}
-          <code className="text-ink/80">admin1234</code>
-          <br />
-          一般會員 <code className="text-ink/80">customer@test.com</code> /{" "}
-          <code className="text-ink/80">user1234</code>
-        </div>
+        {process.env.NODE_ENV !== "production" && (
+          <div className="mt-3 rounded-lg bg-muted px-3 py-2.5 text-xs text-ink/60">
+            🔧 測試帳號（僅開發模式，正式版停用）：
+            <br />
+            管理員 <code className="text-ink/80">admin@test.com</code> /{" "}
+            <code className="text-ink/80">admin1234</code>
+            <br />
+            一般會員 <code className="text-ink/80">customer@test.com</code> /{" "}
+            <code className="text-ink/80">user1234</code>
+          </div>
+        )}
 
         {/* 分隔線 */}
         <div className="my-6 flex items-center gap-3 text-xs text-ink/40">

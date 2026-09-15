@@ -100,10 +100,15 @@ npm install
   npm run start
   ```
 
-**測試帳號**（內建）：
-- 管理員：`admin@test.com` / `admin1234`
-- 一般會員：`customer@test.com` / `user1234`
-- 一般客人也可以在 `/register` 自行註冊。
+**帳號**：
+- 內建測試帳號 `admin@test.com / admin1234`、`customer@test.com / user1234`
+  **只在開發模式(`npm run dev`)能用；正式版(`npm run start`)會自動停用**，
+  避免預設帳密被拿來登入後台。
+- 一般客人可在 `/register` 自行註冊。
+- **正式上線前，先建立你自己的管理員帳號**（正式版只有這種帳號進得了後台）：
+  ```bash
+  npm run create-admin -- 你的email 你的強密碼 你的名字
+  ```
 
 ---
 
@@ -145,6 +150,7 @@ npm install
 | `npm run db:push` | 把 schema 同步到資料庫 |
 | `npm run db:seed` | 重置示範資料（分類/商品/訂單） |
 | `npm run db:studio` | 開視覺化資料庫管理介面 |
+| `npm run create-admin -- <email> <密碼> [姓名]` | 建立/升級正式管理員帳號 |
 | `npm run stores:fetch` | 重新抓全台 7-11 門市清單 |
 
 ---
