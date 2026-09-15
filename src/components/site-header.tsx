@@ -17,9 +17,13 @@ type HeaderUser = {
 export function SiteHeader({
   user,
   categories,
+  adminChatUnread = 0,
+  hasUnreadReply = false,
 }: {
   user?: HeaderUser;
   categories: Category[];
+  adminChatUnread?: number;
+  hasUnreadReply?: boolean;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { count, ready } = useCart();
@@ -67,9 +71,14 @@ export function SiteHeader({
           {user?.role === "ADMIN" && (
             <Link
               href="/admin"
-              className="hidden rounded-md px-2 py-2 text-sm font-medium text-brand hover:bg-brand-50 sm:inline"
+              className="relative hidden rounded-md px-2 py-2 text-sm font-medium text-brand hover:bg-brand-50 sm:inline"
             >
               後台
+              {adminChatUnread > 0 && (
+                <span className="absolute -right-1 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
+                  {adminChatUnread}
+                </span>
+              )}
             </Link>
           )}
 
@@ -90,9 +99,12 @@ export function SiteHeader({
             <>
               <Link
                 href="/account"
-                className="flex items-center gap-1.5 rounded-md px-2 py-2 text-sm text-ink hover:bg-muted"
+                className="relative flex items-center gap-1.5 rounded-md px-2 py-2 text-sm text-ink hover:bg-muted"
               >
                 <IconUser className="h-6 w-6" />
+                {hasUnreadReply && (
+                  <span className="absolute left-6 top-1 h-2.5 w-2.5 rounded-full bg-brand ring-2 ring-white" />
+                )}
                 <span className="hidden max-w-24 truncate sm:inline">
                   {user.name ?? "會員"}
                 </span>
@@ -160,12 +172,14 @@ export function SiteHeader({
             <div className="mt-2 flex flex-col border-t border-line">
               {user ? (
                 <>
-                  <Link href="/account" onClick={() => setDrawerOpen(false)} className="px-4 py-3 hover:bg-muted">
+                  <Link href="/account" onClick={() => setDrawerOpen(false)} className="flex items-center gap-2 px-4 py-3 hover:bg-muted">
                     會員中心（{user.name ?? "會員"}）
+                    {hasUnreadReply && <span className="rounded-full bg-brand px-2 py-0.5 text-xs text-white">新回覆</span>}
                   </Link>
                   {user.role === "ADMIN" && (
-                    <Link href="/admin" onClick={() => setDrawerOpen(false)} className="px-4 py-3 font-medium text-brand hover:bg-muted">
+                    <Link href="/admin" onClick={() => setDrawerOpen(false)} className="flex items-center gap-2 px-4 py-3 font-medium text-brand hover:bg-muted">
                       後台管理
+                      {adminChatUnread > 0 && <span className="rounded-full bg-brand px-2 py-0.5 text-xs text-white">{adminChatUnread} 未讀</span>}
                     </Link>
                   )}
                   <form action={logoutAction}>

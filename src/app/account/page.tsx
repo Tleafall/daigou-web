@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-helpers";
 import { logoutAction } from "@/lib/auth-actions";
+import { customerHasUnread } from "@/lib/chat-store";
 
 export const metadata: Metadata = { title: "會員中心" };
 
 export default async function AccountPage() {
   const user = await requireUser();
+  const chatUnread = customerHasUnread(user.id ?? user.email ?? "");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -29,20 +31,29 @@ export default async function AccountPage() {
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {[
+        {([
           { title: "我的訂單", desc: "查看訂單與出貨狀態", href: "/account/orders" },
           { title: "常用收件地址", desc: "管理宅配地址", href: "/account/addresses" },
           { title: "取消 / 退換貨申請", desc: "售後服務（於訂單內操作）", href: "/account/orders" },
-          { title: "客服聊聊", desc: "有問題直接問賣家", href: "/account/chat" },
+          { title: "客服聊聊", desc: "有問題直接問賣家", href: "/account/chat", badge: chatUnread },
           { title: "帳號設定", desc: "個資與帳號刪除", href: undefined },
-        ].map((item) =>
+        ] as { title: string; desc: string; href?: string; badge?: boolean }[]).map((item) =>
           item.href ? (
             <Link
               key={item.title}
               href={item.href}
-              className="rounded-xl border border-line bg-white p-4 transition-colors hover:border-brand hover:bg-brand-50"
+              className={`rounded-xl border bg-white p-4 transition-colors hover:border-brand hover:bg-brand-50 ${
+                item.badge ? "border-brand-200" : "border-line"
+              }`}
             >
-              <div className="font-medium">{item.title}</div>
+              <div className="flex items-center gap-2 font-medium">
+                {item.title}
+                {item.badge ? (
+                  <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">
+                    新回覆
+                  </span>
+                ) : null}
+              </div>
               <div className="mt-1 text-sm text-ink/50">{item.desc}</div>
               <div className="mt-2 text-xs font-medium text-brand">前往 →</div>
             </Link>

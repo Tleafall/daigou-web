@@ -21,7 +21,23 @@ export type Conversation = {
   userName: string;
   userEmail: string;
   messages: ChatMessage[];
+  adminReadAt?: string; // 賣家最後讀取時間
+  customerReadAt?: string; // 顧客最後讀取時間
 };
+
+// 該對話對「賣家」而言有未讀（顧客有新訊息）
+function unreadForAdmin(c: Conversation): boolean {
+  const since = c.adminReadAt ?? "";
+  return c.messages.some((m) => m.sender === "customer" && m.createdAt > since);
+}
+
+// 該對話對「顧客」而言有未讀（賣家/機器人有新回覆）
+function unreadForCustomer(c: Conversation): boolean {
+  const since = c.customerReadAt ?? "";
+  return c.messages.some(
+    (m) => (m.sender === "admin" || m.sender === "bot") && m.createdAt > since,
+  );
+}
 
 type Store = { conversations: Map<string, Conversation>; seq: number };
 
@@ -79,6 +95,29 @@ export function listConversations() {
       userEmail: c.userEmail,
       messageCount: c.messages.length,
       last: c.messages[c.messages.length - 1],
+      unread: unreadForAdmin(c),
     }))
     .sort((a, b) => (b.last?.createdAt ?? "").localeCompare(a.last?.createdAt ?? ""));
+}
+
+// ---- 未讀標記 ----
+export function markReadByAdmin(userId: string) {
+  const c = getStore().conversations.get(userId);
+  if (c) c.adminReadAt = new Date().toISOString();
+}
+
+export function markReadByCustomer(userId: string) {
+  const c = getStore().conversations.get(userId);
+  if (c) c.customerReadAt = new Date().toISOString();
+}
+
+// 賣家後台待處理的對話數（有顧客新訊息未讀）
+export function adminUnreadCount(): number {
+  return [...getStore().conversations.values()].filter(unreadForAdmin).length;
+}
+
+// 顧客是否有未讀的賣家回覆
+export function customerHasUnread(userId: string): boolean {
+  const c = getStore().conversations.get(userId);
+  return c ? unreadForCustomer(c) : false;
 }

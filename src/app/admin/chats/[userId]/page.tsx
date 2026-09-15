@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth-helpers";
-import { getConversation } from "@/lib/chat-store";
+import { getConversation, markReadByAdmin } from "@/lib/chat-store";
 import { adminReplyAction } from "@/lib/chat-actions";
 import { ChatProductCard } from "@/components/chat-product-card";
 
@@ -17,6 +17,7 @@ export default async function AdminChatThreadPage({
   const { userId } = await params;
   const conversation = getConversation(userId);
   if (!conversation) notFound();
+  markReadByAdmin(userId); // 打開對話就標記為已讀
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">

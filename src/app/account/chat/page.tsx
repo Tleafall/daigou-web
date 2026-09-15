@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-helpers";
-import { getConversation } from "@/lib/chat-store";
+import { getConversation, markReadByCustomer } from "@/lib/chat-store";
 import { customerSendMessageAction } from "@/lib/chat-actions";
 import { getProduct } from "@/lib/product-store";
 import { ChatProductCard } from "@/components/chat-product-card";
@@ -15,8 +15,10 @@ export default async function ChatPage({
 }) {
   const user = await requireUser();
   const { product: productSlug } = await searchParams;
-  const conversation = getConversation(user.id ?? user.email ?? "");
+  const uid = user.id ?? user.email ?? "";
+  const conversation = getConversation(uid);
   const messages = conversation?.messages ?? [];
+  markReadByCustomer(uid); // 打開就標記為已讀
 
   // 從商品頁點「聊聊」帶進來的商品
   const askingProduct = productSlug ? getProduct(productSlug) : undefined;
