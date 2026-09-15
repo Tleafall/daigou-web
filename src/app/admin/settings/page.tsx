@@ -70,6 +70,19 @@ export default async function AdminSettingsPage({
           </label>
         </div>
 
+        <label className="text-sm">
+          <span className="mb-1 block text-ink/70">LINE 加入好友連結</span>
+          <input
+            name="lineUrl"
+            defaultValue={s.lineUrl}
+            placeholder="https://lin.ee/xxxxxxx 或 https://line.me/R/ti/p/@yourid"
+            className={inputClass}
+          />
+          <span className="mt-1 block text-xs text-ink/40">
+            從 LINE 官方帳號後台複製「加入好友連結」貼上；填了之後，商品頁與會員中心會出現「加 LINE 詢問」按鈕。
+          </span>
+        </label>
+
         <div className="grid grid-cols-2 gap-4">
           <label className="text-sm">
             <span className="mb-1 block text-ink/70">商品旁顯示數量</span>

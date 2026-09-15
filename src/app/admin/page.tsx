@@ -2,13 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { logoutAction } from "@/lib/auth-actions";
-import { adminUnreadCount } from "@/lib/chat-store";
 
 export const metadata: Metadata = { title: "後台管理" };
 
 export default async function AdminPage() {
   const admin = await requireAdmin();
-  const chatUnread = adminUnreadCount();
+
+  const cards: { title: string; desc: string; href?: string }[] = [
+    { title: "訂單管理", desc: "訂單狀態、確認、出貨、取消、客戶風險", href: "/admin/orders" },
+    { title: "商品管理", desc: "商品、規格與庫存、批次匯入", href: "/admin/products" },
+    { title: "客戶風險", desc: "棄單/取消次數、風險分數、封鎖", href: "/admin/customers" },
+    { title: "庫存異動", desc: "庫存流水與稽核", href: "/admin/inventory" },
+    { title: "分類管理", desc: "分類與排序", href: "/admin/categories" },
+    { title: "網站設定", desc: "店名、促銷字、運費、LINE、聯絡方式", href: "/admin/settings" },
+    { title: "管理員權限", desc: "授權其他管理員", href: undefined },
+  ];
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -27,40 +35,19 @@ export default async function AdminPage() {
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {([
-          { title: "訂單管理", desc: "訂單狀態、確認、出貨、取消、客戶風險", href: "/admin/orders" },
-          { title: "商品管理", desc: "商品、規格與庫存一覽（唯讀）", href: "/admin/products" },
-          { title: "客戶風險", desc: "棄單/取消次數、風險分數、封鎖", href: "/admin/customers" },
-          { title: "客服訊息", desc: "回覆顧客的提問", href: "/admin/chats", badge: chatUnread },
-          { title: "庫存異動", desc: "庫存流水與稽核", href: "/admin/inventory" },
-          { title: "分類管理", desc: "分類與排序", href: "/admin/categories" },
-          { title: "網站設定", desc: "店名、促銷字、運費、聯絡方式", href: "/admin/settings" },
-          { title: "管理員權限", desc: "授權其他管理員", href: undefined },
-        ] as { title: string; desc: string; href?: string; badge?: number }[]).map((item) =>
+        {cards.map((item) =>
           item.href ? (
             <Link
               key={item.title}
               href={item.href}
-              className={`rounded-xl border bg-white p-4 transition-colors hover:border-brand hover:bg-brand-50 ${
-                item.badge ? "border-brand-200" : "border-line"
-              }`}
+              className="rounded-xl border border-line bg-white p-4 transition-colors hover:border-brand hover:bg-brand-50"
             >
-              <div className="flex items-center gap-2 font-medium">
-                {item.title}
-                {item.badge ? (
-                  <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">
-                    {item.badge} 未讀
-                  </span>
-                ) : null}
-              </div>
+              <div className="font-medium">{item.title}</div>
               <div className="mt-1 text-sm text-ink/50">{item.desc}</div>
               <div className="mt-2 text-xs font-medium text-brand">前往 →</div>
             </Link>
           ) : (
-            <div
-              key={item.title}
-              className="rounded-xl border border-line bg-white p-4"
-            >
+            <div key={item.title} className="rounded-xl border border-line bg-white p-4">
               <div className="font-medium">{item.title}</div>
               <div className="mt-1 text-sm text-ink/50">{item.desc}</div>
               <div className="mt-2 text-xs text-ink/40">即將推出</div>

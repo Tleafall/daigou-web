@@ -32,7 +32,21 @@ export function SiteFooter() {
         <div>
           <div className="mb-3 text-sm font-semibold">聯絡我們</div>
           <ul className="space-y-2 text-sm text-ink/60">
-            <li>LINE：{site.lineId}</li>
+            <li>
+              LINE：
+              {site.lineUrl && /^https?:\/\//i.test(site.lineUrl) ? (
+                <a
+                  href={site.lineUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-brand hover:underline"
+                >
+                  點我加入 {site.lineId}
+                </a>
+              ) : (
+                site.lineId
+              )}
+            </li>
             <li>Email：{site.email}</li>
           </ul>
         </div>

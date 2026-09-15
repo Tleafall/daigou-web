@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  /* 主色：莫蘭迪粉（低飽和、帶灰的玫瑰色）*/
-  --color-brand-50: #f8f1f3;
-  --color-brand-100: #f0e2e6;
-  --color-brand-200: #e4cad2;
-  --color-brand-500: #bd8492;
-  --color-brand: #bd8492;
-  --color-brand-600: #a66d7c;
-  --color-brand-700: #8a5765;
+  /* 主色：莫蘭迪粉（低飽和帶灰的玫瑰色，這版整體調亮一點）*/
+  --color-brand-50: #fbf4f6;
+  --color-brand-100: #f5e7eb;
+  --color-brand-200: #ebd1d9;
+  --color-brand-500: #c58c9b;
+  --color-brand: #c58c9b;
+  --color-brand-600: #b0778a;
+  --color-brand-700: #955f6e;
 
   /* 中性色（偏莫蘭迪的暖灰，襯托粉調）*/
   --color-ink: #33292e;
-  --color-muted: #f5eff1;
-  --color-line: #ece2e6;
+  --color-muted: #f8f3f5;
+  --color-line: #efe6ea;
 
   --font-sans: var(--font-geist-sans), "Noto Sans TC", "PingFang TC",
     "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --background: #faf6f7;
+  --background: #fcf9fa;
   --foreground: #33292e;
   color-scheme: light;
 }

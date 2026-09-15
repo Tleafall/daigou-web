@@ -15,21 +15,21 @@ export function HeroCarousel() {
       desc: `${site.tagline}。安心下單，支援貨到付款。`,
       cta: "開始選購",
       href: "/category/beauty",
-      gradient: "linear-gradient(120deg, #f0dfe4, #dcc0ca)",
+      gradient: "linear-gradient(120deg, #f7e8ec, #e7cdd6)",
     },
     {
       title: `滿 NT$${site.freeShippingThreshold.toLocaleString("zh-TW")} 免運`,
       desc: "湊單更划算，宅配到府，貨到付款免先付。",
       cta: "看熱門商品",
       href: "/category/fashion",
-      gradient: "linear-gradient(120deg, #e6e0e6, #cabecb)",
+      gradient: "linear-gradient(120deg, #efe9f0, #d8ccd9)",
     },
     {
       title: "日韓美妝・生活雜貨",
       desc: "人氣品項持續更新，喜歡的別錯過。",
       cta: "逛美妝保養",
       href: "/category/beauty",
-      gradient: "linear-gradient(120deg, #f1e6e3, #ddc8c9)",
+      gradient: "linear-gradient(120deg, #f8efec, #e8d5d5)",
     },
   ];
 

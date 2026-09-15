@@ -9,6 +9,7 @@ export type Settings = {
   freeShippingThreshold: number;
   shippingFee: number;
   lineId: string;
+  lineUrl: string; // 官方 LINE 加入好友連結
   email: string;
   productCountDisplay: "none" | "sold" | "stock"; // 商品旁顯示：不顯示/已售數/剩餘數
   lowStockThreshold: number; // 「剩餘」模式：庫存 ≤ 此數才顯示（催單）
@@ -23,6 +24,7 @@ const DEFAULTS: Settings = {
   freeShippingThreshold: site.freeShippingThreshold,
   shippingFee: site.shippingFee,
   lineId: site.lineId,
+  lineUrl: "",
   email: site.email,
   productCountDisplay: "none",
   lowStockThreshold: 5,

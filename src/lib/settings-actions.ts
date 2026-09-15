@@ -21,6 +21,7 @@ export async function updateSettingsAction(formData: FormData) {
     freeShippingThreshold: toInt(formData.get("freeShippingThreshold"), 1000),
     shippingFee: toInt(formData.get("shippingFee"), 100),
     lineId: String(formData.get("lineId") || "").trim(),
+    lineUrl: String(formData.get("lineUrl") || "").trim(),
     email: String(formData.get("email") || "").trim(),
     productCountDisplay: (() => {
       const v = String(formData.get("productCountDisplay") || "none");

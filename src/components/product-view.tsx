@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import type { Product } from "@/lib/mock-data";
+import { useSettings } from "@/lib/settings-context";
 import { ProductGallery } from "./product-gallery";
 import { VariantSelector } from "./variant-selector";
+import { LineContact } from "./line-contact";
 
 export function ProductView({
   product,
@@ -14,6 +15,7 @@ export function ProductView({
   countLabel?: string | null;
 }) {
   const [activeImage, setActiveImage] = useState(0);
+  const settings = useSettings();
 
   // 選到某規格值時，若有圖片標記為該值，就跳到那張
   function handleOptionSelect(value: string) {
@@ -39,12 +41,11 @@ export function ProductView({
         </div>
         <VariantSelector product={product} onOptionSelect={handleOptionSelect} />
 
-        <Link
-          href={`/account/chat?product=${product.slug}`}
-          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-brand px-4 py-2 text-sm font-medium text-brand hover:bg-brand-50"
-        >
-          💬 聊聊（詢問賣家）
-        </Link>
+        <LineContact
+          lineUrl={settings.lineUrl}
+          lineId={settings.lineId}
+          label="加 LINE 詢問此商品"
+        />
       </div>
     </div>
   );
