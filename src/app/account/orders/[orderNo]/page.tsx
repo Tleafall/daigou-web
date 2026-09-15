@@ -36,7 +36,7 @@ export default async function OrderDetailPage({
 
       {order.status === "PENDING" && (
         <div className="mb-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">
-          ✓ 訂單已成立，等待賣家確認。付款方式為貨到付款。
+          ✓ 訂單已成立，等待賣家確認。商品將寄到您選的 7-11 門市，到店取貨付款。
         </div>
       )}
 
@@ -84,16 +84,20 @@ export default async function OrderDetailPage({
             <span>{order.shippingFee === 0 ? "免運" : formatTWD(order.shippingFee)}</span>
           </div>
           <div className="mt-1 flex justify-between border-t border-line pt-2 font-bold">
-            <span>應付金額（貨到付款）</span>
+            <span>應付金額（取貨付款）</span>
             <span className="text-brand">{formatTWD(order.totalAmount)}</span>
           </div>
         </div>
 
-        {/* 收件資料 */}
+        {/* 取貨資料 */}
         <div className="mt-4 border-t border-line pt-4 text-sm text-ink/70">
-          <div className="mb-1 font-medium text-ink">收件資料</div>
+          <div className="mb-1 font-medium text-ink">取貨資料</div>
           <div>{order.recipientName}　{order.recipientPhone}</div>
-          <div>{order.city}{order.district}{order.addressLine}</div>
+          <div className="mt-1">
+            7-11 {order.storeName}
+            <span className="ml-2 font-mono text-xs text-ink/40">#{order.storeId}</span>
+          </div>
+          <div className="text-ink/50">{order.storeAddress}</div>
           {order.customerNote && <div className="mt-1 text-ink/50">備註：{order.customerNote}</div>}
         </div>
 

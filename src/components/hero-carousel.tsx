@@ -12,14 +12,14 @@ export function HeroCarousel() {
   const slides = [
     {
       title: "海外好物，替你嚴選",
-      desc: `${site.tagline}。安心下單，支援貨到付款。`,
+      desc: `${site.tagline}。安心下單，7-11 門市取貨付款。`,
       cta: "開始選購",
       href: "/category/beauty",
       gradient: "linear-gradient(120deg, #f7e8ec, #e7cdd6)",
     },
     {
       title: `滿 NT$${site.freeShippingThreshold.toLocaleString("zh-TW")} 免運`,
-      desc: "湊單更划算，宅配到府，貨到付款免先付。",
+      desc: "湊單更划算，寄到 7-11 門市，取貨再付款。",
       cta: "看熱門商品",
       href: "/category/fashion",
       gradient: "linear-gradient(120deg, #efe9f0, #d8ccd9)",

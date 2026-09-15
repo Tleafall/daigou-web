@@ -54,7 +54,7 @@ export default async function AdminSettingsPage({
             <input name="freeShippingThreshold" type="number" min="0" defaultValue={s.freeShippingThreshold} className={inputClass} />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block text-ink/70">宅配運費（NT$）</span>
+            <span className="mb-1 block text-ink/70">運費（NT$）</span>
             <input name="shippingFee" type="number" min="0" defaultValue={s.shippingFee} className={inputClass} />
           </label>
         </div>

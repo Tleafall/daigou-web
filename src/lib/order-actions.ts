@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { isBlocked } from "@/lib/customer-store";
+import { getStoreById } from "@/lib/stores-711";
 import {
   adminAdvance,
   cancelOrder,
@@ -17,9 +18,9 @@ export type CheckoutInput = {
   items: { productSlug: string; variantId: string; quantity: number }[];
   recipientName: string;
   recipientPhone: string;
-  city: string;
-  district: string;
-  addressLine: string;
+  storeId: string;
+  storeName: string;
+  storeAddress: string;
   customerNote?: string;
 };
 
@@ -38,8 +39,10 @@ export async function createOrderAction(
   if (!name) return { ok: false, error: "請填寫收件人姓名" };
   if (!/^09\d{8}$/.test(phone))
     return { ok: false, error: "手機號碼格式不正確（需為 09 開頭共 10 碼）" };
-  if (!input.city?.trim() || !input.district?.trim() || !input.addressLine?.trim())
-    return { ok: false, error: "請填寫完整收件地址" };
+
+  // 以伺服器端門市清單重新核對，不信任前端傳入的門市名稱/地址
+  const store = getStoreById(input.storeId?.trim() ?? "");
+  if (!store) return { ok: false, error: "請選擇取貨門市" };
 
   return createOrder({
     userId,
@@ -48,9 +51,9 @@ export async function createOrderAction(
     items: input.items,
     recipientName: name,
     recipientPhone: phone,
-    city: input.city.trim(),
-    district: input.district.trim(),
-    addressLine: input.addressLine.trim(),
+    storeId: store.id,
+    storeName: store.name,
+    storeAddress: store.addr,
     customerNote: input.customerNote?.trim() || undefined,
   });
 }

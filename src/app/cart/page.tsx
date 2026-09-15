@@ -118,7 +118,7 @@ export default function CartPage() {
           >
             前往結帳
           </Link>
-          <p className="mt-2 text-center text-xs text-ink/40">付款方式：貨到付款</p>
+          <p className="mt-2 text-center text-xs text-ink/40">付款方式：7-11 賣貨便取貨付款</p>
         </div>
       </div>
     </div>

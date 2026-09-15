@@ -108,7 +108,7 @@ export const seedProducts: Product[] = raw.map((item, i) => {
     slug,
     title: item.title,
     categorySlug: item.cat,
-    description: `海外人氣${seedCategoryName(item.cat)}。此為代購商品，下單後由賣家統一整理出貨；商品皆為正品，實際顏色以實物為準。運送方式為宅配，可選貨到付款。`,
+    description: `海外人氣${seedCategoryName(item.cat)}。此為代購商品，下單後由賣家統一整理出貨；商品皆為正品，實際顏色以實物為準。運送方式為 7-11 賣貨便，商品寄到您指定的門市，到店取貨付款。`,
     price,
     gradient: item.g,
     images: [],

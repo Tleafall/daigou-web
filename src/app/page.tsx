@@ -16,8 +16,8 @@ export default function Home() {
       {/* 特色列 */}
       <section className="mt-4 grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-white py-3 text-center">
         {[
-          { icon: "🚚", label: "滿額免運", sub: "宅配到府" },
-          { icon: "💵", label: "貨到付款", sub: "免先付款" },
+          { icon: "🚚", label: "滿額免運", sub: "7-11 取貨" },
+          { icon: "💵", label: "取貨付款", sub: "到店再付" },
           { icon: "💬", label: "專人客服", sub: "聊聊詢問" },
         ].map((f) => (
           <div key={f.label} className="px-2">

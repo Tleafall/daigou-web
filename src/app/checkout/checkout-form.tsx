@@ -7,48 +7,32 @@ import { useCart } from "@/lib/cart-context";
 import { formatTWD } from "@/lib/format";
 import { useSettings } from "@/lib/settings-context";
 import { createOrderAction } from "@/lib/order-actions";
+import { StorePicker } from "@/components/store-picker";
+import type { Store711 } from "@/lib/stores-711";
 
-type DefaultAddress = {
-  recipientName: string;
-  recipientPhone: string;
-  city: string;
-  district: string;
-  addressLine: string;
-} | null;
-
-export function CheckoutForm({
-  defaultName,
-  defaultAddress,
-}: {
-  defaultName: string;
-  defaultAddress?: DefaultAddress;
-}) {
+export function CheckoutForm({ defaultName }: { defaultName: string }) {
   const { items, subtotal, ready, clear } = useCart();
   const site = useSettings();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
-    recipientName: defaultAddress?.recipientName || defaultName,
-    recipientPhone: defaultAddress?.recipientPhone || "",
-    city: defaultAddress?.city || "",
-    district: defaultAddress?.district || "",
-    addressLine: defaultAddress?.addressLine || "",
-    customerNote: "",
-  });
+  const [recipientName, setRecipientName] = useState(defaultName);
+  const [recipientPhone, setRecipientPhone] = useState("");
+  const [customerNote, setCustomerNote] = useState("");
+  const [store, setStore] = useState<Store711 | null>(null);
 
   const shippingFee =
     subtotal >= site.freeShippingThreshold || subtotal === 0 ? 0 : site.shippingFee;
   const total = subtotal + shippingFee;
 
-  function update(field: keyof typeof form, value: string) {
-    setForm((f) => ({ ...f, [field]: value }));
-  }
-
   function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!store) {
+      setError("請選擇取貨門市");
+      return;
+    }
     startTransition(async () => {
       const result = await createOrderAction({
         items: items.map((i) => ({
@@ -56,7 +40,12 @@ export function CheckoutForm({
           variantId: i.variantId,
           quantity: i.quantity,
         })),
-        ...form,
+        recipientName,
+        recipientPhone,
+        storeId: store.id,
+        storeName: store.name,
+        storeAddress: store.addr,
+        customerNote,
       });
       if (result.ok) {
         clear();
@@ -90,7 +79,7 @@ export function CheckoutForm({
       <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* 收件資料 */}
         <div className="flex flex-col gap-4 rounded-xl border border-line bg-white p-5">
-          <h2 className="font-bold">收件資料</h2>
+          <h2 className="font-bold">取貨資料</h2>
 
           {error && (
             <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
@@ -100,11 +89,11 @@ export function CheckoutForm({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-sm">
-              <span className="mb-1 block text-ink/70">收件人姓名 *</span>
+              <span className="mb-1 block text-ink/70">取貨人姓名 *</span>
               <input
                 className={inputClass}
-                value={form.recipientName}
-                onChange={(e) => update("recipientName", e.target.value)}
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
                 required
               />
             </label>
@@ -112,56 +101,35 @@ export function CheckoutForm({
               <span className="mb-1 block text-ink/70">手機號碼 *</span>
               <input
                 className={inputClass}
-                value={form.recipientPhone}
-                onChange={(e) => update("recipientPhone", e.target.value)}
+                value={recipientPhone}
+                onChange={(e) => setRecipientPhone(e.target.value)}
                 placeholder="0912345678"
                 inputMode="numeric"
                 required
               />
             </label>
-            <label className="text-sm">
-              <span className="mb-1 block text-ink/70">縣市 *</span>
-              <input
-                className={inputClass}
-                value={form.city}
-                onChange={(e) => update("city", e.target.value)}
-                placeholder="台北市"
-                required
-              />
-            </label>
-            <label className="text-sm">
-              <span className="mb-1 block text-ink/70">鄉鎮市區 *</span>
-              <input
-                className={inputClass}
-                value={form.district}
-                onChange={(e) => update("district", e.target.value)}
-                placeholder="大安區"
-                required
-              />
-            </label>
           </div>
-          <label className="text-sm">
-            <span className="mb-1 block text-ink/70">詳細地址 *</span>
-            <input
-              className={inputClass}
-              value={form.addressLine}
-              onChange={(e) => update("addressLine", e.target.value)}
-              placeholder="復興南路一段 100 號 5 樓"
-              required
-            />
-          </label>
+
+          <div className="text-sm">
+            <span className="mb-1 block text-ink/70">7-11 取貨門市 *</span>
+            <StorePicker value={store} onChange={setStore} />
+            <p className="mt-1.5 text-xs text-ink/40">
+              使用 7-ELEVEN 賣貨便，商品寄到您選的門市，到店取貨並付款。
+            </p>
+          </div>
+
           <label className="text-sm">
             <span className="mb-1 block text-ink/70">訂單備註（選填）</span>
             <textarea
               className={`${inputClass} min-h-20`}
-              value={form.customerNote}
-              onChange={(e) => update("customerNote", e.target.value)}
+              value={customerNote}
+              onChange={(e) => setCustomerNote(e.target.value)}
             />
           </label>
 
           <div className="rounded-lg bg-muted px-4 py-3 text-sm">
             <div className="font-medium">付款方式</div>
-            <div className="mt-1 text-ink/60">貨到付款（宅配收到商品時付款）</div>
+            <div className="mt-1 text-ink/60">取貨付款（到 7-11 門市取貨時付款）</div>
           </div>
         </div>
 

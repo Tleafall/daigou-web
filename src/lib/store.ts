@@ -39,9 +39,10 @@ export type Order = {
   totalAmount: number;
   recipientName: string;
   recipientPhone: string;
-  city: string;
-  district: string;
-  addressLine: string;
+  // 賣貨便 7-11 取貨門市（取代原宅配地址）
+  storeId: string;
+  storeName: string;
+  storeAddress: string;
   customerNote?: string;
   createdAt: string;
   updatedAt: string;
@@ -127,9 +128,9 @@ export type CreateOrderInput = {
   items: NewOrderItemInput[];
   recipientName: string;
   recipientPhone: string;
-  city: string;
-  district: string;
-  addressLine: string;
+  storeId: string;
+  storeName: string;
+  storeAddress: string;
   customerNote?: string;
 };
 
@@ -194,9 +195,9 @@ export function createOrder(input: CreateOrderInput): CreateOrderResult {
     totalAmount,
     recipientName: input.recipientName,
     recipientPhone: input.recipientPhone,
-    city: input.city,
-    district: input.district,
-    addressLine: input.addressLine,
+    storeId: input.storeId,
+    storeName: input.storeName,
+    storeAddress: input.storeAddress,
     customerNote: input.customerNote,
     createdAt: now,
     updatedAt: now,
@@ -355,9 +356,9 @@ function seed(store: Store) {
       totalAmount: subtotal + shippingFee,
       recipientName: "王小明",
       recipientPhone: "0912345678",
-      city: "台北市",
-      district: "大安區",
-      addressLine: "復興南路一段 100 號 5 樓",
+      storeId: "287731",
+      storeName: "BBS夢廣場店",
+      storeAddress: "台北市信義區松高路11號6樓",
       createdAt: ts,
       updatedAt: ts,
       ...over,
