@@ -13,7 +13,7 @@ export const testUsers: TestUser[] = [
     id: "u-admin",
     email: "admin@test.com",
     password: "admin1234",
-    name: "管理員（姑姑）",
+    name: "管理員",
     role: "ADMIN",
   },
   {
