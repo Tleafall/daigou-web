@@ -6,6 +6,7 @@ import { listCategories } from "@/lib/category-store";
 import { createProduct } from "@/lib/product-store";
 import { gradientPresets } from "@/lib/mock-data";
 import { parseRows } from "@/lib/product-import";
+import { uploadImages } from "@/lib/cloudinary";
 
 export type RowError = { row: number; title: string; reason: string };
 export type ImportResult =
@@ -146,12 +147,14 @@ export async function importProductsAction(
     }
 
     const gradient = gradientPresets[created % gradientPresets.length];
+    // 圖片自動上傳 Cloudinary（未設金鑰時退回存 data URL）
+    const images = await uploadImages(imageUrls);
     await createProduct({
       title: r.title,
       description: r.description,
       categorySlug: slug,
       gradient,
-      images: imageUrls, // createProduct 會轉成 { url } 物件
+      images,
       optionGroups: [],
       variants: [{ options: {}, price: r.price, stock: r.stock }],
     });

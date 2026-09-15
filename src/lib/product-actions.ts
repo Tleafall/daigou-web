@@ -10,6 +10,7 @@ import {
 } from "@/lib/mock-data";
 import { createProduct, getProduct, updateProduct } from "@/lib/product-store";
 import type { ProductImage } from "@/lib/mock-data";
+import { uploadImages } from "@/lib/cloudinary";
 
 type VariantInput = { options: Record<string, string>; price: number; stock: number };
 
@@ -69,7 +70,8 @@ export async function createProductAction(formData: FormData) {
   const categorySlug = String(formData.get("categorySlug") || "").trim();
   const gIndex = toInt(formData.get("gradient"));
   const gradient = gradientPresets[gIndex] ?? gradientPresets[0];
-  const images = await readImageDataUrls(formData);
+  // 圖片自動上傳 Cloudinary（未設金鑰時退回存 data URL）
+  const images = await uploadImages(await readImageDataUrls(formData));
   const { optionGroups, variants } = parseVariants(formData.get("variantsJson"));
 
   if (!title || !categorySlug || variants.length === 0) {
@@ -118,7 +120,8 @@ export async function updateProductAction(formData: FormData) {
     const tag = String(formData.get(`tag_${i}`) || "").trim();
     images.push({ url: img.url, tag: tag || undefined });
   });
-  for (const url of await readImageDataUrls(formData)) images.push({ url });
+  for (const img of await uploadImages(await readImageDataUrls(formData)))
+    images.push(img);
 
   await updateProduct(slug, {
     title,

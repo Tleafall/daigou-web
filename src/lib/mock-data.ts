@@ -22,7 +22,8 @@ export type Variant = {
 export type ProductStatus = "ACTIVE" | "ARCHIVED" | "DRAFT";
 
 // 商品圖；tag 對應某個規格選項值（如「紅色」），選到時圖庫會跳到這張
-export type ProductImage = { url: string; tag?: string };
+// publicId：Cloudinary 圖片 id（有上雲才有），供日後刪圖/找孤兒圖
+export type ProductImage = { url: string; tag?: string; publicId?: string };
 
 export type Product = {
   id: string;

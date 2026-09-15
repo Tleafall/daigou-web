@@ -137,7 +137,7 @@ export type CreateProductInput = {
   description: string;
   categorySlug: string;
   gradient: [string, string];
-  images?: string[];
+  images?: ProductImage[];
   optionGroups: OptionGroup[];
   variants: { options: Record<string, string>; price: number; stock: number }[];
 };
@@ -150,7 +150,7 @@ export async function createProduct(input: CreateProductInput): Promise<string> 
     price: v.price,
     stock: v.stock,
   }));
-  const images: ProductImage[] = (input.images ?? []).map((url) => ({ url }));
+  const images: ProductImage[] = input.images ?? [];
   await prisma.product.create({
     data: {
       slug,

@@ -14,6 +14,7 @@ export default async function AdminPage() {
     { title: "客戶風險", desc: "棄單/取消次數、風險分數、封鎖", href: "/admin/customers" },
     { title: "庫存異動", desc: "庫存流水與稽核", href: "/admin/inventory" },
     { title: "分類管理", desc: "分類與排序", href: "/admin/categories" },
+    { title: "圖片雲端化", desc: "把商品圖片搬到雲端圖床（Cloudinary）", href: "/admin/media" },
     { title: "網站設定", desc: "店名、促銷字、運費、LINE、聯絡方式", href: "/admin/settings" },
     { title: "管理員權限", desc: "授權其他管理員", href: undefined },
   ];
