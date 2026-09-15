@@ -15,7 +15,8 @@ const riskMeta: Record<RiskProfile["level"], { label: string; cls: string }> = {
 
 export default async function AdminOrdersPage() {
   await requireAdmin();
-  const orders = listAllOrders();
+  const orders = await listAllOrders();
+  const risks = await Promise.all(orders.map((o) => riskForUser(o.userId)));
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -47,8 +48,8 @@ export default async function AdminOrdersPage() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((o) => {
-              const risk = riskForUser(o.userId);
+            {orders.map((o, i) => {
+              const risk = risks[i];
               const rm = riskMeta[risk.level];
               return (
                 <tr key={o.orderNo} className="border-b border-line last:border-0 hover:bg-muted/50">

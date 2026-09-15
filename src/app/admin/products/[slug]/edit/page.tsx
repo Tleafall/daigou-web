@@ -15,10 +15,10 @@ export default async function EditProductPage({
 }) {
   await requireAdmin();
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) notFound();
 
-  const categories = listCategories();
+  const categories = await listCategories();
   const inputClass =
     "w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand";
 

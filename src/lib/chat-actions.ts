@@ -18,7 +18,7 @@ export async function customerSendMessageAction(formData: FormData) {
   // 帶入詢問中的商品（蝦皮式）
   let product;
   if (productSlug) {
-    const p = getProduct(productSlug);
+    const p = await getProduct(productSlug);
     if (p) {
       product = {
         slug: p.slug,
@@ -39,7 +39,7 @@ export async function customerSendMessageAction(formData: FormData) {
     product,
   });
 
-  const settings = getSettings();
+  const settings = await getSettings();
   if (shouldBot && settings.botEnabled && settings.botMessage.trim()) {
     sendMessage(userId, "bot", settings.botMessage.trim());
   }

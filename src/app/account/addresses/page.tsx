@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "常用收件地址" };
 
 export default async function AddressesPage() {
   const user = await requireUser();
-  const addresses = listAddresses(user.id ?? user.email ?? "");
+  const addresses = await listAddresses(user.id ?? user.email ?? "");
 
   const inputClass =
     "w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand";

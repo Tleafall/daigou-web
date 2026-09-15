@@ -1,7 +1,8 @@
-// ⚠️ 原型用「伺服器記憶體」商品庫（可增修）。重啟伺服器會回到種子資料。
-// 之後接 Prisma 後換成資料庫。
+// 商品：存於 PostgreSQL（Product 表；規格/選項/圖片以 JSON 欄位保存）。
+import { cache } from "react";
+import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import {
-  seedProducts,
   type OptionGroup,
   type Product,
   type ProductImage,
@@ -18,73 +19,110 @@ function variantOptionLabel(v: Variant): string {
   );
 }
 
-type Store = { products: Product[] };
-
-const g = globalThis as unknown as { __daigouProducts?: Store };
-
-function getStore(): Store {
-  if (!g.__daigouProducts) {
-    g.__daigouProducts = { products: seedProducts.map((p) => structuredClone(p)) };
-  }
-  return g.__daigouProducts;
+// JSON 欄位寫入型別轉換小工具
+function json(v: unknown): Prisma.InputJsonValue {
+  return v as Prisma.InputJsonValue;
 }
 
-function recalcPrice(p: Product) {
-  p.price = Math.min(...p.variants.map((v) => v.price));
+type ProductRow = {
+  id: string;
+  slug: string;
+  title: string;
+  categorySlug: string;
+  description: string;
+  price: number;
+  gradient: Prisma.JsonValue;
+  images: Prisma.JsonValue;
+  optionGroups: Prisma.JsonValue;
+  variants: Prisma.JsonValue;
+  status: string;
+};
+
+// DB 列 → 應用型別（id 對外沿用 slug，全站以 slug 為商品識別）
+function toProduct(r: ProductRow): Product {
+  return {
+    id: r.slug,
+    slug: r.slug,
+    title: r.title,
+    categorySlug: r.categorySlug,
+    description: r.description,
+    price: r.price,
+    gradient: r.gradient as unknown as [string, string],
+    images: r.images as unknown as ProductImage[],
+    optionGroups: r.optionGroups as unknown as OptionGroup[],
+    variants: r.variants as unknown as Variant[],
+    status: r.status as ProductStatus,
+  };
 }
 
 // ---- 查詢 ----
-export function listAllProducts(): Product[] {
-  return getStore().products;
+// 以 React cache 於單次請求內去重（列表頁 + 卡片會多次讀取）
+export const listAllProducts = cache(async (): Promise<Product[]> => {
+  const rows = await prisma.product.findMany({ orderBy: { createdAt: "asc" } });
+  return rows.map(toProduct);
+});
+
+export async function listActiveProducts(): Promise<Product[]> {
+  return (await listAllProducts()).filter((p) => p.status === "ACTIVE");
 }
 
-export function listActiveProducts(): Product[] {
-  return getStore().products.filter((p) => p.status === "ACTIVE");
+export async function latestActiveProducts(): Promise<Product[]> {
+  return [...(await listActiveProducts())].reverse();
 }
 
-export function latestActiveProducts(): Product[] {
-  return [...listActiveProducts()].reverse();
-}
-
-export function getActiveByCategory(slug: string): Product[] {
-  return listActiveProducts().filter((p) => p.categorySlug === slug);
+export async function getActiveByCategory(slug: string): Promise<Product[]> {
+  return (await listActiveProducts()).filter((p) => p.categorySlug === slug);
 }
 
 // 供結帳/訂單使用：任何狀態都找得到（歷史訂單需要）
-export function getProduct(slug: string): Product | undefined {
-  return getStore().products.find((p) => p.slug === slug);
+export async function getProduct(slug: string): Promise<Product | undefined> {
+  return (await listAllProducts()).find((p) => p.slug === slug);
 }
 
-export function getActiveProduct(slug: string): Product | undefined {
-  const p = getProduct(slug);
+export async function getActiveProduct(slug: string): Promise<Product | undefined> {
+  const p = await getProduct(slug);
   return p && p.status === "ACTIVE" ? p : undefined;
 }
 
-export function getVariant(
+export async function getVariant(
   variantId: string,
-): { product: Product; variant: Variant } | undefined {
-  for (const p of getStore().products) {
+): Promise<{ product: Product; variant: Variant } | undefined> {
+  for (const p of await listAllProducts()) {
     const variant = p.variants.find((v) => v.id === variantId);
     if (variant) return { product: p, variant };
   }
   return undefined;
 }
 
+// 變體 id 形如 `${slug}-v${n}`，可反推所屬商品 slug（slug 本身不含 -v 數字結尾）
+function slugFromVariantId(variantId: string): string {
+  return variantId.replace(/-v\d+$/, "");
+}
+
 // 調整庫存並記錄異動（下單扣、取消補、盤點調整都走這裡）
-export function adjustVariantStock(
+// 每次都從 DB 讀取最新商品，確保同一商品多變體連續調整不會互相覆蓋
+export async function adjustVariantStock(
   variantId: string,
   delta: number,
   type: "SALE" | "CANCEL" | "RESTOCK" | "ADJUST",
   reason: string,
   orderNo?: string,
-): boolean {
-  const found = getVariant(variantId);
-  if (!found) return false;
-  found.variant.stock = Math.max(0, found.variant.stock + delta);
-  recordMovement({
+): Promise<boolean> {
+  const slug = slugFromVariantId(variantId);
+  const row = await prisma.product.findUnique({ where: { slug } });
+  if (!row) return false;
+  const variants = row.variants as unknown as Variant[];
+  const v = variants.find((x) => x.id === variantId);
+  if (!v) return false;
+  v.stock = Math.max(0, v.stock + delta);
+  await prisma.product.update({
+    where: { slug },
+    data: { variants: json(variants) },
+  });
+  await recordMovement({
     variantId,
-    productTitle: found.product.title,
-    optionLabel: variantOptionLabel(found.variant),
+    productTitle: row.title,
+    optionLabel: variantOptionLabel(v),
     type,
     delta,
     reason,
@@ -104,8 +142,7 @@ export type CreateProductInput = {
   variants: { options: Record<string, string>; price: number; stock: number }[];
 };
 
-export function createProduct(input: CreateProductInput): string {
-  const store = getStore();
+export async function createProduct(input: CreateProductInput): Promise<string> {
   const slug = `c${Date.now().toString(36)}`;
   const variants: Variant[] = input.variants.map((v, i) => ({
     id: `${slug}-v${i + 1}`,
@@ -113,20 +150,21 @@ export function createProduct(input: CreateProductInput): string {
     price: v.price,
     stock: v.stock,
   }));
-  const product: Product = {
-    id: slug,
-    slug,
-    title: input.title,
-    categorySlug: input.categorySlug,
-    description: input.description,
-    price: Math.min(...variants.map((v) => v.price)),
-    gradient: input.gradient,
-    images: (input.images ?? []).map((url) => ({ url })),
-    optionGroups: input.optionGroups,
-    variants,
-    status: "ACTIVE",
-  };
-  store.products.push(product);
+  const images: ProductImage[] = (input.images ?? []).map((url) => ({ url }));
+  await prisma.product.create({
+    data: {
+      slug,
+      title: input.title,
+      categorySlug: input.categorySlug,
+      description: input.description,
+      price: Math.min(...variants.map((v) => v.price)),
+      gradient: json(input.gradient),
+      images: json(images),
+      optionGroups: json(input.optionGroups),
+      variants: json(variants),
+      status: "ACTIVE",
+    },
+  });
   return slug;
 }
 
@@ -139,24 +177,24 @@ export type UpdateProductInput = {
   images: ProductImage[]; // 更新後的完整圖片陣列（含 tag）
 };
 
-export function updateProduct(slug: string, input: UpdateProductInput): boolean {
-  const p = getProduct(slug);
-  if (!p) return false;
-  p.title = input.title;
-  p.description = input.description;
-  p.categorySlug = input.categorySlug;
-  p.status = input.status;
-  p.images = input.images;
+export async function updateProduct(
+  slug: string,
+  input: UpdateProductInput,
+): Promise<boolean> {
+  const row = await prisma.product.findUnique({ where: { slug } });
+  if (!row) return false;
+  const variants = row.variants as unknown as Variant[];
+  const movements: Parameters<typeof recordMovement>[0][] = [];
   for (const vi of input.variants) {
-    const v = p.variants.find((x) => x.id === vi.id);
+    const v = variants.find((x) => x.id === vi.id);
     if (v) {
       v.price = vi.price;
       if (vi.stock !== v.stock) {
         const delta = vi.stock - v.stock;
         v.stock = vi.stock;
-        recordMovement({
+        movements.push({
           variantId: v.id,
-          productTitle: p.title,
+          productTitle: input.title,
           optionLabel: variantOptionLabel(v),
           type: "ADJUST",
           delta,
@@ -165,13 +203,30 @@ export function updateProduct(slug: string, input: UpdateProductInput): boolean 
       }
     }
   }
-  recalcPrice(p);
+  await prisma.product.update({
+    where: { slug },
+    data: {
+      title: input.title,
+      description: input.description,
+      categorySlug: input.categorySlug,
+      status: input.status,
+      images: json(input.images),
+      variants: json(variants),
+      price: Math.min(...variants.map((v) => v.price)),
+    },
+  });
+  for (const m of movements) await recordMovement(m);
   return true;
 }
 
-export function setProductStatus(slug: string, status: ProductStatus): boolean {
-  const p = getProduct(slug);
-  if (!p) return false;
-  p.status = status;
-  return true;
+export async function setProductStatus(
+  slug: string,
+  status: ProductStatus,
+): Promise<boolean> {
+  try {
+    await prisma.product.update({ where: { slug }, data: { status } });
+    return true;
+  } catch {
+    return false;
+  }
 }

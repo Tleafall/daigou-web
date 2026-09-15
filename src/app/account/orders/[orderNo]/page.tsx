@@ -20,7 +20,7 @@ export default async function OrderDetailPage({
 }) {
   const user = await requireUser();
   const { orderNo } = await params;
-  const order = getOrder(orderNo);
+  const order = await getOrder(orderNo);
   if (!order || order.userId !== (user.id ?? user.email)) notFound();
 
   const canCancel = order.status === "PENDING" || order.status === "CONFIRMED";

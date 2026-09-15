@@ -12,7 +12,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getActiveProduct(slug);
+  const product = await getActiveProduct(slug);
   return {
     title: product ? product.title : "商品",
     description: product?.description,
@@ -25,11 +25,14 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = getActiveProduct(slug);
+  const product = await getActiveProduct(slug);
   if (!product) notFound();
 
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
-  const countLabel = productCountLabel(product.slug, totalStock);
+  const [countLabel, catName] = await Promise.all([
+    productCountLabel(product.slug, totalStock),
+    categoryName(product.categorySlug),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -38,7 +41,7 @@ export default async function ProductPage({
         <Link href="/" className="hover:text-brand">首頁</Link>
         <span className="mx-2">/</span>
         <Link href={`/category/${product.categorySlug}`} className="hover:text-brand">
-          {categoryName(product.categorySlug)}
+          {catName}
         </Link>
         <span className="mx-2">/</span>
         <span className="text-ink/80">{product.title}</span>

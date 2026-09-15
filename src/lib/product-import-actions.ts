@@ -83,7 +83,7 @@ export async function importProductsAction(
     if (noExt && !fileMap.has(noExt)) fileMap.set(noExt, f);
   }
 
-  const categories = listCategories();
+  const categories = await listCategories();
   const catByName = new Map(categories.map((c) => [c.name, c.slug]));
 
   let created = 0;
@@ -146,7 +146,7 @@ export async function importProductsAction(
     }
 
     const gradient = gradientPresets[created % gradientPresets.length];
-    createProduct({
+    await createProduct({
       title: r.title,
       description: r.description,
       categorySlug: slug,

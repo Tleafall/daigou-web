@@ -13,7 +13,7 @@ export default async function SearchPage({
   const { q } = await searchParams;
   const query = (q ?? "").trim();
   const results = query
-    ? listActiveProducts().filter((p) =>
+    ? (await listActiveProducts()).filter((p) =>
         p.title.toLowerCase().includes(query.toLowerCase()),
       )
     : [];

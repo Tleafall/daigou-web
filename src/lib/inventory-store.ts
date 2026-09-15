@@ -1,4 +1,5 @@
-// ⚠️ 原型用「伺服器記憶體」庫存異動流水。重啟伺服器會清空。之後接 Prisma。
+// 庫存異動流水：存於 PostgreSQL（InventoryMovement 表）。
+import { prisma } from "@/lib/prisma";
 
 export type MovementType = "SALE" | "CANCEL" | "RESTOCK" | "ADJUST";
 
@@ -14,26 +15,33 @@ export type Movement = {
   createdAt: string;
 };
 
-type Store = { movements: Movement[]; seq: number };
-
-const g = globalThis as unknown as { __daigouInventory?: Store };
-
-function getStore(): Store {
-  if (!g.__daigouInventory) g.__daigouInventory = { movements: [], seq: 1 };
-  return g.__daigouInventory;
-}
-
-export function recordMovement(input: Omit<Movement, "id" | "createdAt">) {
-  const store = getStore();
-  store.movements.push({
-    ...input,
-    id: `mv-${store.seq++}`,
-    createdAt: new Date().toISOString(),
+export async function recordMovement(input: Omit<Movement, "id" | "createdAt">) {
+  await prisma.inventoryMovement.create({
+    data: {
+      variantId: input.variantId,
+      productTitle: input.productTitle,
+      optionLabel: input.optionLabel,
+      type: input.type,
+      delta: input.delta,
+      reason: input.reason,
+      orderNo: input.orderNo ?? null,
+    },
   });
 }
 
-export function listMovements(): Movement[] {
-  return [...getStore().movements].sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt),
-  );
+export async function listMovements(): Promise<Movement[]> {
+  const rows = await prisma.inventoryMovement.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    variantId: r.variantId,
+    productTitle: r.productTitle,
+    optionLabel: r.optionLabel,
+    type: r.type as MovementType,
+    delta: r.delta,
+    reason: r.reason,
+    orderNo: r.orderNo ?? undefined,
+    createdAt: r.createdAt.toISOString(),
+  }));
 }

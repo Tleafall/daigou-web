@@ -21,7 +21,7 @@ export default async function ChatPage({
   markReadByCustomer(uid); // 打開就標記為已讀
 
   // 從商品頁點「聊聊」帶進來的商品
-  const askingProduct = productSlug ? getProduct(productSlug) : undefined;
+  const askingProduct = productSlug ? await getProduct(productSlug) : undefined;
   const askingCard = askingProduct
     ? {
         slug: askingProduct.slug,

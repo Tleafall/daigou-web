@@ -77,7 +77,7 @@ export async function createProductAction(formData: FormData) {
     redirect("/admin/products/new?error=1");
   }
 
-  const slug = createProduct({
+  const slug = await createProduct({
     title,
     description,
     categorySlug,
@@ -108,7 +108,7 @@ export async function updateProductAction(formData: FormData) {
     stock: toInt(formData.get(`stock_${id}`)),
   }));
   // 重建圖片陣列：保留未刪除的既有圖（帶上新的 tag）＋ 附加新上傳的圖
-  const existing = getProduct(slug)?.images ?? [];
+  const existing = (await getProduct(slug))?.images ?? [];
   const removeSet = new Set(
     formData.getAll("removeIndex").map((v) => Number(v)).filter((n) => Number.isInteger(n)),
   );
@@ -120,7 +120,7 @@ export async function updateProductAction(formData: FormData) {
   });
   for (const url of await readImageDataUrls(formData)) images.push({ url });
 
-  updateProduct(slug, {
+  await updateProduct(slug, {
     title,
     description,
     categorySlug,

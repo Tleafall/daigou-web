@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = getSettings();
+  const settings = await getSettings();
   return {
     title: {
       default: `${settings.name} — ${settings.tagline}`,
@@ -39,8 +39,7 @@ export default async function RootLayout({
   const user = session?.user
     ? { name: session.user.name, role: session.user.role }
     : null;
-  const categories = listCategories();
-  const settings = getSettings();
+  const [categories, settings] = await Promise.all([listCategories(), getSettings()]);
 
   return (
     <html

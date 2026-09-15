@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx scripts/seed-db.ts",
+    "db:studio": "prisma studio",
+    "stores:fetch": "node scripts/fetch-711-stores.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
@@ -31,6 +35,7 @@
     "eslint-config-next": "16.3.0",
     "prisma": "^7.9.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }

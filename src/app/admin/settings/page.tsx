@@ -12,7 +12,7 @@ export default async function AdminSettingsPage({
   searchParams: Promise<{ saved?: string }>;
 }) {
   await requireAdmin();
-  const s = getSettings();
+  const s = await getSettings();
   const { saved } = await searchParams;
 
   const inputClass =

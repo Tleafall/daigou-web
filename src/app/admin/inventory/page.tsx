@@ -14,7 +14,7 @@ const typeMeta: Record<MovementType, { label: string; cls: string }> = {
 
 export default async function AdminInventoryPage() {
   await requireAdmin();
-  const movements = listMovements();
+  const movements = await listMovements();
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">

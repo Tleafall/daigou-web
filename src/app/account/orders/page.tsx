@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "我的訂單" };
 
 export default async function MyOrdersPage() {
   const user = await requireUser();
-  const orders = listOrdersByUser(user.id ?? user.email ?? "");
+  const orders = await listOrdersByUser(user.id ?? user.email ?? "");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">

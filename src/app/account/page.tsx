@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "會員中心" };
 
 export default async function AccountPage() {
   const user = await requireUser();
-  const settings = getSettings();
+  const settings = await getSettings();
 
   const cards = [
     { title: "我的訂單", desc: "查看訂單與出貨狀態", href: "/account/orders" },

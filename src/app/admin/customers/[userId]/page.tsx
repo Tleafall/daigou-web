@@ -32,13 +32,15 @@ export default async function CustomerDetailPage({
 }) {
   await requireAdmin();
   const { userId } = await params;
-  const orders = listOrdersByUser(userId);
+  const orders = await listOrdersByUser(userId);
   if (orders.length === 0) notFound();
 
   const info = orders[0];
-  const risk = riskForUser(userId);
+  const [risk, profile] = await Promise.all([
+    riskForUser(userId),
+    getCustomerProfile(userId),
+  ]);
   const rm = riskMeta[risk.level];
-  const profile = getCustomerProfile(userId);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">

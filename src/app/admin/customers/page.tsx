@@ -20,7 +20,14 @@ const flagMeta: Record<ManualFlag, { label: string; cls: string } | null> = {
 
 export default async function AdminCustomersPage() {
   await requireAdmin();
-  const customers = listCustomers();
+  const customers = await listCustomers();
+  const rows = await Promise.all(
+    customers.map(async (c) => ({
+      c,
+      risk: await riskForUser(c.userId),
+      profile: await getCustomerProfile(c.userId),
+    })),
+  );
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -51,10 +58,9 @@ export default async function AdminCustomersPage() {
               </tr>
             </thead>
             <tbody>
-              {customers.map((c) => {
-                const risk = riskForUser(c.userId);
+              {rows.map(({ c, risk, profile }) => {
                 const rm = riskMeta[risk.level];
-                const flag = flagMeta[getCustomerProfile(c.userId).manualFlag];
+                const flag = flagMeta[profile.manualFlag];
                 return (
                   <tr key={c.userId} className="border-b border-line last:border-0 hover:bg-muted/50">
                     <td className="px-4 py-3">

@@ -12,7 +12,10 @@ export const metadata: Metadata = { title: "分類管理" };
 
 export default async function AdminCategoriesPage() {
   await requireAdmin();
-  const categories = listCategories();
+  const categories = await listCategories();
+  const counts = await Promise.all(
+    categories.map((c) => productCountForCategory(c.slug)),
+  );
 
   const inputClass =
     "rounded-lg border border-line px-2 py-1.5 text-sm outline-none focus:border-brand";
@@ -28,8 +31,8 @@ export default async function AdminCategoriesPage() {
 
       {/* 現有分類 */}
       <div className="flex flex-col gap-2">
-        {categories.map((c) => {
-          const count = productCountForCategory(c.slug);
+        {categories.map((c, i) => {
+          const count = counts[i];
           return (
             <div key={c.slug} className="rounded-xl border border-line bg-white p-3">
               <form action={updateCategoryAction} className="flex flex-wrap items-center gap-2">

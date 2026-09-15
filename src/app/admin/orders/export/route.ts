@@ -21,7 +21,7 @@ export async function GET() {
     return new Response("Forbidden", { status: 403 });
   }
 
-  const orders = listAllOrders();
+  const orders = await listAllOrders();
   const header = [
     "訂單編號",
     "下單時間",

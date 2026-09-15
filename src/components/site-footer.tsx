@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { getSettings } from "@/lib/settings-store";
 
-export function SiteFooter() {
-  const site = getSettings();
+export async function SiteFooter() {
+  const site = await getSettings();
   return (
     <footer className="mt-16 border-t border-line bg-muted">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 sm:grid-cols-4">

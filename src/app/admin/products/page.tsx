@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { type ProductStatus } from "@/lib/mock-data";
-import { categoryName } from "@/lib/category-store";
+import { listCategories } from "@/lib/category-store";
 import { listAllProducts } from "@/lib/product-store";
 import { formatTWD } from "@/lib/format";
 
@@ -16,7 +16,12 @@ const statusMeta: Record<ProductStatus, { label: string; cls: string }> = {
 
 export default async function AdminProductsPage() {
   await requireAdmin();
-  const products = listAllProducts();
+  const [products, categories] = await Promise.all([
+    listAllProducts(),
+    listCategories(),
+  ]);
+  const catName = (slug: string) =>
+    categories.find((c) => c.slug === slug)?.name ?? "商品";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -65,7 +70,7 @@ export default async function AdminProductsPage() {
               return (
                 <tr key={p.id} className="border-b border-line last:border-0 hover:bg-muted/50">
                   <td className="px-4 py-3">{p.title}</td>
-                  <td className="px-4 py-3 text-ink/60">{categoryName(p.categorySlug)}</td>
+                  <td className="px-4 py-3 text-ink/60">{catName(p.categorySlug)}</td>
                   <td className="px-4 py-3">
                     {min === max ? formatTWD(min) : `${formatTWD(min)}~${formatTWD(max)}`}
                   </td>

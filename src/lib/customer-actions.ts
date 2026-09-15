@@ -17,7 +17,7 @@ export async function setCustomerFlagAction(formData: FormData) {
   await assertAdmin();
   const userId = String(formData.get("userId"));
   const flag = String(formData.get("flag")) as ManualFlag;
-  setCustomerFlag(userId, flag);
+  await setCustomerFlag(userId, flag);
   revalidatePath(`/admin/customers/${userId}`);
   revalidatePath("/admin/customers");
 }
@@ -26,6 +26,6 @@ export async function setCustomerNoteAction(formData: FormData) {
   await assertAdmin();
   const userId = String(formData.get("userId"));
   const note = String(formData.get("note") || "").trim();
-  setCustomerNote(userId, note);
+  await setCustomerNote(userId, note);
   revalidatePath(`/admin/customers/${userId}`);
 }

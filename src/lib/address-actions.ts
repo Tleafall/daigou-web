@@ -22,21 +22,21 @@ export async function addAddressAction(formData: FormData) {
     return; // 前端已有 required；不合格則不新增
   }
 
-  addAddress({ userId, recipientName, recipientPhone, city, district, addressLine });
+  await addAddress({ userId, recipientName, recipientPhone, city, district, addressLine });
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
 }
 
 export async function removeAddressAction(formData: FormData) {
   const userId = await requireUserId();
-  removeAddress(userId, String(formData.get("id")));
+  await removeAddress(userId, String(formData.get("id")));
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
 }
 
 export async function setDefaultAddressAction(formData: FormData) {
   const userId = await requireUserId();
-  setDefaultAddress(userId, String(formData.get("id")));
+  await setDefaultAddress(userId, String(formData.get("id")));
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
 }

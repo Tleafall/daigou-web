@@ -1,5 +1,7 @@
-// ⚠️ 原型用「伺服器記憶體」訂單庫。重啟伺服器會清空。
-// 之後接 Neon + Prisma 後，這層會換成資料庫（介面刻意貼近未來做法）。
+// 訂單：存於 PostgreSQL（Order 表；品項/退換貨以 JSON 欄位保存快照）。
+import { cache } from "react";
+import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { adjustVariantStock, getActiveProduct } from "@/lib/product-store";
 import { getSettings } from "@/lib/settings-store";
 
@@ -48,44 +50,107 @@ export type Order = {
   updatedAt: string;
 };
 
-type Store = { orders: Order[]; seq: number };
-
-const g = globalThis as unknown as { __daigouStore?: Store };
-
-function getStore(): Store {
-  if (!g.__daigouStore) {
-    g.__daigouStore = { orders: [], seq: 1 };
-    seed(g.__daigouStore);
-  }
-  return g.__daigouStore;
+function json(v: unknown): Prisma.InputJsonValue {
+  return v as Prisma.InputJsonValue;
 }
 
-function genOrderNo(store: Store): string {
+type OrderRow = {
+  orderNo: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  status: string;
+  cancelledBy: string | null;
+  abandoned: boolean;
+  cancellationReason: string | null;
+  previousStatus: string | null;
+  returnRequest: Prisma.JsonValue;
+  items: Prisma.JsonValue;
+  subtotal: number;
+  shippingFee: number;
+  codFee: number;
+  totalAmount: number;
+  recipientName: string;
+  recipientPhone: string;
+  storeId: string;
+  storeName: string;
+  storeAddress: string;
+  customerNote: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function toOrder(r: OrderRow): Order {
+  return {
+    orderNo: r.orderNo,
+    userId: r.userId,
+    userEmail: r.userEmail,
+    userName: r.userName,
+    status: r.status as OrderStatus,
+    cancelledBy: (r.cancelledBy as "customer" | "admin" | null) ?? undefined,
+    abandoned: r.abandoned,
+    cancellationReason: r.cancellationReason ?? undefined,
+    previousStatus: (r.previousStatus as OrderStatus | null) ?? undefined,
+    returnRequest:
+      (r.returnRequest as unknown as { reason: string; createdAt: string } | null) ??
+      undefined,
+    items: r.items as unknown as OrderItem[],
+    subtotal: r.subtotal,
+    shippingFee: r.shippingFee,
+    codFee: r.codFee,
+    totalAmount: r.totalAmount,
+    recipientName: r.recipientName,
+    recipientPhone: r.recipientPhone,
+    storeId: r.storeId,
+    storeName: r.storeName,
+    storeAddress: r.storeAddress,
+    customerNote: r.customerNote ?? undefined,
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+  };
+}
+
+// 訂單編號：D + 今天日期 + 4 碼流水號（流水號存 Counter 表，全域遞增）
+async function nextSeq(): Promise<number> {
+  const c = await prisma.counter.upsert({
+    where: { name: "orderNo" },
+    create: { name: "orderNo", value: 1 },
+    update: { value: { increment: 1 } },
+  });
+  return c.value;
+}
+
+function orderNoFromSeq(seq: number): string {
   const d = new Date();
   const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(
     d.getDate(),
   ).padStart(2, "0")}`;
-  const n = String(store.seq++).padStart(4, "0");
-  return `D${ymd}${n}`;
+  return `D${ymd}${String(seq).padStart(4, "0")}`;
 }
 
 // ---- 查詢 ----
-export function listAllOrders(): Order[] {
-  return [...getStore().orders].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+// 以 React cache 於單次請求內去重（多處衍生統計會重複讀全部訂單）
+const allOrders = cache(async (): Promise<Order[]> => {
+  const rows = await prisma.order.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map(toOrder);
+});
+
+export async function listAllOrders(): Promise<Order[]> {
+  return allOrders();
 }
 
-export function listOrdersByUser(userId: string): Order[] {
-  return listAllOrders().filter((o) => o.userId === userId);
+export async function listOrdersByUser(userId: string): Promise<Order[]> {
+  return (await allOrders()).filter((o) => o.userId === userId);
 }
 
-export function getOrder(orderNo: string): Order | undefined {
-  return getStore().orders.find((o) => o.orderNo === orderNo);
+export async function getOrder(orderNo: string): Promise<Order | undefined> {
+  return (await allOrders()).find((o) => o.orderNo === orderNo);
 }
 
 // 商品累計賣出數量（不計已取消訂單）
-export function soldCountForProduct(slug: string): number {
+export async function soldCountForProduct(slug: string): Promise<number> {
   let n = 0;
-  for (const o of getStore().orders) {
+  for (const o of await allOrders()) {
     if (o.status === "CANCELLED") continue;
     for (const it of o.items) if (it.productSlug === slug) n += it.quantity;
   }
@@ -93,9 +158,12 @@ export function soldCountForProduct(slug: string): number {
 }
 
 // 依後台設定，回傳商品旁要顯示的文字（已售 / 剩餘 / 不顯示）
-export function productCountLabel(slug: string, totalStock: number): string | null {
-  const s = getSettings();
-  if (s.productCountDisplay === "sold") return `已售 ${soldCountForProduct(slug)}`;
+export async function productCountLabel(
+  slug: string,
+  totalStock: number,
+): Promise<string | null> {
+  const s = await getSettings();
+  if (s.productCountDisplay === "sold") return `已售 ${await soldCountForProduct(slug)}`;
   if (s.productCountDisplay === "stock") {
     // 只在庫存低於門檻時顯示「僅剩 X 件」催單；庫存充足或 0 都不顯示
     return totalStock > 0 && totalStock <= s.lowStockThreshold
@@ -108,9 +176,9 @@ export function productCountLabel(slug: string, totalStock: number): string | nu
 export type CustomerSummary = { userId: string; userName: string; userEmail: string };
 
 // 從訂單推導出所有下過單的顧客（去重）
-export function listCustomers(): CustomerSummary[] {
+export async function listCustomers(): Promise<CustomerSummary[]> {
   const map = new Map<string, CustomerSummary>();
-  for (const o of getStore().orders) {
+  for (const o of await allOrders()) {
     if (!map.has(o.userId)) {
       map.set(o.userId, { userId: o.userId, userName: o.userName, userEmail: o.userEmail });
     }
@@ -134,7 +202,7 @@ export type CreateOrderInput = {
   customerNote?: string;
 };
 
-export const COD_MAX = 10000; // 貨到付款單筆上限
+export const COD_MAX = 10000; // 取貨付款單筆上限
 export const MAX_QTY = 10; // 單一商品購買上限
 export const FREE_SHIPPING = 1000;
 export const SHIPPING_FEE = 100;
@@ -143,13 +211,13 @@ export type CreateOrderResult =
   | { ok: true; orderNo: string }
   | { ok: false; error: string };
 
-// 價格一律以伺服器端（此處為 mock-data）重算，不信任前端傳入
-export function createOrder(input: CreateOrderInput): CreateOrderResult {
+// 價格一律以伺服器端重算，不信任前端傳入
+export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
   if (input.items.length === 0) return { ok: false, error: "購物車是空的" };
 
   const items: OrderItem[] = [];
   for (const line of input.items) {
-    const product = getActiveProduct(line.productSlug);
+    const product = await getActiveProduct(line.productSlug);
     const variant = product?.variants.find((v) => v.id === line.variantId);
     if (!product || !variant) return { ok: false, error: "商品已下架或不存在" };
     if (line.quantity < 1 || line.quantity > MAX_QTY)
@@ -172,58 +240,52 @@ export function createOrder(input: CreateOrderInput): CreateOrderResult {
     });
   }
 
-  const settings = getSettings();
+  const settings = await getSettings();
   const subtotal = items.reduce((s, it) => s + it.lineTotal, 0);
   const shippingFee = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
   const totalAmount = subtotal + shippingFee;
 
   if (totalAmount > COD_MAX)
-    return { ok: false, error: `貨到付款單筆上限為 NT$${COD_MAX.toLocaleString("zh-TW")}` };
+    return { ok: false, error: `取貨付款單筆上限為 NT$${COD_MAX.toLocaleString("zh-TW")}` };
 
-  const store = getStore();
-  const now = new Date().toISOString();
-  const order: Order = {
-    orderNo: genOrderNo(store),
-    userId: input.userId,
-    userEmail: input.userEmail,
-    userName: input.userName,
-    status: "PENDING",
-    items,
-    subtotal,
-    shippingFee,
-    codFee: 0,
-    totalAmount,
-    recipientName: input.recipientName,
-    recipientPhone: input.recipientPhone,
-    storeId: input.storeId,
-    storeName: input.storeName,
-    storeAddress: input.storeAddress,
-    customerNote: input.customerNote,
-    createdAt: now,
-    updatedAt: now,
-  };
+  const orderNo = orderNoFromSeq(await nextSeq());
+  await prisma.order.create({
+    data: {
+      orderNo,
+      userId: input.userId,
+      userEmail: input.userEmail,
+      userName: input.userName,
+      status: "PENDING",
+      items: json(items),
+      subtotal,
+      shippingFee,
+      codFee: 0,
+      totalAmount,
+      recipientName: input.recipientName,
+      recipientPhone: input.recipientPhone,
+      storeId: input.storeId,
+      storeName: input.storeName,
+      storeAddress: input.storeAddress,
+      customerNote: input.customerNote ?? null,
+    },
+  });
 
   // 下單即扣庫存（並記錄異動）
   for (const it of items) {
-    adjustVariantStock(it.variantId, -it.quantity, "SALE", "下單扣庫存", order.orderNo);
+    await adjustVariantStock(it.variantId, -it.quantity, "SALE", "下單扣庫存", orderNo);
   }
 
-  store.orders.push(order);
-  return { ok: true, orderNo: order.orderNo };
+  return { ok: true, orderNo };
 }
 
 // ---- 狀態轉換（集中控管，禁止任意跳） ----
 type TransitionResult = { ok: true } | { ok: false; error: string };
 
-function touch(o: Order) {
-  o.updatedAt = new Date().toISOString();
-}
-
-export function adminAdvance(
+export async function adminAdvance(
   orderNo: string,
   action: "confirm" | "ship" | "complete",
-): TransitionResult {
-  const o = getOrder(orderNo);
+): Promise<TransitionResult> {
+  const o = await prisma.order.findUnique({ where: { orderNo } });
   if (!o) return { ok: false, error: "訂單不存在" };
   const map: Record<typeof action, [OrderStatus, OrderStatus]> = {
     confirm: ["PENDING", "CONFIRMED"],
@@ -231,20 +293,18 @@ export function adminAdvance(
     complete: ["SHIPPED", "COMPLETED"],
   };
   const [from, to] = map[action];
-  if (o.status !== from)
-    return { ok: false, error: `目前狀態無法執行此操作` };
-  o.status = to;
-  touch(o);
+  if (o.status !== from) return { ok: false, error: `目前狀態無法執行此操作` };
+  await prisma.order.update({ where: { orderNo }, data: { status: to } });
   return { ok: true };
 }
 
-export function cancelOrder(
+export async function cancelOrder(
   orderNo: string,
   by: "customer" | "admin",
   reason: string,
   opts?: { abandoned?: boolean },
-): TransitionResult {
-  const o = getOrder(orderNo);
+): Promise<TransitionResult> {
+  const o = await prisma.order.findUnique({ where: { orderNo } });
   if (!o) return { ok: false, error: "訂單不存在" };
 
   if (opts?.abandoned) {
@@ -256,14 +316,22 @@ export function cancelOrder(
     if (o.status !== "PENDING" && o.status !== "CONFIRMED")
       return { ok: false, error: "此訂單狀態無法取消" };
   }
-  o.previousStatus = o.status; // 記住取消前狀態，供復原
-  o.status = "CANCELLED";
-  o.cancelledBy = by;
-  o.cancellationReason = reason;
-  o.abandoned = opts?.abandoned ?? false;
+
+  await prisma.order.update({
+    where: { orderNo },
+    data: {
+      previousStatus: o.status, // 記住取消前狀態，供復原
+      status: "CANCELLED",
+      cancelledBy: by,
+      cancellationReason: reason,
+      abandoned: opts?.abandoned ?? false,
+    },
+  });
+
   // 取消/棄單回補庫存
-  for (const it of o.items) {
-    adjustVariantStock(
+  const items = o.items as unknown as OrderItem[];
+  for (const it of items) {
+    await adjustVariantStock(
       it.variantId,
       it.quantity,
       "CANCEL",
@@ -271,35 +339,46 @@ export function cancelOrder(
       o.orderNo,
     );
   }
-  touch(o);
   return { ok: true };
 }
 
 // 復原已取消/棄單的訂單，回到取消前的狀態
-export function restoreOrder(orderNo: string): TransitionResult {
-  const o = getOrder(orderNo);
+export async function restoreOrder(orderNo: string): Promise<TransitionResult> {
+  const o = await prisma.order.findUnique({ where: { orderNo } });
   if (!o) return { ok: false, error: "訂單不存在" };
   if (o.status !== "CANCELLED") return { ok: false, error: "僅已取消的訂單可復原" };
-  o.status = o.previousStatus ?? "PENDING";
-  o.cancelledBy = undefined;
-  o.abandoned = false;
-  o.cancellationReason = undefined;
-  o.previousStatus = undefined;
+
+  await prisma.order.update({
+    where: { orderNo },
+    data: {
+      status: (o.previousStatus as OrderStatus | null) ?? "PENDING",
+      cancelledBy: null,
+      abandoned: false,
+      cancellationReason: null,
+      previousStatus: null,
+    },
+  });
+
   // 復原訂單：重新扣回庫存
-  for (const it of o.items) {
-    adjustVariantStock(it.variantId, -it.quantity, "SALE", "訂單復原扣庫存", o.orderNo);
+  const items = o.items as unknown as OrderItem[];
+  for (const it of items) {
+    await adjustVariantStock(it.variantId, -it.quantity, "SALE", "訂單復原扣庫存", o.orderNo);
   }
-  touch(o);
   return { ok: true };
 }
 
-export function requestReturn(orderNo: string, reason: string): TransitionResult {
-  const o = getOrder(orderNo);
+export async function requestReturn(
+  orderNo: string,
+  reason: string,
+): Promise<TransitionResult> {
+  const o = await prisma.order.findUnique({ where: { orderNo } });
   if (!o) return { ok: false, error: "訂單不存在" };
   if (o.status !== "SHIPPED" && o.status !== "COMPLETED")
     return { ok: false, error: "僅已出貨/已完成的訂單可申請退換貨" };
-  o.returnRequest = { reason, createdAt: new Date().toISOString() };
-  touch(o);
+  await prisma.order.update({
+    where: { orderNo },
+    data: { returnRequest: json({ reason, createdAt: new Date().toISOString() }) },
+  });
   return { ok: true };
 }
 
@@ -313,8 +392,8 @@ export type RiskProfile = {
   level: "low" | "watch" | "high";
 };
 
-export function riskForUser(userId: string): RiskProfile {
-  const orders = getStore().orders.filter((o) => o.userId === userId);
+export async function riskForUser(userId: string): Promise<RiskProfile> {
+  const orders = (await allOrders()).filter((o) => o.userId === userId);
   const completedOrders = orders.filter((o) => o.status === "COMPLETED").length;
   const customerCancelCount = orders.filter(
     (o) => o.status === "CANCELLED" && o.cancelledBy === "customer",
@@ -333,78 +412,4 @@ export function riskForUser(userId: string): RiskProfile {
     score,
     level,
   };
-}
-
-// ---- 示範種子資料（讓後台/我的訂單一開始就有東西看） ----
-function seed(store: Store) {
-  const now = Date.now();
-  const mk = (
-    over: Partial<Order> & Pick<Order, "items" | "status">,
-    minsAgo: number,
-  ): Order => {
-    const subtotal = over.items.reduce((s, it) => s + it.lineTotal, 0);
-    const shippingFee = subtotal >= FREE_SHIPPING ? 0 : SHIPPING_FEE;
-    const ts = new Date(now - minsAgo * 60000).toISOString();
-    return {
-      orderNo: genOrderNo(store),
-      userId: "u-customer",
-      userEmail: "customer@test.com",
-      userName: "測試顧客",
-      subtotal,
-      shippingFee,
-      codFee: 0,
-      totalAmount: subtotal + shippingFee,
-      recipientName: "王小明",
-      recipientPhone: "0912345678",
-      storeId: "287731",
-      storeName: "BBS夢廣場店",
-      storeAddress: "台北市信義區松高路11號6樓",
-      createdAt: ts,
-      updatedAt: ts,
-      ...over,
-    };
-  };
-
-  const item = (
-    slug: string,
-    title: string,
-    variantId: string,
-    optionLabel: string,
-    unitPrice: number,
-    qty: number,
-    gradient: [string, string],
-  ): OrderItem => ({
-    productSlug: slug,
-    productTitle: title,
-    variantId,
-    optionLabel,
-    unitPrice,
-    quantity: qty,
-    lineTotal: unitPrice * qty,
-    gradient,
-  });
-
-  store.orders.push(
-    mk(
-      {
-        status: "PENDING",
-        items: [item("p5", "純棉寬鬆落肩上衣", "p5-v1", "顏色：米白、尺寸：S", 590, 1, ["#d7ecff", "#8fc4ff"])],
-      },
-      30,
-    ),
-    mk(
-      {
-        status: "SHIPPED",
-        items: [item("p17", "無線藍牙耳機", "p17-v1", "顏色：白", 1590, 1, ["#dfe3ff", "#a2acff"])],
-      },
-      600,
-    ),
-    mk(
-      {
-        status: "COMPLETED",
-        items: [item("p1", "日本溫和胺基酸洗面乳", "p1-v1", "容量：120ml", 390, 2, ["#ffd9c7", "#ff9e7d"])],
-      },
-      4320,
-    ),
-  );
 }

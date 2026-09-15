@@ -14,7 +14,7 @@ export default async function NewProductPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   await requireAdmin();
-  const categories = listCategories();
+  const categories = await listCategories();
   const { error } = await searchParams;
   const inputClass =
     "w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand";

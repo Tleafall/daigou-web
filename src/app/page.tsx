@@ -4,10 +4,14 @@ import { listCategories } from "@/lib/category-store";
 import { ProductCard } from "@/components/product-card";
 import { HeroCarousel } from "@/components/hero-carousel";
 
-export default function Home() {
-  const categories = listCategories();
-  const featured = listActiveProducts().slice(0, 5);
-  const latest = latestActiveProducts().slice(0, 10);
+export default async function Home() {
+  const [categories, active, latestAll] = await Promise.all([
+    listCategories(),
+    listActiveProducts(),
+    latestActiveProducts(),
+  ]);
+  const featured = active.slice(0, 5);
+  const latest = latestAll.slice(0, 10);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">

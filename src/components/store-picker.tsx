@@ -27,17 +27,13 @@ export function StorePicker({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  // 關鍵字防抖後查詢
+  // 關鍵字防抖後查詢（setState 都放在非同步 callback 內，避免同步觸發連鎖 render）
   useEffect(() => {
     const q = keyword.trim();
-    if (q.length < 1) {
-      setResults([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    if (q.length < 1) return;
     const ctrl = new AbortController();
     const timer = setTimeout(async () => {
+      setLoading(true);
       try {
         const res = await fetch(`/api/stores?q=${encodeURIComponent(q)}`, {
           signal: ctrl.signal,

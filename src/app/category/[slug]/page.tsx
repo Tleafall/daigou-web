@@ -13,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = getCategory(slug);
+  const category = await getCategory(slug);
   return { title: category ? category.name : "分類" };
 }
 
@@ -27,10 +27,10 @@ export default async function CategoryPage({
   const { slug } = await params;
   const { page: pageParam } = await searchParams;
 
-  const category = getCategory(slug);
+  const category = await getCategory(slug);
   if (!category) notFound();
 
-  const all = getActiveByCategory(slug);
+  const all = await getActiveByCategory(slug);
   const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
   const page = Math.min(Math.max(1, Number(pageParam) || 1), totalPages);
   const items = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

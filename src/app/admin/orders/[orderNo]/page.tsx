@@ -32,12 +32,15 @@ export default async function AdminOrderDetailPage({
 }) {
   await requireAdmin();
   const { orderNo } = await params;
-  const order = getOrder(orderNo);
+  const order = await getOrder(orderNo);
   if (!order) notFound();
 
-  const risk = riskForUser(order.userId);
+  const [risk, profile] = await Promise.all([
+    riskForUser(order.userId),
+    getCustomerProfile(order.userId),
+  ]);
   const rm = riskMeta[risk.level];
-  const manualFlag = getCustomerProfile(order.userId).manualFlag;
+  const manualFlag = profile.manualFlag;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">

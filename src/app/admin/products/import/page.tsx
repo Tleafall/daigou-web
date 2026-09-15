@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "批次匯入商品" };
 
 export default async function ImportProductsPage() {
   await requireAdmin();
-  const categories = listCategories();
+  const categories = await listCategories();
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">

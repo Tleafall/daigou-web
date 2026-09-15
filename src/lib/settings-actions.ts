@@ -14,7 +14,7 @@ export async function updateSettingsAction(formData: FormData) {
     return Number.isFinite(n) && n >= 0 ? n : fallback;
   };
 
-  updateSettings({
+  await updateSettings({
     name: String(formData.get("name") || "").trim() || "商店",
     tagline: String(formData.get("tagline") || "").trim(),
     announcement: String(formData.get("announcement") || "").trim(),

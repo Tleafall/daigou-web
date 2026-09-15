@@ -1,62 +1,62 @@
-// ⚠️ 原型用「伺服器記憶體」分類庫（可增修）。重啟伺服器會回到種子資料。之後接 Prisma。
-import { seedCategories, type Category } from "@/lib/mock-data";
-import { listAllProducts } from "@/lib/product-store";
+// 商品分類：存於 PostgreSQL（Category 表）。
+import { cache } from "react";
+import { prisma } from "@/lib/prisma";
+import type { Category } from "@/lib/mock-data";
 
-type Store = { categories: Category[]; seq: number };
+// 以 React cache 於單次請求內去重（分類列表在很多頁面/卡片重複用到）
+export const listCategories = cache(async (): Promise<Category[]> => {
+  const rows = await prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
+  return rows.map((r) => ({
+    slug: r.slug,
+    name: r.name,
+    emoji: r.emoji,
+    sortOrder: r.sortOrder,
+  }));
+});
 
-const g = globalThis as unknown as { __daigouCategories?: Store };
-
-function getStore(): Store {
-  if (!g.__daigouCategories) {
-    g.__daigouCategories = {
-      categories: seedCategories.map((c) => ({ ...c })),
-      seq: 1,
-    };
-  }
-  return g.__daigouCategories;
+export async function getCategory(slug: string): Promise<Category | undefined> {
+  return (await listCategories()).find((c) => c.slug === slug);
 }
 
-export function listCategories(): Category[] {
-  return [...getStore().categories].sort((a, b) => a.sortOrder - b.sortOrder);
+export async function categoryName(slug: string): Promise<string> {
+  return (await getCategory(slug))?.name ?? "商品";
 }
 
-export function getCategory(slug: string): Category | undefined {
-  return getStore().categories.find((c) => c.slug === slug);
-}
-
-export function categoryName(slug: string): string {
-  return getCategory(slug)?.name ?? "商品";
-}
-
-export function createCategory(name: string, emoji: string): string {
-  const store = getStore();
+export async function createCategory(name: string, emoji: string): Promise<string> {
   const slug = `cat${Date.now().toString(36)}`;
-  const sortOrder = Math.max(0, ...store.categories.map((c) => c.sortOrder)) + 1;
-  store.categories.push({ slug, name, emoji: emoji || "🛍️", sortOrder });
+  const max = await prisma.category.aggregate({ _max: { sortOrder: true } });
+  const sortOrder = (max._max.sortOrder ?? 0) + 1;
+  await prisma.category.create({
+    data: { slug, name, emoji: emoji || "🛍️", sortOrder },
+  });
   return slug;
 }
 
-export function updateCategory(
+export async function updateCategory(
   slug: string,
   input: { name: string; emoji: string; sortOrder: number },
-): boolean {
-  const c = getCategory(slug);
-  if (!c) return false;
-  c.name = input.name;
-  c.emoji = input.emoji || "🛍️";
-  c.sortOrder = input.sortOrder;
-  return true;
+): Promise<boolean> {
+  try {
+    await prisma.category.update({
+      where: { slug },
+      data: { name: input.name, emoji: input.emoji || "🛍️", sortOrder: input.sortOrder },
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // 產品數（判斷能否刪除）
-export function productCountForCategory(slug: string): number {
-  return listAllProducts().filter((p) => p.categorySlug === slug).length;
+export async function productCountForCategory(slug: string): Promise<number> {
+  return prisma.product.count({ where: { categorySlug: slug } });
 }
 
-export function removeCategory(slug: string): { ok: boolean; error?: string } {
-  if (productCountForCategory(slug) > 0)
+export async function removeCategory(
+  slug: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if ((await productCountForCategory(slug)) > 0)
     return { ok: false, error: "此分類仍有商品，請先移除或改分類" };
-  const store = getStore();
-  store.categories = store.categories.filter((c) => c.slug !== slug);
+  await prisma.category.delete({ where: { slug } });
   return { ok: true };
 }

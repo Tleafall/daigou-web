@@ -23,7 +23,7 @@ export async function createCategoryAction(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
   const emoji = String(formData.get("emoji") || "").trim();
   if (!name) return;
-  createCategory(name, emoji);
+  await createCategory(name, emoji);
   refresh();
 }
 
@@ -34,13 +34,13 @@ export async function updateCategoryAction(formData: FormData) {
   const emoji = String(formData.get("emoji") || "").trim();
   const sortOrder = Math.floor(Number(formData.get("sortOrder"))) || 0;
   if (!name) return;
-  updateCategory(slug, { name, emoji, sortOrder });
+  await updateCategory(slug, { name, emoji, sortOrder });
   refresh();
 }
 
 export async function removeCategoryAction(formData: FormData) {
   await assertAdmin();
   const slug = String(formData.get("slug") || "");
-  removeCategory(slug); // 有商品時 store 會拒絕
+  await removeCategory(slug); // 有商品時 store 會拒絕
   refresh();
 }

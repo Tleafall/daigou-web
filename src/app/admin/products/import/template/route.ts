@@ -7,7 +7,8 @@ export async function GET() {
   if (session?.user?.role !== "ADMIN") {
     return new Response("Forbidden", { status: 403 });
   }
-  const buf = buildTemplateBuffer(listCategories().map((c) => c.name));
+  const categories = await listCategories();
+  const buf = buildTemplateBuffer(categories.map((c) => c.name));
   return new Response(new Uint8Array(buf), {
     headers: {
       "Content-Type":

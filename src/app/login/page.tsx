@@ -12,7 +12,7 @@ export default async function LoginPage() {
   const session = await auth();
   if (session?.user) redirect("/");
 
-  const site = getSettings();
+  const site = await getSettings();
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-12">
