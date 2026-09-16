@@ -44,7 +44,8 @@ export function ProductView({
         <LineContact
           lineUrl={settings.lineUrl}
           lineId={settings.lineId}
-          label="加 LINE 詢問此商品"
+          label="用 LINE 詢問此商品"
+          message={`您好，我想詢問這個商品：${product.title}（商品編號 ${product.slug}）`}
         />
       </div>
     </div>

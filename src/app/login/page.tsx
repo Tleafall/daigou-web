@@ -45,37 +45,6 @@ export default async function LoginPage() {
             <code className="text-ink/80">user1234</code>
           </div>
         )}
-
-        {/* 分隔線 */}
-        <div className="my-6 flex items-center gap-3 text-xs text-ink/40">
-          <span className="h-px flex-1 bg-line" />
-          之後開通
-          <span className="h-px flex-1 bg-line" />
-        </div>
-
-        {/* OAuth（尚未接金鑰） */}
-        <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            disabled
-            className="flex items-center justify-center gap-3 rounded-full border border-line py-3 text-sm font-medium text-ink/50 disabled:cursor-not-allowed"
-          >
-            <span className="grid h-5 w-5 place-items-center rounded-full text-xs font-bold text-[#4285F4] ring-1 ring-line">
-              G
-            </span>
-            使用 Google 登入（待接金鑰）
-          </button>
-          <button
-            type="button"
-            disabled
-            className="flex items-center justify-center gap-3 rounded-full border border-line py-3 text-sm font-medium text-ink/50 disabled:cursor-not-allowed"
-          >
-            <span className="grid h-5 w-5 place-items-center rounded text-xs font-bold text-[#06C755] ring-1 ring-line">
-              L
-            </span>
-            使用 LINE 登入（待接金鑰）
-          </button>
-        </div>
       </div>
 
       <Link href="/" className="mt-6 text-sm text-ink/50 hover:text-brand">

@@ -1,14 +1,23 @@
 // 官方 LINE 加入好友按鈕 / ID（純顯示元件，前後台皆可用）
+// message：若提供，改用「開啟官方帳號聊天並帶入訊息」深連結（客人不用自己打字）。
 export function LineContact({
   lineUrl,
   lineId,
   label = "加 LINE 詢問",
+  message,
 }: {
   lineUrl: string;
   lineId: string;
   label?: string;
+  message?: string;
 }) {
-  const href = lineUrl && /^https?:\/\//i.test(lineUrl) ? lineUrl : null;
+  // 帶訊息詢問：line.me/R/oaMessage/{ID}/?{文字}（ID 與文字都 percent-encode）
+  const oaMessageHref =
+    message && lineId
+      ? `https://line.me/R/oaMessage/${encodeURIComponent(lineId)}/?${encodeURIComponent(message)}`
+      : null;
+  const href =
+    oaMessageHref ?? (lineUrl && /^https?:\/\//i.test(lineUrl) ? lineUrl : null);
 
   if (!href) {
     return (

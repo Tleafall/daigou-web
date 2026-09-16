@@ -15,17 +15,6 @@ export async function SiteFooter() {
           <div className="mb-3 text-sm font-semibold">關於我們</div>
           <ul className="space-y-2 text-sm text-ink/60">
             <li><Link href="/about" className="hover:text-brand">品牌介紹</Link></li>
-            <li><span className="text-ink/40">服務條款（即將推出）</span></li>
-            <li><span className="text-ink/40">隱私權政策（即將推出）</span></li>
-          </ul>
-        </div>
-
-        <div>
-          <div className="mb-3 text-sm font-semibold">購物須知</div>
-          <ul className="space-y-2 text-sm text-ink/60">
-            <li><span className="text-ink/40">付款與配送（即將推出）</span></li>
-            <li><span className="text-ink/40">退換貨政策（即將推出）</span></li>
-            <li><span className="text-ink/40">常見問題（即將推出）</span></li>
           </ul>
         </div>
 

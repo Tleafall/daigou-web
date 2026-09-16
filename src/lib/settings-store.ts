@@ -26,7 +26,7 @@ export const DEFAULTS: Settings = {
   freeShippingThreshold: site.freeShippingThreshold,
   shippingFee: site.shippingFee,
   lineId: site.lineId,
-  lineUrl: "",
+  lineUrl: site.lineUrl,
   email: site.email,
   productCountDisplay: "none",
   lowStockThreshold: 5,
