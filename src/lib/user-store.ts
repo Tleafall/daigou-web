@@ -25,6 +25,47 @@ export async function findUserByEmail(email: string): Promise<DbUser | null> {
   };
 }
 
+// LINE 登入：以 Account(provider=line, providerAccountId) 對應到 User。
+// 第一次登入建立 User＋Account 連結；之後同一個 LINE 帳號都對到同一個 User。
+// 回傳 User 的資料庫 id，讓訂單/風險/封鎖都以此 id 為準，跟 Email 會員一致。
+export async function upsertLineUser(
+  providerAccountId: string,
+  profile: { name?: string | null; email?: string | null; image?: string | null },
+): Promise<{ id: string; role: "CUSTOMER" | "ADMIN" }> {
+  const existing = await prisma.account.findUnique({
+    where: { provider_providerAccountId: { provider: "line", providerAccountId } },
+  });
+  if (existing) {
+    const u = await prisma.user.update({
+      where: { id: existing.userId },
+      data: {
+        name: profile.name ?? undefined,
+        image: profile.image ?? undefined,
+      },
+    });
+    return { id: u.id, role: (u.role as "CUSTOMER" | "ADMIN") ?? "CUSTOMER" };
+  }
+
+  // email 只在沒被別的帳號用時才存，避免 unique 衝突（LINE 不一定給 email）
+  let email: string | null = null;
+  if (profile.email) {
+    const e = profile.email.trim().toLowerCase();
+    const taken = await prisma.user.findUnique({ where: { email: e } });
+    if (!taken) email = e;
+  }
+
+  const u = await prisma.user.create({
+    data: {
+      name: profile.name ?? "LINE 會員",
+      email,
+      image: profile.image ?? null,
+      role: "CUSTOMER",
+      accounts: { create: { provider: "line", providerAccountId, type: "oauth" } },
+    },
+  });
+  return { id: u.id, role: "CUSTOMER" };
+}
+
 export type AdminSummary = { id: string; email: string; name: string };
 
 export async function listAdmins(): Promise<AdminSummary[]> {

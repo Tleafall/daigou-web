@@ -2,7 +2,7 @@ import NextAuth, { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import LINE from "next-auth/providers/line";
 import { testUsers } from "@/lib/test-users";
-import { findUserByEmail } from "@/lib/user-store";
+import { findUserByEmail, upsertLineUser } from "@/lib/user-store";
 import { verifyPassword } from "@/lib/password";
 
 // LINE 登入：只有在 .env 有填金鑰時才啟用（沒填就只有帳密/Email 登入，不影響現況）
@@ -69,10 +69,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ...oauthProviders,
   ],
   callbacks: {
-    // 把 role 塞進 token（LINE 等 OAuth 登入者沒有 role，一律當一般會員）
-    jwt: ({ token, user }) => {
+    // 登入當下（user 存在）決定 token。LINE 登入會把會員寫進資料庫，
+    // 並把 token.sub 換成資料庫 User id，讓訂單/風險/封鎖與 Email 會員一致。
+    jwt: async ({ token, user, account }) => {
       if (user) {
-        token.role = (user as { role?: "CUSTOMER" | "ADMIN" }).role ?? "CUSTOMER";
+        if (account?.provider === "line") {
+          const dbUser = await upsertLineUser(account.providerAccountId, {
+            name: user.name,
+            email: user.email,
+            image: user.image,
+          });
+          token.sub = dbUser.id;
+          token.role = dbUser.role;
+        } else {
+          token.role = (user as { role?: "CUSTOMER" | "ADMIN" }).role ?? "CUSTOMER";
+        }
       }
       return token;
     },
