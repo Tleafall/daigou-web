@@ -196,9 +196,15 @@ cloudflared tunnel run yuqing
 ```bash
 npm run db:backup
 ```
-會在專案的 `backups/` 產生一個 `daigou-日期.sql`，自動保留最近 14 份。
+會在專案的 `backups/` 產生一個 `daigou-日期.sql`，**保留所有備份不刪**（備份檔很小）。
 （若出現找不到 pg_dump，設環境變數 `PG_DUMP` 指到
 `C:\Program Files\PostgreSQL\17\bin\pg_dump.exe`。）
+
+**雲端備份（會自動做）：**
+- 這台電腦若有登入 **OneDrive**（Windows 內建），備份會自動再複製一份到
+  `OneDrive\雨晴代購備份`，OneDrive 就會自動同步上雲——**不用另外設定**。
+- 想改用 Google Drive / Dropbox：裝好它的桌面同步程式，在 `.env` 加一行
+  `BACKUP_CLOUD_DIR="同步資料夾的完整路徑"`，備份就會改複製到那裡。
 
 **設成每天自動備份（Windows 工作排程器）：**
 1. 開「工作排程器」→ 建立基本工作 → 名稱「daigou 每日備份」。
@@ -214,8 +220,7 @@ npm run db:backup
 psql -U postgres -d daigou -f backups\daigou-那個檔.sql
 ```
 
-> ⚠️ 備份檔存在同一台電腦，若整台壞了也會一起沒。**強烈建議**再把 `backups/` 資料夾
-> 定期複製一份到雲端（Google Drive 等）或隨身碟，才是真正安全。
+> 有了上面的雲端備份，就算整台電腦壞了，雲端還有一份，資料就安全了。
 
 ---
 

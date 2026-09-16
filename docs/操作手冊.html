@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>雨晴代購 · 網站操作手冊</title>
+<style>
+  :root{
+    --pink:#c58c9b; --pink-dark:#955f6e; --pink-soft:#fbf4f6;
+    --ink:#33292e; --muted:#7a6b71; --line:#efe6ea; --bg:#fcf9fa;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    line-height:1.85; font-size:17px;
+  }
+  header{
+    background:linear-gradient(135deg,#f7e8ec,#e7cdd6);
+    padding:40px 20px; text-align:center;
+  }
+  header h1{margin:0; font-size:28px; color:var(--pink-dark)}
+  header p{margin:8px 0 0; color:var(--muted)}
+  .wrap{max-width:760px; margin:0 auto; padding:20px 18px 80px}
+  .intro{
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:20px 22px; margin:24px 0;
+  }
+  .intro b{color:var(--pink-dark)}
+  h2{
+    margin:40px 0 4px; font-size:21px; color:var(--pink-dark);
+    display:flex; align-items:center; gap:10px;
+  }
+  h2 .num{
+    flex:none; width:32px; height:32px; border-radius:50%;
+    background:var(--pink); color:#fff; font-size:16px;
+    display:grid; place-items:center;
+  }
+  section{
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:6px 22px 18px; margin-top:12px;
+  }
+  ol,ul{padding-left:22px; margin:12px 0}
+  li{margin:7px 0}
+  .tip{
+    background:var(--pink-soft); border-left:4px solid var(--pink);
+    border-radius:10px; padding:12px 16px; margin:16px 0; color:var(--ink);
+  }
+  .tip b{color:var(--pink-dark)}
+  .path{
+    background:#f4eef1; border-radius:8px; padding:2px 8px;
+    font-weight:600; color:var(--pink-dark); white-space:nowrap;
+  }
+  .toc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 24px;margin:24px 0}
+  .toc a{color:var(--pink-dark); text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  .toc ol{columns:2; column-gap:28px}
+  @media(max-width:520px){ .toc ol{columns:1} body{font-size:16px} }
+  footer{text-align:center; color:var(--muted); padding:30px 20px; font-size:15px}
+</style>
+</head>
+<body>
+<header>
+  <h1>雨晴代購 · 網站操作手冊</h1>
+  <p>這本手冊帶您一步一步操作,放輕鬆跟著做就可以了 🌸</p>
+</header>
+
+<div class="wrap">
+
+  <div class="intro">
+    這個網站您主要會用到的,就是<b>後台</b>——也就是您管理訂單和商品的地方。<br>
+    客人在前台逛、下單;您在後台看到訂單、準備出貨。以下每一段都是一件事,想到哪件就翻到哪段。
+  </div>
+
+  <div class="toc">
+    <b>目錄</b>
+    <ol>
+      <li><a href="#s1">進入後台</a></li>
+      <li><a href="#s2">處理訂單與出貨</a></li>
+      <li><a href="#s3">匯出訂單清單</a></li>
+      <li><a href="#s4">新增商品</a></li>
+      <li><a href="#s5">修改商品</a></li>
+      <li><a href="#s6">一次匯入很多商品</a></li>
+      <li><a href="#s7">商品分類</a></li>
+      <li><a href="#s8">商品圖片</a></li>
+      <li><a href="#s9">客人與售後</a></li>
+      <li><a href="#s10">網站設定</a></li>
+      <li><a href="#s11">新增管理員</a></li>
+      <li><a href="#s12">官方 LINE 客服</a></li>
+      <li><a href="#s13">資料備份</a></li>
+    </ol>
+  </div>
+
+  <h2 id="s1"><span class="num">1</span>進入後台</h2>
+  <section>
+    <ol>
+      <li>打開瀏覽器,連到您的網站(<b>yuchingmakeup.com</b>)。</li>
+      <li>點右上角的「<b>登入</b>」。</li>
+      <li>輸入您的管理員 Email 和密碼,按登入。</li>
+      <li>登入後,右上角會多一個「<b>後台</b>」——點進去就是您的管理中心。</li>
+    </ol>
+    <div class="tip">後台首頁有好幾個方塊:訂單管理、商品管理、分類管理、網站設定…點進去就能操作。這本手冊接下來就是一個一個帶您。</div>
+  </section>
+
+  <h2 id="s2"><span class="num">2</span>處理訂單與出貨</h2>
+  <section>
+    <p>客人下單後,訂單會出現在 <span class="path">後台 → 訂單管理</span>。點任何一筆進去,就能看到買了什麼、客人選的取貨門市、電話。</p>
+    <p><b>訂單會經過這幾個階段,您按按鈕讓它前進:</b></p>
+    <ol>
+      <li><b>待確認</b> → 您看過、確定要接單,按「<b>確認訂單</b>」。</li>
+      <li><b>已確認</b> → 您把商品用 7-11 賣貨便寄出後,按「<b>標記已出貨</b>」。</li>
+      <li><b>已出貨</b> → 客人到門市取貨、付款、完成後,按「<b>完成訂單</b>」。</li>
+    </ol>
+    <div class="tip"><b>重要:實際的寄件是您自己做的。</b>網站幫您記下客人要寄到哪家 7-11,但真正把貨寄出去,是您到 7-11「賣貨便」的賣家系統建立寄件、把貨交給店員。寄出後,再回網站按「標記已出貨」就好。</div>
+    <p>如果客人臨時不要了,或有狀況,同一頁也有「取消訂單」「標記棄單/拒收」等按鈕,按下去前都會再問一次,不怕手滑。</p>
+  </section>
+
+  <h2 id="s3"><span class="num">3</span>匯出訂單清單</h2>
+  <section>
+    <p>在 <span class="path">後台 → 訂單管理</span> 右上角有「<b>⬇ 匯出 CSV</b>」。點一下會下載一個表格檔,裡面有所有訂單的收件人、電話、取貨門市、商品、金額。</p>
+    <div class="tip">這個檔可以用 Excel 打開,方便您一次整理要寄的貨、或留底對帳。</div>
+  </section>
+
+  <h2 id="s4"><span class="num">4</span>新增商品</h2>
+  <section>
+    <ol>
+      <li>到 <span class="path">後台 → 商品管理</span>,按右上角「<b>＋ 新增商品</b>」。</li>
+      <li>填商品名稱、選分類、填價格和庫存數量。</li>
+      <li>如果商品有不同款式(顏色、尺寸…),按「<b>＋ 新增規格類型</b>」,一種一種加進去,每種再填各自的價格和庫存。</li>
+      <li>下面可以寫商品介紹、上傳照片(可多張)。</li>
+      <li>按「<b>建立商品</b>」——商品就上架,客人馬上看得到。</li>
+    </ol>
+  </section>
+
+  <h2 id="s5"><span class="num">5</span>修改商品</h2>
+  <section>
+    <p>在 <span class="path">後台 → 商品管理</span> 找到商品,點右邊「<b>編輯</b>」。您可以改:</p>
+    <ul>
+      <li><b>價格、庫存</b>:直接改數字存檔。</li>
+      <li><b>上架狀態</b>:想暫時不賣,把狀態改成「已下架」,前台就看不到了(但訂單紀錄還留著);想再賣,改回「上架中」。</li>
+      <li><b>照片</b>:可以新增,或勾選舊照片旁的「刪除」把它移除。</li>
+    </ul>
+    <div class="tip">商品是用「下架」不是真的刪掉,這樣以前的訂單還查得到當時買的東西,對帳比較安心。</div>
+  </section>
+
+  <h2 id="s6"><span class="num">6</span>一次匯入很多商品</h2>
+  <section>
+    <p>要一次上架很多商品時,不用一個一個打。到 <span class="path">後台 → 商品管理 → 批次匯入</span>:</p>
+    <ol>
+      <li>先按「<b>下載 Excel 範本</b>」。</li>
+      <li>在 Excel 裡一列填一個商品(名稱、分類、售價、庫存…)。</li>
+      <li>回網站把填好的 Excel 上傳。若要一起放照片,把照片檔也一起選,系統會用檔名幫您對上。</li>
+      <li>按開始匯入,會告訴您成功幾筆、哪些需要修正。</li>
+    </ol>
+  </section>
+
+  <h2 id="s7"><span class="num">7</span>商品分類</h2>
+  <section>
+    <p>在 <span class="path">後台 → 分類管理</span> 可以:</p>
+    <ul>
+      <li><b>新增分類</b>:填圖示(emoji)和名稱,按新增。</li>
+      <li><b>改名或調順序</b>:直接改欄位,按儲存。</li>
+      <li><b>刪除</b>:只有「沒有商品」的分類才能刪(避免不小心把有商品的分類刪掉)。</li>
+    </ul>
+  </section>
+
+  <h2 id="s8"><span class="num">8</span>商品圖片</h2>
+  <section>
+    <p>您上傳的商品照片,系統會自動幫您存到雲端相簿,網站讀取更快,不用您操心。</p>
+    <div class="tip">如果哪天需要,<span class="path">後台 → 圖片雲端化</span> 有一個「一鍵搬到雲端」的按鈕,平常用不到,放著就好。</div>
+  </section>
+
+  <h2 id="s9"><span class="num">9</span>客人與售後</h2>
+  <section>
+    <ul>
+      <li><b>客人取消訂單</b>:客人可以在還沒出貨前自己取消,庫存會自動加回來。</li>
+      <li><b>退換貨</b>:客人在訂單裡送出申請後,您會在該訂單看到原因,再私下跟客人聯繫處理。</li>
+      <li><b>客人名單與提醒</b>:<span class="path">後台 → 客戶風險</span> 會依每位客人的完成、取消、未取貨次數,幫您做個參考分數,方便您留意。</li>
+      <li><b>暫停某位客人下單</b>:在客人明細頁可以把對方設為「封鎖下單」,之後對方就無法結帳;想恢復按「正常」即可。</li>
+    </ul>
+  </section>
+
+  <h2 id="s10"><span class="num">10</span>網站設定</h2>
+  <section>
+    <p>到 <span class="path">後台 → 網站設定</span>,這些都能自己改,存檔後全站馬上更新:</p>
+    <ul>
+      <li>店名、標語</li>
+      <li>最上方那條促銷文字</li>
+      <li><b>運費</b>、滿多少免運</li>
+      <li>官方 LINE、聯絡 Email</li>
+      <li>商品旁要不要顯示「已售 N」或「僅剩 N 件」</li>
+    </ul>
+  </section>
+
+  <h2 id="s11"><span class="num">11</span>新增管理員</h2>
+  <section>
+    <p>想讓別人也能幫忙管理後台:</p>
+    <ol>
+      <li>請對方先到網站的「<b>註冊會員</b>」註冊一個帳號。</li>
+      <li>您到 <span class="path">後台 → 管理員管理</span>,輸入對方的 Email,按「設為管理員」。</li>
+    </ol>
+    <div class="tip">同一頁也能取消別人的管理員權限。系統會保護「最後一位管理員」不被移除,不用擔心把自己鎖在外面。</div>
+  </section>
+
+  <h2 id="s12"><span class="num">12</span>官方 LINE 客服</h2>
+  <section>
+    <p>網站上「加入 LINE」「用 LINE 詢問此商品」這些按鈕,客人點一下就會直接開啟 LINE 找到您,不用自己搜尋。</p>
+    <p>客人針對某商品詢問時,訊息會自動帶上商品名稱,您一看就知道他問的是哪一件。平常就用您的官方 LINE 回覆客人即可。</p>
+  </section>
+
+  <h2 id="s13"><span class="num">13</span>資料備份</h2>
+  <section>
+    <p>訂單和客人的資料會定期自動備份,並存一份到雲端,您不用特別做什麼。</p>
+    <div class="tip">這部分是由架設網站的人在電腦上設定好的自動作業。您只要知道「資料有在自動備份、很安全」就可以了。</div>
+  </section>
+
+</div>
+
+<footer>
+  遇到不確定的地方,先別急,大部分按鈕按下去前都會再問一次確認。<br>
+  真的卡住,就把畫面拍下來、記下您想做什麼,請幫您架站的人協助。🌸
+</footer>
+
+</body>
+</html>
