@@ -66,3 +66,8 @@ export async function loginAction(
 export async function logoutAction() {
   await signOut({ redirectTo: "/" });
 }
+
+// 用 LINE 登入（導向 LINE 授權頁）
+export async function lineSignInAction() {
+  await signIn("line", { redirectTo: "/" });
+}

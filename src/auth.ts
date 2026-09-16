@@ -1,8 +1,18 @@
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import LINE from "next-auth/providers/line";
 import { testUsers } from "@/lib/test-users";
 import { findUserByEmail } from "@/lib/user-store";
 import { verifyPassword } from "@/lib/password";
+
+// LINE 登入：只有在 .env 有填金鑰時才啟用（沒填就只有帳密/Email 登入，不影響現況）
+const lineClientId = process.env.AUTH_LINE_ID;
+const lineClientSecret = process.env.AUTH_LINE_SECRET;
+export const lineLoginEnabled = Boolean(lineClientId && lineClientSecret);
+
+const oauthProviders: NextAuthConfig["providers"] = lineLoginEnabled
+  ? [LINE({ clientId: lineClientId, clientSecret: lineClientSecret })]
+  : [];
 
 // 帳密測試登入 + JWT session。
 // JWT 策略是刻意選的：之後加 Google/LINE + Prisma adapter 時仍可沿用，
@@ -56,11 +66,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return null;
       },
     }),
+    ...oauthProviders,
   ],
   callbacks: {
-    // 把 role 塞進 token
+    // 把 role 塞進 token（LINE 等 OAuth 登入者沒有 role，一律當一般會員）
     jwt: ({ token, user }) => {
-      if (user) token.role = user.role;
+      if (user) {
+        token.role = (user as { role?: "CUSTOMER" | "ADMIN" }).role ?? "CUSTOMER";
+      }
       return token;
     },
     // 再從 token 帶到 session，讓 server 端可讀 session.user.id / role

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { auth, lineLoginEnabled } from "@/auth";
+import { lineSignInAction } from "@/lib/auth-actions";
 import { getSettings } from "@/lib/settings-store";
 import { LoginForm } from "./login-form";
 
@@ -26,6 +27,22 @@ export default async function LoginPage() {
         <div className="mt-6">
           <LoginForm />
         </div>
+
+        {/* LINE 登入（.env 有填金鑰才會出現） */}
+        {lineLoginEnabled && (
+          <form action={lineSignInAction} className="mt-3">
+            <button
+              type="submit"
+              className="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#06C755" }}
+            >
+              <span className="grid h-5 w-5 place-items-center rounded bg-white text-[11px] font-bold text-[#06C755]">
+                L
+              </span>
+              使用 LINE 登入
+            </button>
+          </form>
+        )}
 
         <p className="mt-4 text-center text-sm text-ink/60">
           還沒有帳號？{" "}
