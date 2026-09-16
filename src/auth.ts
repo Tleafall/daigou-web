@@ -8,6 +8,9 @@ import { verifyPassword } from "@/lib/password";
 // JWT 策略是刻意選的：之後加 Google/LINE + Prisma adapter 時仍可沿用，
 // 且 Credentials provider 只能搭配 JWT。
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  // 正式上線走 Cloudflare Tunnel + 自訂網域（反向代理）時，信任轉發過來的 Host，
+  // 否則登入會因為 host 不符被擋。
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [

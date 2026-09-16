@@ -112,32 +112,79 @@ npm install
 
 ---
 
-## 7. 對外上線：Cloudflare Tunnel（從家用電腦）
+## 7. 對外上線：Cloudflare Tunnel → 網域 yuchingmakeup.com
 
 讓外面的人連得到家裡電腦跑的網站，免固定 IP、免開防火牆、自帶 HTTPS。
+**前提**：這台電腦已照第 1～6 步把網站架好、也建好正式管理員；網域 `yuchingmakeup.com`
+已在 Cloudflare 帳號底下（買的時候就自動歸戶）。以下都在**這台要當主機的電腦**上做。
 
-1. 註冊 Cloudflare 帳號（免費）：https://dash.cloudflare.com
-2. 安裝 cloudflared：https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/
-   （Windows 可用 `winget install --id Cloudflare.cloudflared`）
-3. 登入並授權：
-   ```bash
-   cloudflared tunnel login
-   ```
-4. 建立 tunnel：
-   ```bash
-   cloudflared tunnel create daigou
-   ```
-5. 先用正式版把網站跑起來（步驟 6 的 build + start，聽 3000 埠）。
-6. 快速測試（會給一個臨時網址）：
-   ```bash
-   cloudflared tunnel --url http://localhost:3000
-   ```
-7. 要綁自己的網域、開機自動啟動：照 Cloudflare 文件設定 `config.yml` 的
-   `ingress` 指到 `http://localhost:3000`，再 `cloudflared tunnel route dns daigou 你的網域`，
-   並把 cloudflared 設成 Windows 服務常駐。
+> ⚠️ 主機要 **24 小時開機**、且**同時跑著兩個東西**：網站(`npm run start`) + cloudflared。
+> 兩個都設成開機自動啟動，才不用每次手動開。
 
-> 網站要一直開著才連得到，所以家用電腦要維持開機＋跑著 `npm run start` 和 cloudflared。
-> 之後嫌麻煩可改租 VPS，資料用 `pg_dump` 搬過去即可。
+**步驟 A — 先把正式版網站跑起來（聽 3000 埠）**
+```bash
+npm run build
+npm run start
+```
+（先確認 http://localhost:3000 打得開、能登入後台，再往下。）
+
+**步驟 B — 安裝 cloudflared**
+```bash
+winget install --id Cloudflare.cloudflared
+```
+（裝完關掉再開一個新的終端機，讓 `cloudflared` 指令生效。）
+
+**步驟 C — 登入並授權（會開瀏覽器）**
+```bash
+cloudflared tunnel login
+```
+瀏覽器會跳出來，選 `yuchingmakeup.com` 這個網域授權。
+
+**步驟 D — 建立 tunnel**
+```bash
+cloudflared tunnel create yuqing
+```
+記下印出來的 **Tunnel UUID**（一長串），以及憑證檔路徑
+（通常在 `C:\Users\你的帳號\.cloudflared\<UUID>.json`）。
+
+**步驟 E — 建立設定檔** `C:\Users\你的帳號\.cloudflared\config.yml`，內容：
+```yaml
+tunnel: <上一步的 UUID>
+credentials-file: C:\Users\你的帳號\.cloudflared\<UUID>.json
+
+ingress:
+  - hostname: yuchingmakeup.com
+    service: http://localhost:3000
+  - hostname: www.yuchingmakeup.com
+    service: http://localhost:3000
+  - service: http_status:404
+```
+
+**步驟 F — 把網域指到這個 tunnel**
+```bash
+cloudflared tunnel route dns yuqing yuchingmakeup.com
+cloudflared tunnel route dns yuqing www.yuchingmakeup.com
+```
+
+**步驟 G — 先手動跑起來測試**
+```bash
+cloudflared tunnel run yuqing
+```
+然後用手機／別台電腦開 `https://yuchingmakeup.com`，能看到網站就成功了。
+
+**步驟 H — 設成開機自動啟動（常駐）**
+- Tunnel：`cloudflared service install`（裝成 Windows 服務，開機自動跑，讀上面的 config.yml）。
+- 網站：讓 `npm run start` 也開機自動跑。最簡單一種：
+  ```bash
+  npm i -g pm2 pm2-windows-startup
+  pm2 start "npm run start" --name daigou
+  pm2 save
+  pm2-startup install
+  ```
+  （或用 Windows「工作排程器」在登入時執行一個跑 `npm run start` 的 .bat。）
+
+> 之後想省事、不想一直開電腦，可改租 VPS：把這套裝上去、資料用 `pg_dump` 搬過去，
+> 網域一樣指過去即可（詳見第 9 節的方向）。
 
 ---
 
