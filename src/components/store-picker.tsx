@@ -94,7 +94,7 @@ export function StorePicker({
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          placeholder="輸入門市店名、地址或門市代號搜尋"
+          placeholder="搜尋門市店名 / 地址 / 代號（可用空格縮小，如：台中 逢甲）"
           autoComplete="off"
         />
         {keyword && (

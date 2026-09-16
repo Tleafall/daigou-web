@@ -24,22 +24,32 @@ export function getStoreById(id: string): Store711 | undefined {
   return STORES.find((s) => s.id === key);
 }
 
-// 依關鍵字搜尋門市：可比對店名 / 地址 / 門市代號 / 縣市鄉鎮
-// 排序：門市代號完全相符 > 店名開頭相符 > 店名包含 > 其他（地址等）
+// 依關鍵字搜尋門市：可比對店名 / 地址 / 門市代號 / 縣市鄉鎮。
+// 支援用「空格」分開多個關鍵字縮小範圍（例：「台中 逢甲」＝台中且逢甲都要符合）。
+// 排序：門市代號完全相符 > 店名相符 > 其他（地址等）。
 export function searchStores(keyword: string, limit = 20): Store711[] {
   const q = normalize(keyword);
   if (!q) return [];
+  const tokens = q.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return [];
 
   const scored: { s: Store711; score: number }[] = [];
   for (const s of STORES) {
-    let score = 0;
+    const haystack = `${s.id} ${s.name} ${s.city}${s.town} ${s.addr}`;
+    // 每個關鍵字都要出現（多字詞用空格分開可精準縮小）
+    if (!tokens.every((t) => haystack.includes(t))) continue;
+
+    // 排序分數：以第一個關鍵字對「門市代號 / 店名」的貼近度為主
+    const t0 = tokens[0];
+    let score = 10;
     if (s.id === q) score = 100;
-    else if (s.name.startsWith(q)) score = 80;
-    else if (s.name.includes(q)) score = 60;
-    else if (s.id.includes(q)) score = 50;
-    else if (`${s.city}${s.town}`.includes(q)) score = 30;
-    else if (s.addr.includes(q)) score = 20;
-    if (score > 0) scored.push({ s, score });
+    else if (s.name === t0) score = 90;
+    else if (s.name.startsWith(t0)) score = 80;
+    else if (s.name.includes(t0)) score = 60;
+    else if (s.id.includes(t0)) score = 50;
+    else if (`${s.city}${s.town}`.includes(t0)) score = 30;
+    else if (s.addr.includes(t0)) score = 20;
+    scored.push({ s, score });
   }
 
   scored.sort((a, b) => b.score - a.score || a.s.name.localeCompare(b.s.name, "zh-TW"));
