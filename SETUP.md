@@ -188,6 +188,37 @@ cloudflared tunnel run yuqing
 
 ---
 
+## 7.5 資料備份（強烈建議設定）
+
+家用電腦硬碟會壞，正式營運一定要備份訂單/客戶資料。
+
+**手動備份一次：**
+```bash
+npm run db:backup
+```
+會在專案的 `backups/` 產生一個 `daigou-日期.sql`，自動保留最近 14 份。
+（若出現找不到 pg_dump，設環境變數 `PG_DUMP` 指到
+`C:\Program Files\PostgreSQL\17\bin\pg_dump.exe`。）
+
+**設成每天自動備份（Windows 工作排程器）：**
+1. 開「工作排程器」→ 建立基本工作 → 名稱「daigou 每日備份」。
+2. 觸發：每天，選一個離峰時間（如凌晨 3:00）。
+3. 動作：啟動程式
+   - 程式：`C:\Program Files\nodejs\node.exe`
+   - 引數：`scripts/backup-db.mjs`
+   - 開始位置：專案資料夾（`...\daigou-web`）
+4. 完成。之後每天會自動存一份。
+
+**還原備份（電腦換機或資料壞掉時）：**
+```bash
+psql -U postgres -d daigou -f backups\daigou-那個檔.sql
+```
+
+> ⚠️ 備份檔存在同一台電腦，若整台壞了也會一起沒。**強烈建議**再把 `backups/` 資料夾
+> 定期複製一份到雲端（Google Drive 等）或隨身碟，才是真正安全。
+
+---
+
 ## 8. 常用指令速查
 
 | 指令 | 用途 |
@@ -197,6 +228,7 @@ cloudflared tunnel run yuqing
 | `npm run db:push` | 把 schema 同步到資料庫 |
 | `npm run db:seed` | 重置示範資料（分類/商品/訂單） |
 | `npm run db:studio` | 開視覺化資料庫管理介面 |
+| `npm run db:backup` | 備份資料庫到 backups/（保留最近 14 份） |
 | `npm run create-admin -- <email> <密碼> [姓名]` | 建立/升級正式管理員帳號 |
 | `npm run stores:fetch` | 重新抓全台 7-11 門市清單 |
 

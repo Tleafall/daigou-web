@@ -47,3 +47,6 @@ next-env.d.ts
 /.agents/
 /.windsurf/
 /.claude/
+
+# 資料庫備份（本機，不進版控）
+/backups

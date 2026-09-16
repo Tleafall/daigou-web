@@ -11,6 +11,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx scripts/seed-db.ts",
     "db:studio": "prisma studio",
+    "db:backup": "node scripts/backup-db.mjs",
     "create-admin": "tsx scripts/create-admin.ts",
     "stores:fetch": "node scripts/fetch-711-stores.mjs"
   },
