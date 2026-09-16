@@ -16,6 +16,7 @@ export default async function AdminPage() {
     { title: "分類管理", desc: "分類與排序", href: "/admin/categories" },
     { title: "圖片雲端化", desc: "把商品圖片搬到雲端圖床（Cloudinary）", href: "/admin/media" },
     { title: "網站設定", desc: "店名、促銷字、運費、LINE、聯絡方式", href: "/admin/settings" },
+    { title: "管理員管理", desc: "檢視管理員、授權或取消他人管理員權限", href: "/admin/admins" },
   ];
 
   return (
