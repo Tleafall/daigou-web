@@ -5,6 +5,7 @@ import { categoryName } from "@/lib/category-store";
 import { getActiveProduct } from "@/lib/product-store";
 import { productCountLabel } from "@/lib/store";
 import { ProductView } from "@/components/product-view";
+import { ViewTracker } from "@/components/view-tracker";
 
 export async function generateMetadata({
   params,
@@ -36,6 +37,7 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
+      <ViewTracker slug={product.slug} />
       {/* 麵包屑 */}
       <nav className="mb-4 text-sm text-ink/50">
         <Link href="/" className="hover:text-brand">首頁</Link>
@@ -54,7 +56,7 @@ export default async function ProductPage({
         <h2 className="mb-3 flex items-center gap-2 border-b border-line pb-2 text-lg font-bold">
           <span className="h-5 w-1 rounded-full bg-brand" />商品敘述
         </h2>
-        <p className="whitespace-pre-line leading-7 text-ink/80">
+        <p className="whitespace-pre-line text-base leading-8 text-ink/80 sm:text-lg">
           {product.description}
         </p>
       </section>

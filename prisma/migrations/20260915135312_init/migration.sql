@@ -95,6 +95,7 @@ CREATE TABLE "Product" (
     "optionGroups" JSONB NOT NULL,
     "variants" JSONB NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+    "views" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

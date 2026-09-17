@@ -35,6 +35,7 @@ type ProductRow = {
   optionGroups: Prisma.JsonValue;
   variants: Prisma.JsonValue;
   status: string;
+  views: number;
 };
 
 // DB 列 → 應用型別（id 對外沿用 slug，全站以 slug 為商品識別）
@@ -51,6 +52,7 @@ function toProduct(r: ProductRow): Product {
     optionGroups: r.optionGroups as unknown as OptionGroup[],
     variants: r.variants as unknown as Variant[],
     status: r.status as ProductStatus,
+    views: r.views,
   };
 }
 
@@ -91,6 +93,15 @@ export async function getVariant(
     if (variant) return { product: p, variant };
   }
   return undefined;
+}
+
+// 商品頁被看一次就 +1（找不到商品就安靜略過，不影響頁面）
+export async function incrementProductViews(slug: string): Promise<void> {
+  try {
+    await prisma.product.update({ where: { slug }, data: { views: { increment: 1 } } });
+  } catch {
+    /* 商品不存在等狀況：忽略 */
+  }
 }
 
 // 變體 id 形如 `${slug}-v${n}`，可反推所屬商品 slug（slug 本身不含 -v 數字結尾）

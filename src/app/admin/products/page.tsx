@@ -80,6 +80,7 @@ export default async function AdminProductsPage({
               <th className="px-4 py-3">價格</th>
               <th className="px-4 py-3">規格</th>
               <th className="px-4 py-3">總庫存</th>
+              <th className="px-4 py-3">瀏覽</th>
               <th className="px-4 py-3">狀態</th>
               <th className="px-4 py-3"></th>
             </tr>
@@ -108,6 +109,7 @@ export default async function AdminProductsPage({
                   <td className={`px-4 py-3 ${stock === 0 ? "text-red-500" : "text-ink/60"}`}>
                     {stock}
                   </td>
+                  <td className="px-4 py-3 text-ink/60">{p.views.toLocaleString("zh-TW")}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${sm.cls}`}>
                       {sm.label}

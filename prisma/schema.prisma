@@ -115,6 +115,7 @@ model Product {
   optionGroups Json // OptionGroup[]
   variants     Json // Variant[]（id / options / price / stock）
   status       String   @default("ACTIVE") // ACTIVE / ARCHIVED / DRAFT
+  views        Int      @default(0) // 商品頁被瀏覽次數
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

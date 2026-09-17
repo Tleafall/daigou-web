@@ -37,6 +37,7 @@ export type Product = {
   optionGroups: OptionGroup[];
   variants: Variant[];
   status: ProductStatus;
+  views: number; // 商品頁瀏覽次數
 };
 
 export const seedCategories: Category[] = [
@@ -116,6 +117,7 @@ export const seedProducts: Product[] = raw.map((item, i) => {
     optionGroups: groups,
     variants,
     status: "ACTIVE",
+    views: 0,
   };
 });
 
