@@ -5,6 +5,9 @@ import { type ProductStatus } from "@/lib/mock-data";
 import { listCategories } from "@/lib/category-store";
 import { listAllProducts } from "@/lib/product-store";
 import { formatTWD } from "@/lib/format";
+import { AdminNotice } from "@/components/admin-notice";
+import { DeleteProductButton } from "@/components/delete-product-button";
+import { toggleProductVisibilityAction } from "@/lib/product-actions";
 
 export const metadata: Metadata = { title: "商品管理" };
 
@@ -14,7 +17,16 @@ const statusMeta: Record<ProductStatus, { label: string; cls: string }> = {
   DRAFT: { label: "草稿", cls: "bg-amber-100 text-amber-700" },
 };
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    created?: string;
+    updated?: string;
+    deleted?: string;
+    title?: string;
+  }>;
+}) {
   await requireAdmin();
   const [products, categories] = await Promise.all([
     listAllProducts(),
@@ -22,6 +34,15 @@ export default async function AdminProductsPage() {
   ]);
   const catName = (slug: string) =>
     categories.find((c) => c.slug === slug)?.name ?? "商品";
+  const { created, updated, deleted, title: noticeTitle } = await searchParams;
+  const tt = noticeTitle ? `「${noticeTitle}」` : "";
+  const notice = created
+    ? `商品${tt}新增成功`
+    : updated
+      ? `商品${tt}已儲存`
+      : deleted
+        ? `商品${tt}已刪除`
+        : null;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -30,6 +51,8 @@ export default async function AdminProductsPage() {
         <span className="mx-2">/</span>
         <span className="text-ink/80">商品管理</span>
       </nav>
+
+      {notice && <AdminNotice message={notice} />}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-bold">商品管理</h1>
         <div className="flex gap-2">
@@ -69,7 +92,14 @@ export default async function AdminProductsPage() {
               const sm = statusMeta[p.status];
               return (
                 <tr key={p.id} className="border-b border-line last:border-0 hover:bg-muted/50">
-                  <td className="px-4 py-3">{p.title}</td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/products/${p.slug}`}
+                      className="font-medium text-ink hover:text-brand hover:underline"
+                    >
+                      {p.title}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3 text-ink/60">{catName(p.categorySlug)}</td>
                   <td className="px-4 py-3">
                     {min === max ? formatTWD(min) : `${formatTWD(min)}~${formatTWD(max)}`}
@@ -84,12 +114,24 @@ export default async function AdminProductsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/products/${p.slug}/edit`}
-                      className="text-brand hover:underline"
-                    >
-                      編輯
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/admin/products/${p.slug}/edit`}
+                        className="text-brand hover:underline"
+                      >
+                        編輯
+                      </Link>
+                      {p.status !== "DRAFT" && (
+                        <form action={toggleProductVisibilityAction}>
+                          <input type="hidden" name="slug" value={p.slug} />
+                          <input type="hidden" name="current" value={p.status} />
+                          <button className="text-ink/50 hover:text-brand">
+                            {p.status === "ACTIVE" ? "隱藏" : "顯示"}
+                          </button>
+                        </form>
+                      )}
+                      <DeleteProductButton slug={p.slug} title={p.title} />
+                    </div>
                   </td>
                 </tr>
               );

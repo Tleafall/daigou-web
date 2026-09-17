@@ -5,6 +5,7 @@ import { gradientPresets } from "@/lib/mock-data";
 import { listCategories } from "@/lib/category-store";
 import { createProductAction } from "@/lib/product-actions";
 import { ProductVariantBuilder } from "@/components/product-variant-builder";
+import { ProductImagePicker } from "@/components/product-image-picker";
 
 export const metadata: Metadata = { title: "新增商品" };
 
@@ -60,16 +61,10 @@ export default async function NewProductPage({
           <textarea name="description" className={`${inputClass} min-h-24`} placeholder="商品介紹、材質、代購說明…" />
         </label>
 
-        <label className="text-sm">
-          <span className="mb-1 block text-ink/70">商品圖片（選填，可多選，每張 ≤2MB、最多 6 張）</span>
-          <input
-            type="file"
-            name="images"
-            accept="image/*"
-            multiple
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
-          />
-        </label>
+        <div className="text-sm">
+          <span className="mb-1 block text-ink/70">商品圖片（選填，最多 6 張）</span>
+          <ProductImagePicker />
+        </div>
 
         <fieldset className="text-sm">
           <span className="mb-2 block text-ink/70">封面配色（未上傳圖片時的底色）</span>
@@ -84,7 +79,7 @@ export default async function NewProductPage({
               </label>
             ))}
           </div>
-          <p className="mt-2 text-xs text-ink/40">（原型無圖片上傳，先用配色當封面）</p>
+          <p className="mt-2 text-xs text-ink/40">（沒有上傳圖片時，用這個配色當封面）</p>
         </fieldset>
 
         <div className="flex gap-2">

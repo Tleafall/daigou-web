@@ -5,22 +5,49 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { listCategories } from "@/lib/category-store";
 import { getProduct } from "@/lib/product-store";
 import { updateProductAction } from "@/lib/product-actions";
+import { ProductVariantBuilder } from "@/components/product-variant-builder";
+import { ProductImageManager } from "@/components/product-image-manager";
 
 export const metadata: Metadata = { title: "編輯商品" };
 
 export default async function EditProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   await requireAdmin();
   const { slug } = await params;
+  const { error } = await searchParams;
   const product = await getProduct(slug);
   if (!product) notFound();
 
   const categories = await listCategories();
   const inputClass =
     "w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand";
+
+  // 規格建構器的預填值（key 與建構器的 comboKey 一致：鍵排序後 `名稱:值` 以 | 連接）
+  const cellKey = (o: Record<string, string>) =>
+    Object.keys(o)
+      .sort()
+      .map((k) => `${k}:${o[k]}`)
+      .join("|");
+  const initialCells: Record<string, { price: string; stock: string }> = {};
+  for (const v of product.variants) {
+    initialCells[cellKey(v.options)] = {
+      price: String(v.price),
+      stock: String(v.stock),
+    };
+  }
+  const only = product.variants[0];
+  const initialSingle =
+    product.optionGroups.length === 0 && only
+      ? { price: String(only.price), stock: String(only.stock) }
+      : { price: "", stock: "0" };
+  const optionValues = [
+    ...new Set(product.optionGroups.flatMap((g) => g.values)),
+  ];
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -31,9 +58,28 @@ export default async function EditProductPage({
       </nav>
       <h1 className="mb-6 text-xl font-bold">編輯商品</h1>
 
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          請確認已填商品名稱、分類，且至少一個規格有設定售價。
+        </div>
+      )}
+
+      {/* 圖片：即時管理（新增即上傳、可排序/刪除/設定對應規格，不用按下方「儲存變更」） */}
+      <div className="mb-4 rounded-xl border border-line bg-white p-5">
+        <div className="mb-1 text-sm font-medium text-ink/70">商品圖片</div>
+        <p className="mb-3 text-xs text-ink/40">
+          這一區是「即時儲存」：新增、刪除、調整順序、設定對應規格都會立刻生效，不需要按下方的「儲存變更」。
+          第一張為封面。
+        </p>
+        <ProductImageManager
+          slug={product.slug}
+          images={product.images}
+          optionValues={optionValues}
+        />
+      </div>
+
       <form action={updateProductAction} className="flex flex-col gap-4 rounded-xl border border-line bg-white p-5">
         <input type="hidden" name="slug" value={product.slug} />
-        <input type="hidden" name="variantIds" value={product.variants.map((v) => v.id).join(",")} />
 
         <label className="text-sm">
           <span className="mb-1 block text-ink/70">商品名稱 *</span>
@@ -53,7 +99,7 @@ export default async function EditProductPage({
             <span className="mb-1 block text-ink/70">上架狀態</span>
             <select name="status" defaultValue={product.status} className={inputClass}>
               <option value="ACTIVE">上架中</option>
-              <option value="ARCHIVED">已下架</option>
+              <option value="ARCHIVED">已下架（隱藏）</option>
               <option value="DRAFT">草稿</option>
             </select>
           </label>
@@ -64,85 +110,17 @@ export default async function EditProductPage({
           <textarea name="description" defaultValue={product.description} className={`${inputClass} min-h-24`} />
         </label>
 
-        {/* 商品圖片 */}
+        {/* 規格與定價（可新增/移除/修改規格與選項） */}
         <div className="text-sm">
-          <span className="mb-1 block text-ink/70">商品圖片</span>
-          {product.images.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-3">
-              {product.images.map((img, i) => (
-                <div key={i} className="w-24">
-                  <div className="relative h-24 w-24 overflow-hidden rounded-lg ring-1 ring-line">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt="" className="h-full w-full object-cover" />
-                    {i === 0 && (
-                      <span className="absolute left-1 top-1 rounded bg-brand px-1 text-[10px] text-white">
-                        封面
-                      </span>
-                    )}
-                  </div>
-                  <input
-                    name={`tag_${i}`}
-                    defaultValue={img.tag ?? ""}
-                    placeholder="對應規格"
-                    className="mt-1 w-24 rounded border border-line px-1.5 py-1 text-xs outline-none focus:border-brand"
-                  />
-                  <label className="mt-1 flex items-center gap-1 text-xs text-ink/50">
-                    <input type="checkbox" name="removeIndex" value={i} /> 刪除
-                  </label>
-                </div>
-              ))}
-            </div>
-          )}
-          <input
-            type="file"
-            name="images"
-            accept="image/*"
-            multiple
-            className="w-full rounded-lg border border-line px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-1 file:text-white"
+          <span className="mb-1 block text-ink/70">規格與定價 *</span>
+          <ProductVariantBuilder
+            initialGroups={product.optionGroups}
+            initialCells={initialCells}
+            initialSingle={initialSingle}
           />
-          <p className="mt-1 text-xs text-ink/40">
-            新選的圖會加在後面（第一張為封面）；勾選「刪除」可移除既有圖。每張 ≤2MB。
-            <br />
-            「對應規格」填規格選項（如 <span className="text-ink/60">紅色</span>），顧客選到該規格時圖庫會自動跳到這張。
+          <p className="mt-2 text-xs text-ink/40">
+            可調整規格類型、選項、售價與庫存。改動後按「儲存變更」生效；選項相同的規格會保留原庫存。
           </p>
-        </div>
-
-        {/* 規格價格 / 庫存 */}
-        <div className="text-sm">
-          <span className="mb-2 block text-ink/70">規格價格與庫存</span>
-          <div className="flex flex-col gap-2">
-            {product.variants.map((v) => {
-              const label =
-                Object.entries(v.options)
-                  .map(([k, val]) => `${k}：${val}`)
-                  .join("、") || "預設規格";
-              return (
-                <div key={v.id} className="flex items-center gap-3 rounded-lg border border-line px-3 py-2">
-                  <span className="flex-1 text-ink/70">{label}</span>
-                  <label className="flex items-center gap-1">
-                    <span className="text-xs text-ink/50">價</span>
-                    <input
-                      name={`price_${v.id}`}
-                      type="number"
-                      min="0"
-                      defaultValue={v.price}
-                      className="w-24 rounded border border-line px-2 py-1 text-sm outline-none focus:border-brand"
-                    />
-                  </label>
-                  <label className="flex items-center gap-1">
-                    <span className="text-xs text-ink/50">庫存</span>
-                    <input
-                      name={`stock_${v.id}`}
-                      type="number"
-                      min="0"
-                      defaultValue={v.stock}
-                      className="w-20 rounded border border-line px-2 py-1 text-sm outline-none focus:border-brand"
-                    />
-                  </label>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
         <div className="flex gap-2">

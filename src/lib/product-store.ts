@@ -177,37 +177,58 @@ export type UpdateProductInput = {
   description: string;
   categorySlug: string;
   status: ProductStatus;
-  variants: { id: string; price: number; stock: number }[];
-  images: ProductImage[]; // 更新後的完整圖片陣列（含 tag）
+  optionGroups: OptionGroup[];
+  // 完整的新規格集合（可新增/移除/改選項）；沿用選項相同者的既有 id 與庫存
+  variants: { options: Record<string, string>; price: number; stock: number }[];
 };
+
+// 用排序後的選項組成簽章，讓「同一組選項」不論鍵順序都對得起來
+function optionsSig(options: Record<string, string>): string {
+  return Object.keys(options)
+    .sort()
+    .map((k) => `${k}=${options[k]}`)
+    .join("|");
+}
 
 export async function updateProduct(
   slug: string,
   input: UpdateProductInput,
 ): Promise<boolean> {
-  // 同樣鎖住該商品那一列，避免後台改庫存與客人下單扣庫存同時發生時互相蓋掉
+  if (input.variants.length === 0) return false;
+  // 鎖住該商品那一列，避免後台改規格與客人下單扣庫存同時發生時互相蓋掉
   return prisma.$transaction(async (tx) => {
     const rows = await tx.$queryRaw<{ variants: Variant[] }[]>`
       SELECT variants FROM "Product" WHERE slug = ${slug} FOR UPDATE
     `;
     if (rows.length === 0) return false;
-    const variants = rows[0].variants;
-    const movements: {
-      variantId: string;
-      optionLabel: string;
-      delta: number;
-    }[] = [];
-    for (const vi of input.variants) {
-      const v = variants.find((x) => x.id === vi.id);
-      if (v) {
-        v.price = vi.price;
-        if (vi.stock !== v.stock) {
-          const delta = vi.stock - v.stock;
-          v.stock = vi.stock;
-          movements.push({ variantId: v.id, optionLabel: variantOptionLabel(v), delta });
-        }
-      }
+    const existing = rows[0].variants;
+    const existingBySig = new Map(existing.map((v) => [optionsSig(v.options), v]));
+    // 目前最大的 -vN 流水號，供新規格編號（保持 `${slug}-v\d+` 格式，庫存調整才反查得到 slug）
+    let maxN = 0;
+    for (const v of existing) {
+      const m = v.id.match(/-v(\d+)$/);
+      if (m) maxN = Math.max(maxN, Number(m[1]));
     }
+
+    const movements: { variantId: string; optionLabel: string; delta: number }[] = [];
+    const nextVariants: Variant[] = input.variants.map((vi) => {
+      const prev = existingBySig.get(optionsSig(vi.options));
+      if (prev) {
+        // 沿用既有 id；庫存有變就記一筆異動
+        if (vi.stock !== prev.stock) {
+          movements.push({
+            variantId: prev.id,
+            optionLabel: variantOptionLabel({ ...prev, options: vi.options }),
+            delta: vi.stock - prev.stock,
+          });
+        }
+        return { id: prev.id, options: vi.options, price: vi.price, stock: vi.stock };
+      }
+      // 新規格：給新的流水號
+      const id = `${slug}-v${++maxN}`;
+      return { id, options: vi.options, price: vi.price, stock: vi.stock };
+    });
+
     await tx.product.update({
       where: { slug },
       data: {
@@ -215,9 +236,9 @@ export async function updateProduct(
         description: input.description,
         categorySlug: input.categorySlug,
         status: input.status,
-        images: json(input.images),
-        variants: json(variants),
-        price: Math.min(...variants.map((v) => v.price)),
+        optionGroups: json(input.optionGroups),
+        variants: json(nextVariants),
+        price: Math.min(...nextVariants.map((v) => v.price)),
       },
     });
     for (const m of movements) {
@@ -243,6 +264,29 @@ export async function setProductStatus(
 ): Promise<boolean> {
   try {
     await prisma.product.update({ where: { slug }, data: { status } });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// 只更新商品圖片陣列（供編輯頁的即時圖片管理：新增/刪除/排序/規格對應）。
+export async function updateProductImages(
+  slug: string,
+  images: ProductImage[],
+): Promise<boolean> {
+  try {
+    await prisma.product.update({ where: { slug }, data: { images: json(images) } });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// 永久刪除商品。歷史訂單以 JSON 快照保存、不參照 Product，故刪除不影響既有訂單。
+export async function deleteProduct(slug: string): Promise<boolean> {
+  try {
+    await prisma.product.delete({ where: { slug } });
     return true;
   } catch {
     return false;

@@ -7,6 +7,7 @@ import { getStoreById } from "@/lib/stores-711";
 import { savePickupProfile } from "@/lib/pickup-store";
 import {
   adminAdvance,
+  adminRevert,
   cancelOrder,
   createOrder,
   getOrder,
@@ -150,5 +151,13 @@ export async function adminRestoreAction(formData: FormData) {
   await assertAdmin();
   const orderNo = String(formData.get("orderNo"));
   await restoreOrder(orderNo);
+  revalidateAdmin(orderNo);
+}
+
+// 回上一步（誤觸救回，例如不小心點成已完成）
+export async function adminRevertAction(formData: FormData) {
+  await assertAdmin();
+  const orderNo = String(formData.get("orderNo"));
+  await adminRevert(orderNo);
   revalidateAdmin(orderNo);
 }

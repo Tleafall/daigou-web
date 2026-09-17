@@ -66,6 +66,14 @@ export function VariantSelector({
           .map(([k, v]) => `${k}：${v}`)
           .join("、")
       : "";
+    // 縮圖：優先用對應所選規格的圖，否則用封面（第一張）。只存 http(s) 網址，
+    // 避免把 data URL 塞進 localStorage 造成容量爆掉。
+    const selectedValues = Object.values(selected);
+    const chosen =
+      product.images.find(
+        (im) => im.tag && selectedValues.includes(im.tag),
+      )?.url ?? product.images[0]?.url;
+    const image = chosen && /^https?:\/\//i.test(chosen) ? chosen : undefined;
     addItem(
       {
         productSlug: product.slug,
@@ -74,6 +82,7 @@ export function VariantSelector({
         optionLabel,
         unitPrice: matched.price,
         gradient: product.gradient,
+        image,
       },
       qty,
     );

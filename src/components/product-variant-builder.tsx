@@ -18,19 +18,31 @@ function cartesian(groups: Group[]): Record<string, string>[] {
   );
 }
 
-function comboKey(combo: Record<string, string>): string {
-  return Object.entries(combo)
-    .map(([k, v]) => `${k}:${v}`)
+// 以排序後的鍵組成，確保同一組選項不管來源（cartesian 或既有規格）都得到相同 key
+export function comboKey(combo: Record<string, string>): string {
+  return Object.keys(combo)
+    .sort()
+    .map((k) => `${k}:${combo[k]}`)
     .join("|");
 }
+
+export type VariantCell = { price: string; stock: string };
 
 const inputClass =
   "rounded-lg border border-line px-2 py-1.5 text-sm outline-none focus:border-brand";
 
-export function ProductVariantBuilder() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [cells, setCells] = useState<Record<string, { price: string; stock: string }>>({});
-  const [single, setSingle] = useState({ price: "", stock: "0" });
+export function ProductVariantBuilder({
+  initialGroups = [],
+  initialCells = {},
+  initialSingle = { price: "", stock: "0" },
+}: {
+  initialGroups?: Group[];
+  initialCells?: Record<string, VariantCell>;
+  initialSingle?: VariantCell;
+} = {}) {
+  const [groups, setGroups] = useState<Group[]>(initialGroups);
+  const [cells, setCells] = useState<Record<string, VariantCell>>(initialCells);
+  const [single, setSingle] = useState<VariantCell>(initialSingle);
 
   const validGroups = useMemo(
     () =>

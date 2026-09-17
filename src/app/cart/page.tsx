@@ -44,11 +44,20 @@ export default function CartPage() {
             >
               <Link
                 href={`/products/${it.productSlug}`}
-                className="h-20 w-20 shrink-0 rounded-lg"
+                className="h-20 w-20 shrink-0 overflow-hidden rounded-lg"
                 style={{
                   background: `linear-gradient(135deg, ${it.gradient[0]}, ${it.gradient[1]})`,
                 }}
-              />
+              >
+                {it.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={it.image}
+                    alt={it.productTitle}
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </Link>
               <div className="flex flex-1 flex-col">
                 <Link
                   href={`/products/${it.productSlug}`}

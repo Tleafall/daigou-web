@@ -8,12 +8,14 @@ import { formatTWD } from "@/lib/format";
 import { OrderStatusBadge } from "@/components/order-status-badge";
 import { OrderProgress } from "@/components/order-progress";
 import { ConfirmButton } from "@/components/confirm-button";
+import { CopyText } from "@/components/copy-text";
 import {
   adminAbandonAction,
   adminCancelAction,
   adminCompleteAction,
   adminConfirmAction,
   adminRestoreAction,
+  adminRevertAction,
   adminShipAction,
 } from "@/lib/order-actions";
 
@@ -84,13 +86,34 @@ export default async function AdminOrderDetailPage({
           </div>
 
           <div className="mt-4 border-t border-line pt-4 text-sm text-ink/70">
-            <div className="mb-1 font-medium text-ink">取貨資料</div>
-            <div>{order.recipientName}　{order.recipientPhone}</div>
-            <div className="mt-1">
-              7-11 {order.storeName}
-              <span className="ml-2 font-mono text-xs text-ink/40">#{order.storeId}</span>
+            <div className="mb-1 flex items-center justify-between">
+              <span className="font-medium text-ink">取貨資料</span>
+              <CopyText
+                value={`${order.recipientName} ${order.recipientPhone}\n7-11 ${order.storeName}（#${order.storeId}）\n${order.storeAddress}`}
+                className="text-xs font-medium text-brand"
+              >
+                一鍵複製全部
+              </CopyText>
             </div>
-            <div className="text-ink/50">{order.storeAddress}</div>
+            <p className="mb-2 text-xs text-ink/40">
+              下方每個欄位都可點擊複製，方便貼到賣貨便後台。
+            </p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <CopyText value={order.recipientName}>{order.recipientName}</CopyText>
+              <CopyText value={order.recipientPhone}>{order.recipientPhone}</CopyText>
+            </div>
+            <div className="mt-1">
+              7-11{" "}
+              <CopyText value={order.storeName}>{order.storeName}</CopyText>
+              <span className="ml-2 font-mono text-xs">
+                <CopyText value={order.storeId}>#{order.storeId}</CopyText>
+              </span>
+            </div>
+            <div className="mt-1">
+              <CopyText value={order.storeAddress} className="text-ink/50">
+                {order.storeAddress}
+              </CopyText>
+            </div>
             {order.customerNote && <div className="mt-1 text-ink/50">備註：{order.customerNote}</div>}
           </div>
 
@@ -219,8 +242,24 @@ export default async function AdminOrderDetailPage({
                   </p>
                 </form>
               )}
+              {/* 回上一步：防止誤觸（例如不小心點成已完成）。正常流程中可退回一格 */}
+              {(order.status === "CONFIRMED" ||
+                order.status === "SHIPPED" ||
+                order.status === "COMPLETED") && (
+                <form action={adminRevertAction} className="mt-1">
+                  <input type="hidden" name="orderNo" value={order.orderNo} />
+                  <ConfirmButton
+                    message="確定要把訂單狀態退回上一步嗎？（用於誤觸救回）"
+                    className="w-full rounded-lg border border-line py-2 text-sm text-ink/60 hover:border-brand hover:text-brand"
+                  >
+                    ↩ 回上一步
+                  </ConfirmButton>
+                </form>
+              )}
               {order.status === "COMPLETED" && (
-                <p className="text-xs text-ink/40">此訂單已完成，無可用操作。</p>
+                <p className="text-xs text-ink/40">
+                  此訂單已完成。如為誤觸，可用上方「回上一步」退回已出貨。
+                </p>
               )}
             </div>
           </div>

@@ -299,6 +299,23 @@ export async function adminAdvance(
   return { ok: true };
 }
 
+// 回上一步：把狀態往回退一格（防止誤觸，例如不小心點成已完成）。
+// 只在正常流程 CONFIRMED/SHIPPED/COMPLETED 之間回退；不影響庫存
+// （庫存是在建立訂單時就扣、取消時才回補，狀態前後移動不動庫存）。
+export async function adminRevert(orderNo: string): Promise<TransitionResult> {
+  const o = await prisma.order.findUnique({ where: { orderNo } });
+  if (!o) return { ok: false, error: "訂單不存在" };
+  const back: Record<string, OrderStatus> = {
+    CONFIRMED: "PENDING",
+    SHIPPED: "CONFIRMED",
+    COMPLETED: "SHIPPED",
+  };
+  const to = back[o.status];
+  if (!to) return { ok: false, error: "目前狀態無法回上一步" };
+  await prisma.order.update({ where: { orderNo }, data: { status: to } });
+  return { ok: true };
+}
+
 export async function cancelOrder(
   orderNo: string,
   by: "customer" | "admin",

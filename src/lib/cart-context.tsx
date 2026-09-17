@@ -21,6 +21,7 @@ export type CartItem = {
   unitPrice: number;
   quantity: number;
   gradient: [string, string];
+  image?: string; // 商品縮圖（http(s) 網址；沒有就用 gradient 底色）
 };
 
 type CartContextValue = {

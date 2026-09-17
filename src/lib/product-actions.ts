@@ -8,8 +8,12 @@ import {
   type OptionGroup,
   type ProductStatus,
 } from "@/lib/mock-data";
-import { createProduct, getProduct, updateProduct } from "@/lib/product-store";
-import type { ProductImage } from "@/lib/mock-data";
+import {
+  createProduct,
+  deleteProduct,
+  setProductStatus,
+  updateProduct,
+} from "@/lib/product-store";
 import { uploadImages } from "@/lib/cloudinary";
 
 type VariantInput = { options: Record<string, string>; price: number; stock: number };
@@ -90,7 +94,8 @@ export async function createProductAction(formData: FormData) {
   });
   revalidatePath("/admin/products");
   revalidatePath("/");
-  redirect(`/admin/products/${slug}/edit?created=1`);
+  // 建立成功回到商品管理頁（帶 created 參數，前端跳出成功提示）
+  redirect(`/admin/products?created=1&title=${encodeURIComponent(title)}`);
 }
 
 export async function updateProductAction(formData: FormData) {
@@ -100,39 +105,48 @@ export async function updateProductAction(formData: FormData) {
   const description = String(formData.get("description") || "").trim();
   const categorySlug = String(formData.get("categorySlug") || "").trim();
   const status = String(formData.get("status") || "ACTIVE") as ProductStatus;
-  const variantIds = String(formData.get("variantIds") || "")
-    .split(",")
-    .filter(Boolean);
+  // 規格（含結構）可在編輯頁調整，改用與新增相同的 variantsJson
+  const { optionGroups, variants } = parseVariants(formData.get("variantsJson"));
 
-  const variants = variantIds.map((id) => ({
-    id,
-    price: toInt(formData.get(`price_${id}`)),
-    stock: toInt(formData.get(`stock_${id}`)),
-  }));
-  // 重建圖片陣列：保留未刪除的既有圖（帶上新的 tag）＋ 附加新上傳的圖
-  const existing = (await getProduct(slug))?.images ?? [];
-  const removeSet = new Set(
-    formData.getAll("removeIndex").map((v) => Number(v)).filter((n) => Number.isInteger(n)),
-  );
-  const images: ProductImage[] = [];
-  existing.forEach((img, i) => {
-    if (removeSet.has(i)) return;
-    const tag = String(formData.get(`tag_${i}`) || "").trim();
-    images.push({ url: img.url, tag: tag || undefined });
-  });
-  for (const img of await uploadImages(await readImageDataUrls(formData)))
-    images.push(img);
+  if (!title || !categorySlug || variants.length === 0) {
+    redirect(`/admin/products/${slug}/edit?error=1`);
+  }
 
   await updateProduct(slug, {
     title,
     description,
     categorySlug,
     status,
+    optionGroups,
     variants,
-    images,
   });
   revalidatePath("/admin/products");
   revalidatePath(`/products/${slug}`);
   revalidatePath("/");
-  redirect("/admin/products");
+  // 儲存成功回商品管理頁並提示（帶 title 供顯示）
+  redirect(`/admin/products?updated=1&title=${encodeURIComponent(title)}`);
+}
+
+// 快速隱藏／顯示商品（ARCHIVED＝隱藏、不上架；ACTIVE＝顯示）。
+// 暫時缺貨可先隱藏，不用刪除。
+export async function toggleProductVisibilityAction(formData: FormData) {
+  await assertAdmin();
+  const slug = String(formData.get("slug") || "").trim();
+  const current = String(formData.get("current") || "");
+  const next = current === "ACTIVE" ? "ARCHIVED" : "ACTIVE";
+  if (slug) await setProductStatus(slug, next);
+  revalidatePath("/admin/products");
+  revalidatePath(`/products/${slug}`);
+  revalidatePath("/");
+}
+
+// 永久刪除商品（後台商品管理的「刪除」按鈕，前端有二次確認）
+export async function deleteProductAction(formData: FormData) {
+  await assertAdmin();
+  const slug = String(formData.get("slug") || "").trim();
+  const title = String(formData.get("title") || "").trim();
+  if (slug) await deleteProduct(slug);
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  redirect(`/admin/products?deleted=1&title=${encodeURIComponent(title)}`);
 }

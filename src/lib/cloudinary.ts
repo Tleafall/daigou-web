@@ -36,6 +36,16 @@ export async function uploadImage(
   }
 }
 
+// 刪除一張已上傳的圖（用 publicId）。沒設金鑰或沒 publicId 就略過。
+export async function deleteImage(publicId?: string): Promise<void> {
+  if (!cloudinaryReady() || !publicId) return;
+  try {
+    await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+  } catch (err) {
+    console.error("[cloudinary] 刪除失敗：", err);
+  }
+}
+
 // 把一批圖片來源（data URL）上傳到 Cloudinary；某張失敗時保留原來源當備援，不中斷。
 export async function uploadImages(
   sources: string[],
