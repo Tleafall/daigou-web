@@ -143,7 +143,8 @@ export type CreateProductInput = {
 };
 
 export async function createProduct(input: CreateProductInput): Promise<string> {
-  const slug = `c${Date.now().toString(36)}`;
+  // 時間 + 隨機碼，避免兩人同時（或批次匯入同毫秒）產生相同編號而撞號
+  const slug = `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   const variants: Variant[] = input.variants.map((v, i) => ({
     id: `${slug}-v${i + 1}`,
     options: v.options,

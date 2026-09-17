@@ -23,7 +23,7 @@ export async function categoryName(slug: string): Promise<string> {
 }
 
 export async function createCategory(name: string, emoji: string): Promise<string> {
-  const slug = `cat${Date.now().toString(36)}`;
+  const slug = `cat${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   const max = await prisma.category.aggregate({ _max: { sortOrder: true } });
   const sortOrder = (max._max.sortOrder ?? 0) + 1;
   await prisma.category.create({
