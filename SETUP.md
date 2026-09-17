@@ -224,6 +224,17 @@ psql -U postgres -d daigou -f backups\daigou-那個檔.sql
 
 ---
 
+## 7.6 有新版時：更新網站
+
+有新的程式改動時，**雙擊專案資料夾裡的 `更新網站`**（`更新網站.bat`）即可，它會自動：
+下載最新版（`git pull`）→ 更新套件 → 更新資料庫（`db push`）→ 重新打包 → 用 pm2 重啟。
+
+- 建議做桌面捷徑：對 `更新網站.bat` 按右鍵 → 傳送到 → 桌面(建立捷徑)。
+- 若網站不是用 pm2 常駐：更新完照它的提示，關掉舊的「啟動網站」視窗、重開一次即可。
+- 手動等同指令：`git pull && npm install && npm run db:push && npm run build && pm2 restart daigou`
+
+---
+
 ## 8. 常用指令速查
 
 | 指令 | 用途 |
@@ -233,7 +244,8 @@ psql -U postgres -d daigou -f backups\daigou-那個檔.sql
 | `npm run db:push` | 把 schema 同步到資料庫 |
 | `npm run db:seed` | 重置示範資料（分類/商品/訂單） |
 | `npm run db:studio` | 開視覺化資料庫管理介面 |
-| `npm run db:backup` | 備份資料庫到 backups/（保留最近 14 份） |
+| `npm run db:backup` | 備份資料庫到 backups/（保留全部） |
+| 雙擊 `更新網站.bat` | 一鍵更新：pull → 套件 → db push → build → 重啟 |
 | `npm run create-admin -- <email> <密碼> [姓名]` | 建立/升級正式管理員帳號 |
 | `npm run stores:fetch` | 重新抓全台 7-11 門市清單 |
 
