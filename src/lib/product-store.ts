@@ -9,7 +9,6 @@ import {
   type ProductStatus,
   type Variant,
 } from "@/lib/mock-data";
-import { recordMovement } from "@/lib/inventory-store";
 
 function variantOptionLabel(v: Variant): string {
   return (
@@ -100,7 +99,8 @@ function slugFromVariantId(variantId: string): string {
 }
 
 // 調整庫存並記錄異動（下單扣、取消補、盤點調整都走這裡）
-// 每次都從 DB 讀取最新商品，確保同一商品多變體連續調整不會互相覆蓋
+// 用交易 + 「SELECT ... FOR UPDATE」鎖住該商品那一列：同一件商品的庫存變動會排隊
+// 一個一個進行，避免兩筆同時發生時互相蓋掉（不同商品之間不會互相卡）。
 export async function adjustVariantStock(
   variantId: string,
   delta: number,
@@ -109,26 +109,29 @@ export async function adjustVariantStock(
   orderNo?: string,
 ): Promise<boolean> {
   const slug = slugFromVariantId(variantId);
-  const row = await prisma.product.findUnique({ where: { slug } });
-  if (!row) return false;
-  const variants = row.variants as unknown as Variant[];
-  const v = variants.find((x) => x.id === variantId);
-  if (!v) return false;
-  v.stock = Math.max(0, v.stock + delta);
-  await prisma.product.update({
-    where: { slug },
-    data: { variants: json(variants) },
+  return prisma.$transaction(async (tx) => {
+    const rows = await tx.$queryRaw<{ variants: Variant[]; title: string }[]>`
+      SELECT variants, title FROM "Product" WHERE slug = ${slug} FOR UPDATE
+    `;
+    if (rows.length === 0) return false;
+    const variants = rows[0].variants;
+    const v = variants.find((x) => x.id === variantId);
+    if (!v) return false;
+    v.stock = Math.max(0, v.stock + delta);
+    await tx.product.update({ where: { slug }, data: { variants: json(variants) } });
+    await tx.inventoryMovement.create({
+      data: {
+        variantId,
+        productTitle: rows[0].title,
+        optionLabel: variantOptionLabel(v),
+        type,
+        delta,
+        reason,
+        orderNo: orderNo ?? null,
+      },
+    });
+    return true;
   });
-  await recordMovement({
-    variantId,
-    productTitle: row.title,
-    optionLabel: variantOptionLabel(v),
-    type,
-    delta,
-    reason,
-    orderNo,
-  });
-  return true;
 }
 
 // ---- 異動 ----
@@ -182,42 +185,56 @@ export async function updateProduct(
   slug: string,
   input: UpdateProductInput,
 ): Promise<boolean> {
-  const row = await prisma.product.findUnique({ where: { slug } });
-  if (!row) return false;
-  const variants = row.variants as unknown as Variant[];
-  const movements: Parameters<typeof recordMovement>[0][] = [];
-  for (const vi of input.variants) {
-    const v = variants.find((x) => x.id === vi.id);
-    if (v) {
-      v.price = vi.price;
-      if (vi.stock !== v.stock) {
-        const delta = vi.stock - v.stock;
-        v.stock = vi.stock;
-        movements.push({
-          variantId: v.id,
-          productTitle: input.title,
-          optionLabel: variantOptionLabel(v),
-          type: "ADJUST",
-          delta,
-          reason: "後台庫存調整",
-        });
+  // 同樣鎖住該商品那一列，避免後台改庫存與客人下單扣庫存同時發生時互相蓋掉
+  return prisma.$transaction(async (tx) => {
+    const rows = await tx.$queryRaw<{ variants: Variant[] }[]>`
+      SELECT variants FROM "Product" WHERE slug = ${slug} FOR UPDATE
+    `;
+    if (rows.length === 0) return false;
+    const variants = rows[0].variants;
+    const movements: {
+      variantId: string;
+      optionLabel: string;
+      delta: number;
+    }[] = [];
+    for (const vi of input.variants) {
+      const v = variants.find((x) => x.id === vi.id);
+      if (v) {
+        v.price = vi.price;
+        if (vi.stock !== v.stock) {
+          const delta = vi.stock - v.stock;
+          v.stock = vi.stock;
+          movements.push({ variantId: v.id, optionLabel: variantOptionLabel(v), delta });
+        }
       }
     }
-  }
-  await prisma.product.update({
-    where: { slug },
-    data: {
-      title: input.title,
-      description: input.description,
-      categorySlug: input.categorySlug,
-      status: input.status,
-      images: json(input.images),
-      variants: json(variants),
-      price: Math.min(...variants.map((v) => v.price)),
-    },
+    await tx.product.update({
+      where: { slug },
+      data: {
+        title: input.title,
+        description: input.description,
+        categorySlug: input.categorySlug,
+        status: input.status,
+        images: json(input.images),
+        variants: json(variants),
+        price: Math.min(...variants.map((v) => v.price)),
+      },
+    });
+    for (const m of movements) {
+      await tx.inventoryMovement.create({
+        data: {
+          variantId: m.variantId,
+          productTitle: input.title,
+          optionLabel: m.optionLabel,
+          type: "ADJUST",
+          delta: m.delta,
+          reason: "後台庫存調整",
+          orderNo: null,
+        },
+      });
+    }
+    return true;
   });
-  for (const m of movements) await recordMovement(m);
-  return true;
 }
 
 export async function setProductStatus(
