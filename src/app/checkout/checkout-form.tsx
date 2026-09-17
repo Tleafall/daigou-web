@@ -9,6 +9,7 @@ import { useSettings } from "@/lib/settings-context";
 import { createOrderAction } from "@/lib/order-actions";
 import { StorePicker } from "@/components/store-picker";
 import type { Store711 } from "@/lib/stores-711";
+import { shippingFeeFor } from "@/lib/shipping";
 
 export function CheckoutForm({
   defaultName,
@@ -30,8 +31,7 @@ export function CheckoutForm({
   const [customerNote, setCustomerNote] = useState("");
   const [store, setStore] = useState<Store711 | null>(defaultStore);
 
-  const shippingFee =
-    subtotal >= site.freeShippingThreshold || subtotal === 0 ? 0 : site.shippingFee;
+  const shippingFee = shippingFeeFor(subtotal, site);
   const total = subtotal + shippingFee;
 
   function submit(e: React.FormEvent) {
@@ -116,11 +116,20 @@ export function CheckoutForm({
               <input
                 className={inputClass}
                 value={recipientPhone}
-                onChange={(e) => setRecipientPhone(e.target.value)}
+                onChange={(e) =>
+                  // 防呆：只留數字、最多 10 碼
+                  setRecipientPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                }
                 placeholder="0912345678"
                 inputMode="numeric"
+                maxLength={10}
                 required
               />
+              {recipientPhone.length > 0 && !/^09\d{8}$/.test(recipientPhone) && (
+                <span className="mt-1 block text-xs text-red-500">
+                  手機號碼需為 09 開頭、共 10 碼數字
+                </span>
+              )}
             </label>
           </div>
 

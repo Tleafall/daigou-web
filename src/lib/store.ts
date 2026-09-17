@@ -4,6 +4,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { adjustVariantStock, getActiveProduct } from "@/lib/product-store";
 import { getSettings } from "@/lib/settings-store";
+import { shippingFeeFor } from "@/lib/shipping";
 
 export type OrderStatus =
   | "PENDING" // 待確認
@@ -242,7 +243,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
 
   const settings = await getSettings();
   const subtotal = items.reduce((s, it) => s + it.lineTotal, 0);
-  const shippingFee = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
+  const shippingFee = shippingFeeFor(subtotal, settings);
   const totalAmount = subtotal + shippingFee;
 
   if (totalAmount > COD_MAX)

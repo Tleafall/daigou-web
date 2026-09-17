@@ -5,13 +5,13 @@ import { useCart } from "@/lib/cart-context";
 import { formatTWD } from "@/lib/format";
 import { useSettings } from "@/lib/settings-context";
 import { EmptyState } from "@/components/empty-state";
+import { hasFreeShippingPromo, shippingFeeFor } from "@/lib/shipping";
 
 export default function CartPage() {
   const { items, subtotal, ready, setQty, removeItem } = useCart();
   const site = useSettings();
 
-  const shippingFee =
-    subtotal >= site.freeShippingThreshold || subtotal === 0 ? 0 : site.shippingFee;
+  const shippingFee = shippingFeeFor(subtotal, site);
   const total = subtotal + shippingFee;
 
   if (ready && items.length === 0) {
@@ -103,7 +103,7 @@ export default function CartPage() {
             <span className="text-ink/60">運費</span>
             <span>{shippingFee === 0 ? "免運" : formatTWD(shippingFee)}</span>
           </div>
-          {subtotal > 0 && subtotal < site.freeShippingThreshold && (
+          {hasFreeShippingPromo(site) && subtotal > 0 && subtotal < site.freeShippingThreshold && (
             <p className="mt-1 text-xs text-brand">
               再買 {formatTWD(site.freeShippingThreshold - subtotal)} 即可免運
             </p>

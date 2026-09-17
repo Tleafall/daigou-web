@@ -48,6 +48,12 @@ export function RegisterForm() {
           inputMode="numeric"
           autoComplete="tel"
           placeholder="0912345678"
+          maxLength={10}
+          pattern="09[0-9]{8}"
+          title="手機需為 09 開頭、共 10 碼數字"
+          onInput={(e) => {
+            e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "").slice(0, 10);
+          }}
           className={inputClass}
         />
       </label>

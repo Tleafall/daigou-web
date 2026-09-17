@@ -58,6 +58,10 @@ export default async function AdminSettingsPage({
             <input name="shippingFee" type="number" min="0" defaultValue={s.shippingFee} className={inputClass} />
           </label>
         </div>
+        <p className="-mt-2 text-xs text-ink/50">
+          不想做「滿額免運」→ 把<b>門檻設為 0</b>，就會一律收運費。
+          想<b>一律免運</b>→ 把<b>運費設為 0</b>。（改了記得順手改上面的跑馬燈文字）
+        </p>
 
         <div className="grid grid-cols-2 gap-4">
           <label className="text-sm">

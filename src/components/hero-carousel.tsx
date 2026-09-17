@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings-context";
+import { hasFreeShippingPromo } from "@/lib/shipping";
 import { IconChevronRight } from "./icons";
 
 export function HeroCarousel() {
@@ -18,8 +19,11 @@ export function HeroCarousel() {
       gradient: "linear-gradient(120deg, #f7e8ec, #e7cdd6)",
     },
     {
-      title: `滿 NT$${site.freeShippingThreshold.toLocaleString("zh-TW")} 免運`,
-      desc: "湊單更划算，寄到 7-11 門市，取貨再付款。",
+      // 有設「滿額免運」才主打免運，否則改成一般標語
+      title: hasFreeShippingPromo(site)
+        ? `滿 NT$${site.freeShippingThreshold.toLocaleString("zh-TW")} 免運`
+        : "7-11 賣貨便・取貨方便",
+      desc: "寄到你選的 7-11 門市，到店取貨再付款。",
       cta: "看熱門商品",
       href: "/category/fashion",
       gradient: "linear-gradient(120deg, #efe9f0, #d8ccd9)",
