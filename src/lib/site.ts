@@ -7,8 +7,8 @@ export const site = {
   announcement: "全館滿 NT$1,000 免運 · 7-11 賣貨便取貨付款",
   freeShippingThreshold: 1000, // 滿額免運（NT$）
   shippingFee: 100, // 運費（NT$）
-  lineId: "@wts2638t", // 官方 LINE ID
-  // 官方 LINE 加入好友連結（ID 需 percent-encode：@ → %40）
-  lineUrl: "https://line.me/R/ti/p/%40wts2638t",
+  lineId: "@wts2638t", // 官方 LINE 基本 ID（帶訊息詢問用，@ 開頭）
+  // 官方 LINE 加入好友連結（電腦/手機皆可用的 lin.ee 短連結）
+  lineUrl: "https://lin.ee/v7oEi4m",
   email: "hello@example.com", // TODO: 換成實際客服信箱
 };

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getSettings } from "@/lib/settings-store";
 
 export async function SiteFooter() {
@@ -11,12 +10,14 @@ export async function SiteFooter() {
           <p className="mt-2 text-sm text-ink/60">{site.tagline}</p>
         </div>
 
+        {/* 「品牌介紹」暫時隱藏（連 /about 頁）。要恢復：把這段取消註解，並在檔案最上面加回 import Link from "next/link";
         <div>
           <div className="mb-3 text-sm font-semibold">關於我們</div>
           <ul className="space-y-2 text-sm text-ink/60">
             <li><Link href="/about" className="hover:text-brand">品牌介紹</Link></li>
           </ul>
         </div>
+        */}
 
         <div>
           <div className="mb-3 text-sm font-semibold">聯絡我們</div>
@@ -42,7 +43,7 @@ export async function SiteFooter() {
       </div>
 
       <div className="border-t border-line py-4 text-center text-xs text-ink/50">
-        © {new Date().getFullYear()} {site.name}. 本網站為代購示範站。
+        © {new Date().getFullYear()} {site.name}. 版權所有。
       </div>
     </footer>
   );

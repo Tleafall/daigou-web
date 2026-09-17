@@ -66,6 +66,7 @@ export default async function AdminCustomersPage() {
                     <td className="px-4 py-3">
                       <div className="font-medium">{c.userName}</div>
                       <div className="text-xs text-ink/50">{c.userEmail}</div>
+                      <div className="text-xs text-ink/40">識別碼 …{c.userId.slice(-6)}</div>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${rm.cls}`}>

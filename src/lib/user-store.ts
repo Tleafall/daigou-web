@@ -1,5 +1,6 @@
 // 會員帳號：存於 PostgreSQL（User 表）。Email 直接註冊 + 帳密登入用。
 import { prisma } from "@/lib/prisma";
+import { isOwnerEmail } from "@/lib/owner";
 
 export type DbUser = {
   id: string;
@@ -98,6 +99,8 @@ export async function demoteToCustomer(
   const target = await prisma.user.findUnique({ where: { id: userId } });
   if (!target || target.role !== "ADMIN")
     return { ok: false, error: "找不到這位管理員。" };
+  if (isOwnerEmail(target.email))
+    return { ok: false, error: "這是最高管理員（擁有者），不可被移除。" };
   if ((await countAdmins()) <= 1)
     return { ok: false, error: "這是最後一位管理員，不能移除（否則沒人能進後台）。" };
   await prisma.user.update({ where: { id: userId }, data: { role: "CUSTOMER" } });

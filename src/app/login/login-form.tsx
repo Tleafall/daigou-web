@@ -23,7 +23,7 @@ export function LoginForm() {
           type="email"
           required
           autoComplete="email"
-          placeholder="admin@test.com"
+          placeholder="you@example.com"
           className="w-full rounded-lg border border-line px-3 py-2.5 outline-none focus:border-brand"
         />
       </label>

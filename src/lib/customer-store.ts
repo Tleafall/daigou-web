@@ -1,5 +1,6 @@
 // 賣家對客戶的手動標記與備註（僅賣家可見）：存於 PostgreSQL（CustomerProfile 表）。
 import { prisma } from "@/lib/prisma";
+import { isOwnerEmail } from "@/lib/owner";
 
 export type ManualFlag = "NORMAL" | "WATCH" | "BLOCKED";
 
@@ -16,6 +17,14 @@ export async function getCustomerProfile(userId: string): Promise<CustomerProfil
 }
 
 export async function setCustomerFlag(userId: string, flag: ManualFlag) {
+  // 最高管理員（擁有者）不可被封鎖
+  if (flag === "BLOCKED") {
+    const u = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    if (isOwnerEmail(u?.email)) return;
+  }
   await prisma.customerProfile.upsert({
     where: { userId },
     create: { userId, manualFlag: flag },
