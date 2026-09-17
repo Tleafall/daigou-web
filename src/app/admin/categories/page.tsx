@@ -67,8 +67,9 @@ export default async function AdminCategoriesPage() {
       <form action={createCategoryAction} className="mt-6 flex flex-wrap items-end gap-2 rounded-xl border border-line bg-white p-4">
         <div className="text-sm font-bold w-full mb-1">新增分類</div>
         <label className="text-sm">
-          <span className="mb-1 block text-ink/60">圖示</span>
+          <span className="mb-1 block text-ink/60">圖示（emoji）</span>
           <input name="emoji" placeholder="🛍️" className={`${inputClass} w-16 text-center`} />
+          <span className="mt-1 block text-[11px] text-ink/40">Windows 按 ⊞ Win + .</span>
         </label>
         <label className="flex-1 text-sm">
           <span className="mb-1 block text-ink/60">分類名稱</span>
