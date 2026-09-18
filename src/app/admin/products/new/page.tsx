@@ -6,6 +6,7 @@ import { listCategories } from "@/lib/category-store";
 import { createProductAction } from "@/lib/product-actions";
 import { ProductVariantBuilder } from "@/components/product-variant-builder";
 import { ProductImagePicker } from "@/components/product-image-picker";
+import { AutoTextarea } from "@/components/auto-textarea";
 
 export const metadata: Metadata = { title: "新增商品" };
 
@@ -36,6 +37,11 @@ export default async function NewProductPage({
       )}
 
       <form action={createProductAction} className="flex flex-col gap-4 rounded-xl border border-line bg-white p-5">
+        <div className="text-sm">
+          <span className="mb-1 block text-ink/70">商品圖片（選填，最多 6 張）</span>
+          <ProductImagePicker />
+        </div>
+
         <label className="text-sm">
           <span className="mb-1 block text-ink/70">商品名稱 *</span>
           <input name="title" required className={inputClass} placeholder="例：日本人氣保濕面膜" />
@@ -58,13 +64,8 @@ export default async function NewProductPage({
 
         <label className="text-sm">
           <span className="mb-1 block text-ink/70">商品敘述</span>
-          <textarea name="description" className={`${inputClass} min-h-24`} placeholder="商品介紹、材質、代購說明…" />
+          <AutoTextarea name="description" className={`${inputClass} min-h-32`} placeholder="商品介紹、材質、代購說明…" />
         </label>
-
-        <div className="text-sm">
-          <span className="mb-1 block text-ink/70">商品圖片（選填，最多 6 張）</span>
-          <ProductImagePicker />
-        </div>
 
         <fieldset className="text-sm">
           <span className="mb-2 block text-ink/70">封面配色（未上傳圖片時的底色）</span>

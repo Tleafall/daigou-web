@@ -34,17 +34,31 @@ export async function createCategory(name: string, emoji: string): Promise<strin
 
 export async function updateCategory(
   slug: string,
-  input: { name: string; emoji: string; sortOrder: number },
+  input: { name: string; emoji: string; sortOrder?: number },
 ): Promise<boolean> {
   try {
     await prisma.category.update({
       where: { slug },
-      data: { name: input.name, emoji: input.emoji || "🛍️", sortOrder: input.sortOrder },
+      data: {
+        name: input.name,
+        emoji: input.emoji || "🛍️",
+        // 只有明確帶入排序時才更新（排序改用拖曳，編輯名稱/圖示不動排序）
+        ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
+      },
     });
     return true;
   } catch {
     return false;
   }
+}
+
+// 拖曳排序：依傳入的 slug 順序重寫 sortOrder（1, 2, 3…）
+export async function reorderCategories(slugs: string[]): Promise<void> {
+  await prisma.$transaction(
+    slugs.map((slug, i) =>
+      prisma.category.update({ where: { slug }, data: { sortOrder: i + 1 } }),
+    ),
+  );
 }
 
 // 產品數（判斷能否刪除）

@@ -43,6 +43,7 @@ export function ProductVariantBuilder({
   const [groups, setGroups] = useState<Group[]>(initialGroups);
   const [cells, setCells] = useState<Record<string, VariantCell>>(initialCells);
   const [single, setSingle] = useState<VariantCell>(initialSingle);
+  const [bulk, setBulk] = useState<VariantCell>({ price: "", stock: "" });
 
   const validGroups = useMemo(
     () =>
@@ -106,6 +107,21 @@ export function ProductVariantBuilder({
   }
   function setCell(key: string, field: "price" | "stock", val: string) {
     setCells((c) => ({ ...c, [key]: { ...(c[key] ?? { price: "", stock: "0" }), [field]: val } }));
+  }
+  // 一次把售價／庫存套用到所有規格（只套用有填的欄位）
+  function applyBulk() {
+    setCells((c) => {
+      const next = { ...c };
+      for (const combo of combos) {
+        const key = comboKey(combo);
+        const prev = next[key] ?? { price: "", stock: "0" };
+        next[key] = {
+          price: bulk.price !== "" ? bulk.price : prev.price,
+          stock: bulk.stock !== "" ? bulk.stock : prev.stock,
+        };
+      }
+      return next;
+    });
   }
 
   return (
@@ -175,7 +191,44 @@ export function ProductVariantBuilder({
 
       {/* 價格與庫存 */}
       {hasOptions ? (
-        <div className="overflow-x-auto rounded-lg border border-line">
+        <div className="flex flex-col gap-3">
+          {/* 一鍵套用：品項多時，先在這裡填一次，按「全部套用」帶入下方每一列 */}
+          <div className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-brand-200 bg-muted p-3">
+            <span className="w-full text-xs font-medium text-ink/60">
+              一次套用到所有規格（品項多時省時；只會套用有填的欄位）
+            </span>
+            <label className="text-xs text-ink/60">
+              <span className="mb-1 block">售價 (NT$)</span>
+              <input
+                type="number"
+                min="0"
+                value={bulk.price}
+                onChange={(e) => setBulk((b) => ({ ...b, price: e.target.value }))}
+                className={`${inputClass} w-24`}
+                placeholder="全部"
+              />
+            </label>
+            <label className="text-xs text-ink/60">
+              <span className="mb-1 block">庫存</span>
+              <input
+                type="number"
+                min="0"
+                value={bulk.stock}
+                onChange={(e) => setBulk((b) => ({ ...b, stock: e.target.value }))}
+                className={`${inputClass} w-20`}
+                placeholder="全部"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={applyBulk}
+              className="rounded-lg bg-brand px-4 py-1.5 text-sm font-medium text-white hover:bg-brand-600"
+            >
+              全部套用
+            </button>
+          </div>
+
+          <div className="overflow-x-auto rounded-lg border border-line">
           <table className="w-full min-w-[420px] text-sm">
             <thead className="bg-muted text-left text-xs text-ink/60">
               <tr>
@@ -218,6 +271,7 @@ export function ProductVariantBuilder({
               })}
             </tbody>
           </table>
+          </div>
         </div>
       ) : (
         <div className="flex flex-wrap items-end gap-4 rounded-lg border border-line p-3">

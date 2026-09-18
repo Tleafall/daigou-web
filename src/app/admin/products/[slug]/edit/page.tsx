@@ -7,6 +7,7 @@ import { getProduct } from "@/lib/product-store";
 import { updateProductAction } from "@/lib/product-actions";
 import { ProductVariantBuilder } from "@/components/product-variant-builder";
 import { ProductImageManager } from "@/components/product-image-manager";
+import { AutoTextarea } from "@/components/auto-textarea";
 
 export const metadata: Metadata = { title: "編輯商品" };
 
@@ -107,7 +108,7 @@ export default async function EditProductPage({
 
         <label className="text-sm">
           <span className="mb-1 block text-ink/70">商品敘述</span>
-          <textarea name="description" defaultValue={product.description} className={`${inputClass} min-h-24`} />
+          <AutoTextarea name="description" defaultValue={product.description} className={`${inputClass} min-h-32`} />
         </label>
 
         {/* 規格與定價（可新增/移除/修改規格與選項） */}

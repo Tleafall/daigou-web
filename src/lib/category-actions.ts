@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import {
   createCategory,
   removeCategory,
+  reorderCategories,
   updateCategory,
 } from "@/lib/category-store";
 
@@ -32,9 +33,15 @@ export async function updateCategoryAction(formData: FormData) {
   const slug = String(formData.get("slug") || "");
   const name = String(formData.get("name") || "").trim();
   const emoji = String(formData.get("emoji") || "").trim();
-  const sortOrder = Math.floor(Number(formData.get("sortOrder"))) || 0;
   if (!name) return;
-  await updateCategory(slug, { name, emoji, sortOrder });
+  await updateCategory(slug, { name, emoji }); // 排序改用拖曳，這裡不動 sortOrder
+  refresh();
+}
+
+export async function reorderCategoriesAction(slugs: string[]) {
+  await assertAdmin();
+  if (!Array.isArray(slugs) || slugs.length === 0) return;
+  await reorderCategories(slugs.map(String));
   refresh();
 }
 
