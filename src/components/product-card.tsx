@@ -5,7 +5,9 @@ import { productCountLabel } from "@/lib/store";
 import { categoryName } from "@/lib/category-store";
 
 export async function ProductCard({ product }: { product: Product }) {
-  const hasOptions = product.optionGroups.length > 0;
+  // 只有「不同規格價格不一樣」時才顯示「起」（都同價就直接顯示金額）
+  const prices = product.variants.map((v) => v.price);
+  const hasPriceRange = prices.length > 0 && Math.max(...prices) > Math.min(...prices);
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
   const countLabel = await productCountLabel(product.slug, totalStock);
   const catName = await categoryName(product.categorySlug);
@@ -45,7 +47,7 @@ export async function ProductCard({ product }: { product: Product }) {
         <div className="mt-auto flex items-end justify-between pt-2">
           <span className="text-base font-bold text-brand">
             {formatTWD(product.price)}
-            {hasOptions && <span className="ml-1 text-xs font-normal text-ink/40">起</span>}
+            {hasPriceRange && <span className="ml-1 text-xs font-normal text-ink/40">起</span>}
           </span>
           {countLabel && <span className="text-xs text-ink/40">{countLabel}</span>}
         </div>
