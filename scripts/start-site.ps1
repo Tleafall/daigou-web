@@ -1,31 +1,34 @@
 ﻿# 雨晴代購 啟動網站（由 啟動網站.bat 呼叫）
-# 純 PowerShell，能可靠顯示中文，不受 cmd 批次檔中文編碼問題影響。
+# 用途：萬一網站意外被關掉或當掉，雙擊我就能把它重新叫回來（透過 pm2 背景服務，
+#       不會跟 pm2 搶 3000 埠）。網站正常時雙擊我也不會有副作用。
 $ErrorActionPreference = 'Continue'
-try { $host.UI.RawUI.WindowTitle = '雨晴代購 網站' } catch {}
-
-# 切到專案根目錄（此腳本放在 scripts\ 底下）
+try { $host.UI.RawUI.WindowTitle = '雨晴代購 啟動網站' } catch {}
 Set-Location -LiteralPath (Split-Path $PSScriptRoot -Parent)
 
 Write-Host ''
 Write-Host '  ============================================'
-Write-Host '     雨晴代購 - 正在啟動網站'
+Write-Host '     雨晴代購 - 啟動網站'
 Write-Host '  ============================================'
 Write-Host ''
-Write-Host '  啟動後，這個視窗請「保持開著」，'
-Write-Host '  關掉視窗網站就會停。'
-Write-Host ''
 
-if (-not (Test-Path '.next')) {
-  Write-Host '  第一次啟動，正在準備網站檔案，需要幾分鐘，請稍候...'
+if (-not (Get-Command pm2 -ErrorAction SilentlyContinue)) {
+  Write-Host '  找不到 pm2（網站的背景管理工具）。' -ForegroundColor Yellow
+  Write-Host '  請改雙擊「更新網站」重新安裝，或截圖找工程師協助。' -ForegroundColor Yellow
   Write-Host ''
-  npm run build
-  Write-Host ''
+  try { Read-Host '按 Enter 鍵關閉視窗' | Out-Null } catch {}
+  exit 1
 }
 
-Write-Host '  網站啟動中... 稍等幾秒後，'
-Write-Host '  用瀏覽器打開  yuchingmakeup.com  就能看到網站。'
+Write-Host '  正在確認網站狀態，需要的話把它重新啟動...'
 Write-Host ''
-npm run start
+pm2 resurrect             # 若 pm2 曾被整個關閉，從存檔還原網站
+pm2 start daigou 2>$null  # 若網站是停著的，把它啟動（已在跑就不動作）
 Write-Host ''
-Write-Host '  網站已停止。按 Enter 鍵關閉視窗。'
-try { Read-Host | Out-Null } catch {}
+pm2 list
+Write-Host ''
+Write-Host '  ============================================'
+Write-Host '  網站已在背景執行，這個視窗可以直接關閉，不影響網站。'
+Write-Host '  （可用瀏覽器開 yuchingmakeup.com 確認）'
+Write-Host '  ============================================'
+Write-Host ''
+try { Read-Host '按 Enter 鍵關閉視窗' | Out-Null } catch {}
