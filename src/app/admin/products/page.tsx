@@ -7,7 +7,10 @@ import { listAllProducts } from "@/lib/product-store";
 import { formatTWD } from "@/lib/format";
 import { AdminNotice } from "@/components/admin-notice";
 import { DeleteProductButton } from "@/components/delete-product-button";
-import { toggleProductVisibilityAction } from "@/lib/product-actions";
+import {
+  toggleProductFeaturedAction,
+  toggleProductVisibilityAction,
+} from "@/lib/product-actions";
 
 export const metadata: Metadata = { title: "商品管理" };
 
@@ -81,6 +84,7 @@ export default async function AdminProductsPage({
               <th className="px-4 py-3">規格</th>
               <th className="px-4 py-3">總庫存</th>
               <th className="px-4 py-3">瀏覽</th>
+              <th className="px-4 py-3">精選</th>
               <th className="px-4 py-3">狀態</th>
               <th className="px-4 py-3"></th>
             </tr>
@@ -110,6 +114,18 @@ export default async function AdminProductsPage({
                     {stock}
                   </td>
                   <td className="px-4 py-3 text-ink/60">{p.views.toLocaleString("zh-TW")}</td>
+                  <td className="px-4 py-3">
+                    <form action={toggleProductFeaturedAction}>
+                      <input type="hidden" name="slug" value={p.slug} />
+                      <input type="hidden" name="current" value={p.featured ? "1" : "0"} />
+                      <button
+                        title={p.featured ? "已在首頁精選，點一下取消" : "點一下加入首頁精選"}
+                        className={p.featured ? "text-lg text-amber-400" : "text-lg text-ink/25 hover:text-amber-400"}
+                      >
+                        {p.featured ? "★" : "☆"}
+                      </button>
+                    </form>
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${sm.cls}`}>
                       {sm.label}

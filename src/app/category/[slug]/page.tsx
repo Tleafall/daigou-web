@@ -5,7 +5,7 @@ import { getCategory } from "@/lib/category-store";
 import { getActiveByCategory } from "@/lib/product-store";
 import { ProductCard } from "@/components/product-card";
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 24;
 
 export async function generateMetadata({
   params,
@@ -55,7 +55,7 @@ export default async function CategoryPage({
           此分類目前尚無商品
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {items.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

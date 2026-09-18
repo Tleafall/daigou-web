@@ -36,6 +36,7 @@ type ProductRow = {
   variants: Prisma.JsonValue;
   status: string;
   views: number;
+  featured: boolean;
 };
 
 // DB 列 → 應用型別（id 對外沿用 slug，全站以 slug 為商品識別）
@@ -53,6 +54,7 @@ function toProduct(r: ProductRow): Product {
     variants: r.variants as unknown as Variant[],
     status: r.status as ProductStatus,
     views: r.views,
+    featured: r.featured,
   };
 }
 
@@ -69,6 +71,11 @@ export async function listActiveProducts(): Promise<Product[]> {
 
 export async function latestActiveProducts(): Promise<Product[]> {
   return [...(await listActiveProducts())].reverse();
+}
+
+// 首頁「精選推薦」：管理員在後台勾選的上架商品
+export async function listFeaturedProducts(): Promise<Product[]> {
+  return (await listActiveProducts()).filter((p) => p.featured);
 }
 
 export async function getActiveByCategory(slug: string): Promise<Product[]> {
@@ -275,6 +282,19 @@ export async function setProductStatus(
 ): Promise<boolean> {
   try {
     await prisma.product.update({ where: { slug }, data: { status } });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// 設定／取消「精選推薦」（首頁精選區顯示）。
+export async function setProductFeatured(
+  slug: string,
+  featured: boolean,
+): Promise<boolean> {
+  try {
+    await prisma.product.update({ where: { slug }, data: { featured } });
     return true;
   } catch {
     return false;

@@ -11,6 +11,7 @@ import {
 import {
   createProduct,
   deleteProduct,
+  setProductFeatured,
   setProductStatus,
   updateProduct,
 } from "@/lib/product-store";
@@ -137,6 +138,16 @@ export async function toggleProductVisibilityAction(formData: FormData) {
   if (slug) await setProductStatus(slug, next);
   revalidatePath("/admin/products");
   revalidatePath(`/products/${slug}`);
+  revalidatePath("/");
+}
+
+// 加入／移除「首頁精選推薦」（後台商品管理的星號按鈕）
+export async function toggleProductFeaturedAction(formData: FormData) {
+  await assertAdmin();
+  const slug = String(formData.get("slug") || "").trim();
+  const current = String(formData.get("current") || "") === "1";
+  if (slug) await setProductFeatured(slug, !current);
+  revalidatePath("/admin/products");
   revalidatePath("/");
 }
 

@@ -28,7 +28,7 @@ export default async function SearchPage({
       {query && results.length === 0 ? (
         <EmptyState emoji="🔍" title={`找不到符合「${query}」的商品`} subtitle="換個關鍵字試試看" />
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {results.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

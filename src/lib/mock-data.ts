@@ -38,6 +38,7 @@ export type Product = {
   variants: Variant[];
   status: ProductStatus;
   views: number; // 商品頁瀏覽次數
+  featured: boolean; // 是否在首頁「精選推薦」顯示
 };
 
 export const seedCategories: Category[] = [
@@ -118,6 +119,7 @@ export const seedProducts: Product[] = raw.map((item, i) => {
     variants,
     status: "ACTIVE",
     views: 0,
+    featured: i % 5 === 0, // 示範：每隔幾個標一個精選（之後可在後台自行調整）
   };
 });
 

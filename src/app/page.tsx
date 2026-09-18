@@ -1,16 +1,22 @@
 import Link from "next/link";
-import { latestActiveProducts, listActiveProducts } from "@/lib/product-store";
+import {
+  latestActiveProducts,
+  listActiveProducts,
+  listFeaturedProducts,
+} from "@/lib/product-store";
 import { listCategories } from "@/lib/category-store";
 import { ProductCard } from "@/components/product-card";
 import { HeroCarousel } from "@/components/hero-carousel";
 
 export default async function Home() {
-  const [categories, active, latestAll] = await Promise.all([
+  const [categories, active, latestAll, featuredPicked] = await Promise.all([
     listCategories(),
     listActiveProducts(),
     latestActiveProducts(),
+    listFeaturedProducts(),
   ]);
-  const featured = active.slice(0, 5);
+  // 後台有勾選精選就用勾選的；還沒勾選任何商品時，先退回顯示前 5 件，首頁才不會空著
+  const featured = featuredPicked.length > 0 ? featuredPicked : active.slice(0, 5);
   const latest = latestAll.slice(0, 10);
 
   return (
