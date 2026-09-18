@@ -17,7 +17,7 @@ export default async function Home() {
   ]);
   // 後台有勾選精選就用勾選的；還沒勾選任何商品時，先退回顯示前 5 件，首頁才不會空著
   const featured = featuredPicked.length > 0 ? featuredPicked : active.slice(0, 5);
-  const latest = latestAll.slice(0, 24);
+  const latest = latestAll.slice(0, 48);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -80,6 +80,14 @@ export default async function Home() {
           {latest.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            href="/products"
+            className="inline-block rounded-full border border-brand px-8 py-2.5 text-sm font-medium text-brand transition hover:bg-brand hover:text-white"
+          >
+            看更多商品 →
+          </Link>
         </div>
       </section>
     </div>
