@@ -144,6 +144,11 @@ export async function listOrdersByUser(userId: string): Promise<Order[]> {
   return (await allOrders()).filter((o) => o.userId === userId);
 }
 
+// 待處理（新）訂單數：PENDING = 待確認，供後台紅點提示用
+export async function countPendingOrders(): Promise<number> {
+  return prisma.order.count({ where: { status: "PENDING" } });
+}
+
 export async function getOrder(orderNo: string): Promise<Order | undefined> {
   return (await allOrders()).find((o) => o.orderNo === orderNo);
 }

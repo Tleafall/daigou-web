@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import {
   latestActiveProducts,
   listActiveProducts,
   listFeaturedProducts,
 } from "@/lib/product-store";
 import { listCategories } from "@/lib/category-store";
+import { countPendingOrders } from "@/lib/store";
 import { ProductCard } from "@/components/product-card";
 import { HeroCarousel } from "@/components/hero-carousel";
 
@@ -19,8 +21,27 @@ export default async function Home() {
   const featured = featuredPicked.length > 0 ? featuredPicked : active.slice(0, 5);
   const latest = latestAll.slice(0, 48);
 
+  // 管理員：首頁提示有幾筆新訂單待處理
+  const session = await auth();
+  const isAdmin = session?.user?.role === "ADMIN";
+  const pendingOrders = isAdmin ? await countPendingOrders() : 0;
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
+      {isAdmin && pendingOrders > 0 && (
+        <Link
+          href="/admin/orders"
+          className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm transition hover:bg-red-100"
+        >
+          <span className="font-medium text-red-700">
+            🔔 你有 {pendingOrders} 筆新訂單待處理
+          </span>
+          <span className="shrink-0 rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white">
+            前往處理 →
+          </span>
+        </Link>
+      )}
+
       <HeroCarousel />
 
       {/* 特色列 */}

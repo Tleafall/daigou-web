@@ -17,9 +17,11 @@ type HeaderUser = {
 export function SiteHeader({
   user,
   categories,
+  pendingOrders = 0,
 }: {
   user?: HeaderUser;
   categories: Category[];
+  pendingOrders?: number;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { count, ready } = useCart();
@@ -67,9 +69,17 @@ export function SiteHeader({
           {user?.role === "ADMIN" && (
             <Link
               href="/admin"
-              className="hidden rounded-md px-2 py-2 text-sm font-medium text-brand hover:bg-brand-50 sm:inline"
+              className="relative hidden rounded-md px-2 py-2 text-sm font-medium text-brand hover:bg-brand-50 sm:inline"
             >
               後台
+              {pendingOrders > 0 && (
+                <span
+                  className="absolute -right-1 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
+                  title={`${pendingOrders} 筆新訂單待處理`}
+                >
+                  {pendingOrders}
+                </span>
+              )}
             </Link>
           )}
 
@@ -164,8 +174,13 @@ export function SiteHeader({
                     會員中心（{user.name ?? "會員"}）
                   </Link>
                   {user.role === "ADMIN" && (
-                    <Link href="/admin" onClick={() => setDrawerOpen(false)} className="px-4 py-3 font-medium text-brand hover:bg-muted">
+                    <Link href="/admin" onClick={() => setDrawerOpen(false)} className="flex items-center gap-2 px-4 py-3 font-medium text-brand hover:bg-muted">
                       後台管理
+                      {pendingOrders > 0 && (
+                        <span className="grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+                          {pendingOrders}
+                        </span>
+                      )}
                     </Link>
                   )}
                   <form action={logoutAction}>

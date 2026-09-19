@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { auth } from "@/auth";
 import { CartProvider } from "@/lib/cart-context";
 import { listCategories } from "@/lib/category-store";
+import { countPendingOrders } from "@/lib/store";
 import { getSettings } from "@/lib/settings-store";
 import { SettingsProvider } from "@/lib/settings-context";
 
@@ -40,6 +41,8 @@ export default async function RootLayout({
     ? { name: session.user.name, role: session.user.role }
     : null;
   const [categories, settings] = await Promise.all([listCategories(), getSettings()]);
+  // 管理員：計算待處理（新）訂單數，供頁首紅點提示
+  const pendingOrders = user?.role === "ADMIN" ? await countPendingOrders() : 0;
 
   return (
     <html
@@ -49,7 +52,7 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col bg-white">
         <SettingsProvider value={settings}>
           <CartProvider>
-            <SiteHeader user={user} categories={categories} />
+            <SiteHeader user={user} categories={categories} pendingOrders={pendingOrders} />
             <main className="flex-1">{children}</main>
             <SiteFooter />
           </CartProvider>
