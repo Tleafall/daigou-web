@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { listActiveProducts } from "@/lib/product-store";
 import { ProductCard } from "@/components/product-card";
 import { EmptyState } from "@/components/empty-state";
+import { SearchTracker } from "@/components/search-tracker";
 
 export const metadata: Metadata = { title: "搜尋" };
 
@@ -20,6 +21,7 @@ export default async function SearchPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
+      {query && <SearchTracker query={query} />}
       <h1 className="mb-1 text-xl font-bold">搜尋結果</h1>
       <p className="mb-6 text-sm text-ink/50">
         {query ? `關鍵字「${query}」，共 ${results.length} 件` : "請輸入關鍵字"}

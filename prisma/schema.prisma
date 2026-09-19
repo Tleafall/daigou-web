@@ -124,6 +124,25 @@ model Product {
   @@index([status])
 }
 
+// 使用者行為事件（只默默收集，供未來推薦演算法用；不含管理員/自己人）。
+// type：VIEW（瀏覽商品）/ ADD_TO_CART（加入購物車）/ SEARCH（搜尋）。
+model Event {
+  id          String   @id @default(cuid())
+  type        String
+  userId      String? // 登入會員 id（訪客為 null）
+  visitorId   String? // 匿名訪客 cookie 編號
+  productSlug String? // VIEW / ADD_TO_CART 用
+  query       String? // SEARCH 用
+  meta        Json? // 額外資訊（規格、數量等）
+  createdAt   DateTime @default(now())
+
+  @@index([type])
+  @@index([productSlug])
+  @@index([userId])
+  @@index([visitorId])
+  @@index([createdAt])
+}
+
 // ------------------------------------------------------------------
 // 訂單（品項 / 退換貨等以 JSON 欄位保存快照）
 // ------------------------------------------------------------------

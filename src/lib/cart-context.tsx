@@ -71,6 +71,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
         return [...prev, { ...item, key, quantity: Math.min(MAX_QTY, qty) }];
       });
+      // 記錄「加入購物車」事件（供未來推薦用；管理員在伺服器端會被排除；失敗忽略）
+      fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "ADD_TO_CART",
+          slug: item.productSlug,
+          meta: { variantId: item.variantId, qty },
+        }),
+      }).catch(() => {});
     },
     [],
   );
