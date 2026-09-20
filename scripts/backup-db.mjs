@@ -67,7 +67,7 @@ try {
   const kb = Math.round(statSync(outFile).size / 1024);
   console.log(`✓ 備份完成：${outFile}（${kb} KB）`);
 
-  // 再複製一份到雲端同步資料夾（有的話）
+  // 方式一：複製到會自動同步的資料夾（OneDrive / Google Drive 桌面版）
   const cloud = cloudDir();
   if (cloud) {
     try {
@@ -77,9 +77,26 @@ try {
     } catch (e) {
       console.warn(`⚠ 雲端複製失敗（本機備份已完成）：${e.message}`);
     }
-  } else {
+  }
+
+  // 方式二：用 rclone 上傳（免安裝、免管理員；適合 Google Drive）。
+  // 需設環境變數 RCLONE_REMOTE（如 gdrive:daigou-backup）與 RCLONE_EXE（rclone.exe 路徑）。
+  const rcloneRemote = process.env.RCLONE_REMOTE;
+  if (rcloneRemote) {
+    const rcloneExe = process.env.RCLONE_EXE || "rclone";
+    try {
+      execFileSync(rcloneExe, ["copy", outFile, rcloneRemote], {
+        stdio: ["ignore", "inherit", "inherit"],
+      });
+      console.log(`✓ 已用 rclone 上傳到雲端：${rcloneRemote}`);
+    } catch (e) {
+      console.warn(`⚠ rclone 上傳失敗（本機備份已完成）：${e.message}`);
+    }
+  }
+
+  if (!cloud && !rcloneRemote) {
     console.log(
-      "ℹ 尚未設定雲端備份。裝好 OneDrive 或設環境變數 BACKUP_CLOUD_DIR 後，會自動再上雲一份。",
+      "ℹ 尚未設定雲端備份。設定 BACKUP_CLOUD_DIR 或 RCLONE_REMOTE 後，會自動再上雲一份。",
     );
   }
 } catch (e) {
