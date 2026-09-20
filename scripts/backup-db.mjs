@@ -12,11 +12,15 @@
  * 需要系統有 PostgreSQL 的 pg_dump。找不到時可用環境變數 PG_DUMP 指定完整路徑，例如：
  *   PG_DUMP="C:\\Program Files\\PostgreSQL\\17\\bin\\pg_dump.exe"
  */
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
 import { execFileSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+// 從專案根目錄載入 .env（不論從哪個資料夾或排程啟動，都讀得到 DATABASE_URL）
+const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+loadEnv({ path: join(projectRoot, ".env") });
 
 const url = new URL(process.env.DATABASE_URL ?? "");
 const user = decodeURIComponent(url.username);
@@ -25,7 +29,6 @@ const host = url.hostname || "localhost";
 const port = url.port || "5432";
 const db = url.pathname.replace(/^\//, "").split("?")[0];
 
-const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const backupDir = join(projectRoot, "backups");
 mkdirSync(backupDir, { recursive: true });
 
