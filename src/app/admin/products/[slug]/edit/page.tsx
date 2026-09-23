@@ -8,6 +8,7 @@ import { updateProductAction } from "@/lib/product-actions";
 import { ProductVariantBuilder } from "@/components/product-variant-builder";
 import { ProductImageManager } from "@/components/product-image-manager";
 import { AutoTextarea } from "@/components/auto-textarea";
+import { SubmitButton } from "@/components/submit-button";
 
 export const metadata: Metadata = { title: "編輯商品" };
 
@@ -125,9 +126,12 @@ export default async function EditProductPage({
         </div>
 
         <div className="flex gap-2">
-          <button className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600">
+          <SubmitButton
+            pendingText="儲存中…"
+            className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+          >
             儲存變更
-          </button>
+          </SubmitButton>
           <Link href={`/products/${product.slug}`} className="rounded-full border border-line px-6 py-2.5 text-sm text-ink/60 hover:border-brand">
             預覽商品頁
           </Link>

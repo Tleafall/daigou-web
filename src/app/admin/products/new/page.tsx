@@ -7,6 +7,7 @@ import { createProductAction } from "@/lib/product-actions";
 import { ProductVariantBuilder } from "@/components/product-variant-builder";
 import { ProductImagePicker } from "@/components/product-image-picker";
 import { AutoTextarea } from "@/components/auto-textarea";
+import { SubmitButton } from "@/components/submit-button";
 
 export const metadata: Metadata = { title: "新增商品" };
 
@@ -84,9 +85,12 @@ export default async function NewProductPage({
         </fieldset>
 
         <div className="flex gap-2">
-          <button className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600">
+          <SubmitButton
+            pendingText="建立中…"
+            className="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
+          >
             建立商品
-          </button>
+          </SubmitButton>
           <Link href="/admin/products" className="rounded-full border border-line px-6 py-2.5 text-sm text-ink/60 hover:border-brand">
             取消
           </Link>
