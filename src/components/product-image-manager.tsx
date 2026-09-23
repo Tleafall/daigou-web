@@ -13,9 +13,9 @@ import {
   moveProductImage,
   setProductImageTag,
 } from "@/lib/product-image-actions";
+import { shrinkImageFile } from "@/lib/resize-image";
 
 const MAX_IMAGES = 6;
-const MAX_SIZE = 2_000_000;
 
 function readAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -55,18 +55,17 @@ export function ProductImageManager({
     const valid: File[] = [];
     for (const f of picked) {
       if (!f.type.startsWith("image/")) continue;
-      if (f.size > MAX_SIZE) {
-        setMsg(`「${f.name}」超過 2MB，已略過`);
-        continue;
-      }
       valid.push(f);
       if (valid.length >= room) break;
     }
     if (valid.length === 0) return;
     setUploading(true);
-    setMsg("上傳中…");
+    setMsg("處理中…");
     try {
-      const dataUrls = await Promise.all(valid.map(readAsDataUrl));
+      // 送出前自動縮小 + 壓縮，避免上傳太慢/超時，也不會被大小限制擋掉
+      const shrunk = await Promise.all(valid.map(shrinkImageFile));
+      const dataUrls = await Promise.all(shrunk.map(readAsDataUrl));
+      setMsg("上傳中…");
       const res = await addProductImages(slug, dataUrls);
       setMsg(res.ok ? "已上傳" : res.error ?? "上傳失敗");
     } catch {
