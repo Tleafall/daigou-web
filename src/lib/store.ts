@@ -3,7 +3,7 @@ import { cache } from "react";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { adjustVariantStock, getActiveProduct } from "@/lib/product-store";
-import { getSettings } from "@/lib/settings-store";
+import { getSettings, decrementPromoRemaining } from "@/lib/settings-store";
 import { shippingFeeFor } from "@/lib/shipping";
 
 export type OrderStatus =
@@ -280,6 +280,9 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
   for (const it of items) {
     await adjustVariantStock(it.variantId, -it.quantity, "SALE", "下單扣庫存", orderNo);
   }
+
+  // 促銷活動：每來一筆訂單，剩餘名額 -1（活動開啟且還有名額時）
+  await decrementPromoRemaining();
 
   return { ok: true, orderNo };
 }

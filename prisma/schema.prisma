@@ -87,6 +87,9 @@ model SiteSettings {
   lowStockThreshold     Int
   botEnabled            Boolean
   botMessage            String
+  promoEnabled          Boolean  @default(false) // 促銷活動橫幅開關
+  promoText             String   @default("") // 活動文字（例：🎁 開幕慶・前 10 名下單送小禮）
+  promoRemaining        Int      @default(0) // 剩餘名額；下單自動 -1，可手動調整；≤0 收起
   updatedAt             DateTime @updatedAt
 }
 

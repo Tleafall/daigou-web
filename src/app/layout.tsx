@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { PromoBanner } from "@/components/promo-banner";
 import { auth } from "@/auth";
 import { CartProvider } from "@/lib/cart-context";
 import { listCategories } from "@/lib/category-store";
@@ -53,6 +54,7 @@ export default async function RootLayout({
         <SettingsProvider value={settings}>
           <CartProvider>
             <SiteHeader user={user} categories={categories} pendingOrders={pendingOrders} />
+            <PromoBanner />
             <main className="flex-1">{children}</main>
             <SiteFooter />
           </CartProvider>

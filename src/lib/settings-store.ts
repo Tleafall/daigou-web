@@ -17,6 +17,9 @@ export type Settings = {
   lowStockThreshold: number; // 「剩餘」模式：庫存 ≤ 此數才顯示（催單）
   botEnabled: boolean; // 客服自動回覆是否啟用（客服已改用官方 LINE，保留欄位）
   botMessage: string;
+  promoEnabled: boolean; // 促銷活動橫幅開關
+  promoText: string; // 活動文字（橫幅會在後面自動接「・僅剩 X 名」）
+  promoRemaining: number; // 剩餘名額；下單自動 -1、可手動調整；≤0 自動收起
 };
 
 export const DEFAULTS: Settings = {
@@ -32,6 +35,9 @@ export const DEFAULTS: Settings = {
   lowStockThreshold: 5,
   botEnabled: false,
   botMessage: "您好，感謝來訊！小幫手先為您服務，賣家看到後會盡快親自回覆您 😊",
+  promoEnabled: false,
+  promoText: "🎁 開幕慶・前 10 名下單送小禮",
+  promoRemaining: 10,
 };
 
 // 讀取（未初始化回預設）；以 React cache 於單次請求內去重，避免列表 N+1 查詢
@@ -51,6 +57,9 @@ export const getSettings = cache(async (): Promise<Settings> => {
     lowStockThreshold: row.lowStockThreshold,
     botEnabled: row.botEnabled,
     botMessage: row.botMessage,
+    promoEnabled: row.promoEnabled,
+    promoText: row.promoText,
+    promoRemaining: row.promoRemaining,
   };
 });
 
@@ -70,6 +79,9 @@ export async function updateSettings(patch: Partial<Settings>) {
         lowStockThreshold: row.lowStockThreshold,
         botEnabled: row.botEnabled,
         botMessage: row.botMessage,
+        promoEnabled: row.promoEnabled,
+        promoText: row.promoText,
+        promoRemaining: row.promoRemaining,
       }
     : { ...DEFAULTS };
   const next = { ...current, ...patch };
@@ -78,4 +90,17 @@ export async function updateSettings(patch: Partial<Settings>) {
     create: { id: "singleton", ...next },
     update: next,
   });
+}
+
+// 下單時把促銷剩餘名額 -1（只在活動開啟且還有名額時）。
+// 用單一條件式 UPDATE：不會扣成負數、也避免同時多筆訂單互相蓋掉。
+export async function decrementPromoRemaining(): Promise<void> {
+  try {
+    await prisma.siteSettings.updateMany({
+      where: { id: "singleton", promoEnabled: true, promoRemaining: { gt: 0 } },
+      data: { promoRemaining: { decrement: 1 } },
+    });
+  } catch {
+    /* 促銷計數為輔助功能，失敗不影響下單 */
+  }
 }

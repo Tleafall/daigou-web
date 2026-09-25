@@ -30,6 +30,9 @@ export async function updateSettingsAction(formData: FormData) {
     lowStockThreshold: toInt(formData.get("lowStockThreshold"), 5),
     botEnabled: formData.get("botEnabled") === "on",
     botMessage: String(formData.get("botMessage") || "").trim(),
+    promoEnabled: formData.get("promoEnabled") === "on",
+    promoText: String(formData.get("promoText") || "").trim(),
+    promoRemaining: toInt(formData.get("promoRemaining"), 0),
   });
 
   revalidatePath("/", "layout"); // 全站導覽/頁尾/促銷條即時更新

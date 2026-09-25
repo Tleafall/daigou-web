@@ -7,7 +7,7 @@ export async function SiteFooter() {
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 py-10 sm:grid-cols-4">
         <div className="col-span-2 sm:col-span-1">
           <div className="text-lg font-bold text-brand">{site.name}</div>
-          <p className="mt-2 text-sm text-ink/60">{site.tagline}</p>
+          {site.tagline && <p className="mt-2 text-sm text-ink/60">{site.tagline}</p>}
         </div>
 
         {/* 「品牌介紹」暫時隱藏（連 /about 頁）。要恢復：把這段取消註解，並在檔案最上面加回 import Link from "next/link";
@@ -22,22 +22,24 @@ export async function SiteFooter() {
         <div>
           <div className="mb-3 text-sm font-semibold">聯絡我們</div>
           <ul className="space-y-2 text-sm text-ink/60">
-            <li>
-              LINE：
-              {site.lineUrl && /^https?:\/\//i.test(site.lineUrl) ? (
-                <a
-                  href={site.lineUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-brand hover:underline"
-                >
-                  點我加入 {site.lineId}
-                </a>
-              ) : (
-                site.lineId
-              )}
-            </li>
-            <li>Email：{site.email}</li>
+            {site.lineId && (
+              <li>
+                LINE：
+                {site.lineUrl && /^https?:\/\//i.test(site.lineUrl) ? (
+                  <a
+                    href={site.lineUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-brand hover:underline"
+                  >
+                    點我加入 {site.lineId}
+                  </a>
+                ) : (
+                  site.lineId
+                )}
+              </li>
+            )}
+            {site.email && <li>Email：{site.email}</li>}
           </ul>
         </div>
       </div>

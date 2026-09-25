@@ -111,6 +111,44 @@ export default async function AdminSettingsPage({
           「顯示剩餘數」時，只有庫存 ≤ 上面的數字才會顯示「僅剩 N 件」，避免庫存很多時反而沒急迫感。
         </p>
 
+        {/* 促銷活動橫幅 */}
+        <div className="rounded-lg border border-line p-4">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input
+              type="checkbox"
+              name="promoEnabled"
+              defaultChecked={s.promoEnabled}
+              className="h-4 w-4"
+            />
+            開啟促銷活動橫幅（全站最上方顯示）
+          </label>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <label className="text-sm sm:col-span-2">
+              <span className="mb-1 block text-ink/70">活動文字</span>
+              <input
+                name="promoText"
+                defaultValue={s.promoText}
+                placeholder="🎁 開幕慶・前 10 名下單送小禮"
+                className={inputClass}
+              />
+            </label>
+            <label className="text-sm">
+              <span className="mb-1 block text-ink/70">剩餘名額</span>
+              <input
+                name="promoRemaining"
+                type="number"
+                min="0"
+                defaultValue={s.promoRemaining}
+                className={inputClass}
+              />
+            </label>
+          </div>
+          <p className="mt-2 text-xs text-ink/40">
+            橫幅會顯示成「<b>{s.promoText || "活動文字"}・僅剩 N 名</b>」。每來一筆訂單「剩餘名額」自動 −1，
+            歸零時橫幅自動收起。你也可以隨時直接改上面的「剩餘名額」數字（例如補名額、或提早結束就設為 0）。
+          </p>
+        </div>
+
         {/* 客服自動回覆 */}
         <div className="rounded-lg border border-line p-4">
           <label className="flex items-center gap-2 text-sm font-medium">
