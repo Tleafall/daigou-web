@@ -3,7 +3,11 @@ import { cache } from "react";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { adjustVariantStock, getActiveProduct } from "@/lib/product-store";
-import { getSettings, decrementPromoRemaining } from "@/lib/settings-store";
+import {
+  getSettings,
+  decrementPromoRemaining,
+  incrementPromoRemaining,
+} from "@/lib/settings-store";
 import { shippingFeeFor } from "@/lib/shipping";
 
 export type OrderStatus =
@@ -142,6 +146,13 @@ export async function listAllOrders(): Promise<Order[]> {
 
 export async function listOrdersByUser(userId: string): Promise<Order[]> {
   return (await allOrders()).filter((o) => o.userId === userId);
+}
+
+// 某帳號目前「還沒結束」的訂單數（待確認／已確認／已出貨待取貨）
+export async function countOpenOrdersByUser(userId: string): Promise<number> {
+  return prisma.order.count({
+    where: { userId, status: { in: ["PENDING", "CONFIRMED", "SHIPPED"] } },
+  });
 }
 
 // 待處理（新）訂單數：PENDING = 待確認，供後台紅點提示用
@@ -283,8 +294,10 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
     await adjustVariantStock(it.variantId, -it.quantity, "SALE", "下單扣庫存", orderNo);
   }
 
-  // 促銷活動：每來一筆訂單，剩餘名額 -1（活動開啟且還有名額時）
-  await decrementPromoRemaining();
+  // 促銷活動：每來一筆訂單，剩餘名額 -1（活動開啟且還有名額時），並記下這筆有佔名額
+  if (await decrementPromoRemaining()) {
+    await prisma.order.update({ where: { orderNo }, data: { promoClaimed: true } });
+  }
 
   return { ok: true, orderNo };
 }
@@ -353,8 +366,12 @@ export async function cancelOrder(
       cancelledBy: by,
       cancellationReason: reason,
       abandoned: opts?.abandoned ?? false,
+      promoClaimed: false,
     },
   });
+
+  // 這筆訂單有佔促銷名額 → 補回去，讓下一位客人可以拿到
+  if (o.promoClaimed) await incrementPromoRemaining();
 
   // 取消/棄單回補庫存
   const items = o.items as unknown as OrderItem[];
@@ -391,6 +408,10 @@ export async function restoreOrder(orderNo: string): Promise<TransitionResult> {
   const items = o.items as unknown as OrderItem[];
   for (const it of items) {
     await adjustVariantStock(it.variantId, -it.quantity, "SALE", "訂單復原扣庫存", o.orderNo);
+  }
+  // 若活動還有名額，復原的訂單重新佔一個
+  if (await decrementPromoRemaining()) {
+    await prisma.order.update({ where: { orderNo }, data: { promoClaimed: true } });
   }
   return { ok: true };
 }

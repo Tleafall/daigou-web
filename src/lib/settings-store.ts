@@ -20,6 +20,7 @@ export type Settings = {
   promoEnabled: boolean; // 促銷活動橫幅開關
   promoText: string; // 活動文字（橫幅會在後面自動接「・僅剩 X 名」）
   promoRemaining: number; // 剩餘名額；下單自動 -1、可手動調整；≤0 自動收起
+  maxOpenOrders: number; // 每個帳號最多同時幾筆未完成訂單（0＝不限制）
 };
 
 export const DEFAULTS: Settings = {
@@ -38,6 +39,7 @@ export const DEFAULTS: Settings = {
   promoEnabled: false,
   promoText: "🎁 開幕慶・前 10 名下單送小禮",
   promoRemaining: 10,
+  maxOpenOrders: 3,
 };
 
 // 讀取（未初始化回預設）；以 React cache 於單次請求內去重，避免列表 N+1 查詢
@@ -60,6 +62,7 @@ export const getSettings = cache(async (): Promise<Settings> => {
     promoEnabled: row.promoEnabled,
     promoText: row.promoText,
     promoRemaining: row.promoRemaining,
+    maxOpenOrders: row.maxOpenOrders,
   };
 });
 
@@ -82,6 +85,7 @@ export async function updateSettings(patch: Partial<Settings>) {
         promoEnabled: row.promoEnabled,
         promoText: row.promoText,
         promoRemaining: row.promoRemaining,
+        maxOpenOrders: row.maxOpenOrders,
       }
     : { ...DEFAULTS };
   const next = { ...current, ...patch };
@@ -94,13 +98,27 @@ export async function updateSettings(patch: Partial<Settings>) {
 
 // 下單時把促銷剩餘名額 -1（只在活動開啟且還有名額時）。
 // 用單一條件式 UPDATE：不會扣成負數、也避免同時多筆訂單互相蓋掉。
-export async function decrementPromoRemaining(): Promise<void> {
+// 回傳 true 表示這筆訂單確實佔到一個名額（取消時才需要補回）。
+export async function decrementPromoRemaining(): Promise<boolean> {
   try {
-    await prisma.siteSettings.updateMany({
+    const r = await prisma.siteSettings.updateMany({
       where: { id: "singleton", promoEnabled: true, promoRemaining: { gt: 0 } },
       data: { promoRemaining: { decrement: 1 } },
     });
+    return r.count > 0;
   } catch {
-    /* 促銷計數為輔助功能，失敗不影響下單 */
+    return false; /* 促銷計數為輔助功能，失敗不影響下單 */
+  }
+}
+
+// 佔過名額的訂單被取消時，把名額補回來。
+export async function incrementPromoRemaining(): Promise<void> {
+  try {
+    await prisma.siteSettings.updateMany({
+      where: { id: "singleton" },
+      data: { promoRemaining: { increment: 1 } },
+    });
+  } catch {
+    /* 同上 */
   }
 }

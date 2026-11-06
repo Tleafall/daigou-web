@@ -111,6 +111,21 @@ export default async function AdminSettingsPage({
           「顯示剩餘數」時，只有庫存 ≤ 上面的數字才會顯示「僅剩 N 件」，避免庫存很多時反而沒急迫感。
         </p>
 
+        {/* 防惡意下單 */}
+        <label className="text-sm">
+          <span className="mb-1 block text-ink/70">每個帳號最多同時幾筆未完成訂單</span>
+          <input
+            name="maxOpenOrders"
+            type="number"
+            min="0"
+            defaultValue={s.maxOpenOrders}
+            className={`${inputClass} w-32`}
+          />
+          <span className="mt-1 block text-xs text-ink/40">
+            「未完成」＝待確認、已確認、已出貨但還沒取貨。超過這個數量就不能再下單，可防止有人一直下單不取貨、佔掉庫存和促銷名額。設 0 為不限制。
+          </span>
+        </label>
+
         {/* 促銷活動橫幅 */}
         <div className="rounded-lg border border-line p-4">
           <label className="flex items-center gap-2 text-sm font-medium">

@@ -33,6 +33,7 @@ export async function updateSettingsAction(formData: FormData) {
     promoEnabled: formData.get("promoEnabled") === "on",
     promoText: String(formData.get("promoText") || "").trim(),
     promoRemaining: toInt(formData.get("promoRemaining"), 0),
+    maxOpenOrders: toInt(formData.get("maxOpenOrders"), 3),
   });
 
   revalidatePath("/", "layout"); // 全站導覽/頁尾/促銷條即時更新

@@ -90,6 +90,7 @@ model SiteSettings {
   promoEnabled          Boolean  @default(false) // 促銷活動橫幅開關
   promoText             String   @default("") // 活動文字（例：🎁 開幕慶・前 10 名下單送小禮）
   promoRemaining        Int      @default(0) // 剩餘名額；下單自動 -1，可手動調整；≤0 收起
+  maxOpenOrders         Int      @default(3) // 每個帳號最多同時幾筆未完成訂單（0＝不限制）
   updatedAt             DateTime @updatedAt
 }
 
@@ -173,6 +174,7 @@ model Order {
   storeAddress       String
   customerNote       String?
   createdAt          DateTime @default(now())
+  promoClaimed       Boolean  @default(false) // 這筆訂單是否佔用了促銷名額（取消時補回）
   updatedAt          DateTime @updatedAt
 
   @@index([userId, createdAt])

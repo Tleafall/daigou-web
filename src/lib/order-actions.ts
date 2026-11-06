@@ -3,12 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { isBlocked } from "@/lib/customer-store";
+import { getSettings } from "@/lib/settings-store";
 import { getStoreById } from "@/lib/stores-711";
 import { savePickupProfile } from "@/lib/pickup-store";
 import {
   adminAdvance,
   adminRevert,
   cancelOrder,
+  countOpenOrdersByUser,
   createOrder,
   getOrder,
   requestReturn,
@@ -35,6 +37,17 @@ export async function createOrderAction(
   const userId = session.user.id ?? session.user.email ?? "unknown";
   if (await isBlocked(userId))
     return { ok: false, error: "此帳號目前無法下單，請聯繫客服。" };
+
+  // 防惡意下單：同一帳號同時未完成的訂單有上限（後台「網站設定」可調，0＝不限）
+  const { maxOpenOrders } = await getSettings();
+  if (maxOpenOrders > 0) {
+    const open = await countOpenOrdersByUser(userId);
+    if (open >= maxOpenOrders)
+      return {
+        ok: false,
+        error: `您目前有 ${open} 筆訂單尚未完成，請待取貨完成後再下單；如需協助請聯繫客服。`,
+      };
+  }
 
   const name = input.recipientName?.trim();
   const phone = input.recipientPhone?.trim();
