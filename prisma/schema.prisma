@@ -120,6 +120,7 @@ model Product {
   status       String   @default("ACTIVE") // ACTIVE / ARCHIVED / DRAFT
   views        Int      @default(0) // 商品頁被瀏覽次數
   featured     Boolean  @default(false) // 首頁「精選推薦」是否顯示
+  soldBase     Int? // 基礎銷售數（顯示用起始值；null＝依商品編號自動給 0～5）
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

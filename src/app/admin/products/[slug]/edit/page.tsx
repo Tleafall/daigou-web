@@ -108,6 +108,20 @@ export default async function EditProductPage({
         </div>
 
         <label className="text-sm">
+          <span className="mb-1 block text-ink/70">基礎銷售數（「已售」的起始值）</span>
+          <input
+            name="soldBase"
+            type="number"
+            min="0"
+            defaultValue={product.soldBase}
+            className={`${inputClass} w-32`}
+          />
+          <span className="mt-1 block text-xs text-ink/40">
+            前台「已售」＝這個數字＋實際賣出的數量（需在網站設定把「商品旁顯示數量」設成「已售數」才會顯示）。設 0 就只顯示真實銷量。
+          </span>
+        </label>
+
+        <label className="text-sm">
           <span className="mb-1 block text-ink/70">商品敘述</span>
           <AutoTextarea name="description" defaultValue={product.description} className={`${inputClass} min-h-32`} />
         </label>

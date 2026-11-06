@@ -31,7 +31,7 @@ export default async function ProductPage({
 
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
   const [countLabel, catName] = await Promise.all([
-    productCountLabel(product.slug, totalStock),
+    productCountLabel(product.slug, totalStock, product.soldBase),
     categoryName(product.categorySlug),
   ]);
 

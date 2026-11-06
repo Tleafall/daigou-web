@@ -37,7 +37,15 @@ type ProductRow = {
   status: string;
   views: number;
   featured: boolean;
+  soldBase: number | null;
 };
+
+// 未手動設定基礎銷售數時，依商品編號算出固定的 0～5（同一商品每次都一樣，不會跳動）
+export function autoSoldBase(slug: string): number {
+  let h = 0;
+  for (const ch of slug) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h % 6;
+}
 
 // DB 列 → 應用型別（id 對外沿用 slug，全站以 slug 為商品識別）
 function toProduct(r: ProductRow): Product {
@@ -55,6 +63,7 @@ function toProduct(r: ProductRow): Product {
     status: r.status as ProductStatus,
     views: r.views,
     featured: r.featured,
+    soldBase: r.soldBase ?? autoSoldBase(r.slug),
   };
 }
 
@@ -198,6 +207,7 @@ export type UpdateProductInput = {
   optionGroups: OptionGroup[];
   // 完整的新規格集合（可新增/移除/改選項）；沿用選項相同者的既有 id 與庫存
   variants: { options: Record<string, string>; price: number; stock: number }[];
+  soldBase?: number; // 基礎銷售數（不帶則不變）
 };
 
 // 用排序後的選項組成簽章，讓「同一組選項」不論鍵順序都對得起來
@@ -257,6 +267,7 @@ export async function updateProduct(
         optionGroups: json(input.optionGroups),
         variants: json(nextVariants),
         price: Math.min(...nextVariants.map((v) => v.price)),
+        ...(input.soldBase !== undefined ? { soldBase: input.soldBase } : {}),
       },
     });
     for (const m of movements) {

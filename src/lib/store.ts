@@ -167,9 +167,11 @@ export async function soldCountForProduct(slug: string): Promise<number> {
 export async function productCountLabel(
   slug: string,
   totalStock: number,
+  soldBase = 0, // 基礎銷售數；顯示＝基礎＋實際賣出
 ): Promise<string | null> {
   const s = await getSettings();
-  if (s.productCountDisplay === "sold") return `已售 ${await soldCountForProduct(slug)}`;
+  if (s.productCountDisplay === "sold")
+    return `已售 ${soldBase + (await soldCountForProduct(slug))}`;
   if (s.productCountDisplay === "stock") {
     // 只在庫存低於門檻時顯示「僅剩 X 件」催單；庫存充足或 0 都不顯示
     return totalStock > 0 && totalStock <= s.lowStockThreshold

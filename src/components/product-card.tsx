@@ -9,7 +9,7 @@ export async function ProductCard({ product }: { product: Product }) {
   const prices = product.variants.map((v) => v.price);
   const hasPriceRange = prices.length > 0 && Math.max(...prices) > Math.min(...prices);
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
-  const countLabel = await productCountLabel(product.slug, totalStock);
+  const countLabel = await productCountLabel(product.slug, totalStock, product.soldBase);
   const catName = await categoryName(product.categorySlug);
 
   return (

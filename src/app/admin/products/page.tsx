@@ -28,6 +28,8 @@ export default async function AdminProductsPage({
     updated?: string;
     deleted?: string;
     title?: string;
+    q?: string;
+    cat?: string;
   }>;
 }) {
   await requireAdmin();
@@ -37,7 +39,16 @@ export default async function AdminProductsPage({
   ]);
   const catName = (slug: string) =>
     categories.find((c) => c.slug === slug)?.name ?? "商品";
-  const { created, updated, deleted, title: noticeTitle } = await searchParams;
+  const { created, updated, deleted, title: noticeTitle, q, cat } = await searchParams;
+  // 搜尋：商品名稱關鍵字（不分大小寫，可用空白分隔多個字）＋分類
+  const keyword = (q ?? "").trim().toLowerCase();
+  const terms = keyword.split(/\s+/).filter(Boolean);
+  const filtered = products.filter(
+    (p) =>
+      (!cat || p.categorySlug === cat) &&
+      terms.every((t) => p.title.toLowerCase().includes(t)),
+  );
+  const searching = terms.length > 0 || Boolean(cat);
   const tt = noticeTitle ? `「${noticeTitle}」` : "";
   const notice = created
     ? `商品${tt}新增成功`
@@ -74,6 +85,39 @@ export default async function AdminProductsPage({
         </div>
       </div>
 
+      {/* 搜尋 */}
+      <form method="get" className="mb-4 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder="搜尋商品名稱…"
+          autoFocus={Boolean(q)}
+          className="min-w-0 flex-1 rounded-full border border-line px-4 py-2 text-sm outline-none focus:border-brand"
+        />
+        <select
+          name="cat"
+          defaultValue={cat ?? ""}
+          className="rounded-full border border-line px-3 py-2 text-sm outline-none focus:border-brand"
+        >
+          <option value="">全部分類</option>
+          {categories.map((c) => (
+            <option key={c.slug} value={c.slug}>{c.name}</option>
+          ))}
+        </select>
+        <button className="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-brand-600">
+          搜尋
+        </button>
+        {searching && (
+          <Link href="/admin/products" className="text-sm text-ink/50 hover:text-brand">
+            清除
+          </Link>
+        )}
+      </form>
+      <p className="mb-2 text-xs text-ink/50">
+        {searching ? `找到 ${filtered.length} 件（共 ${products.length} 件）` : `共 ${products.length} 件商品`}
+      </p>
+
       <div className="overflow-x-auto rounded-xl border border-line bg-white">
         <table className="w-full min-w-[680px] text-sm">
           <thead className="border-b border-line bg-muted text-left text-xs text-ink/60">
@@ -90,7 +134,7 @@ export default async function AdminProductsPage({
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => {
+            {filtered.map((p) => {
               const stock = p.variants.reduce((s, v) => s + v.stock, 0);
               const min = Math.min(...p.variants.map((v) => v.price));
               const max = Math.max(...p.variants.map((v) => v.price));
@@ -154,6 +198,13 @@ export default async function AdminProductsPage({
                 </tr>
               );
             })}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={9} className="px-4 py-10 text-center text-ink/50">
+                  找不到符合的商品
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
