@@ -52,6 +52,22 @@ export async function SiteFooter() {
             {site.email && <li>Email：{site.email}</li>}
           </ul>
         </div>
+
+        {/* 官網 QR code：電腦上逛的客人用手機一掃就能繼續看；點圖可下載分享 */}
+        <div>
+          <div className="mb-3 text-sm font-semibold">手機掃描逛官網</div>
+          <a href="/qrcode.png" download={`${site.name}-QRcode.png`} title="點擊下載 QR code">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/qrcode.svg"
+              alt={`${site.name}官網 QR code`}
+              width={112}
+              height={112}
+              className="h-28 w-28 rounded-lg border border-line bg-white p-1.5"
+            />
+          </a>
+          <p className="mt-2 text-xs text-ink/40">點圖可下載，分享給朋友</p>
+        </div>
       </div>
 
       <div className="border-t border-line py-4 text-center text-xs text-ink/50">
