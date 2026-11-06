@@ -25,6 +25,12 @@ export default async function RegisterPage() {
           <RegisterForm />
         </div>
 
+        <p className="mt-3 text-center text-xs text-ink/50">
+          註冊即表示您同意本店的
+          <Link href="/terms" className="text-brand hover:underline">服務條款</Link>與
+          <Link href="/privacy" className="text-brand hover:underline">隱私權政策</Link>
+        </p>
+
         <p className="mt-4 text-center text-sm text-ink/60">
           已經有帳號了？{" "}
           <Link href="/login" className="font-medium text-brand hover:underline">

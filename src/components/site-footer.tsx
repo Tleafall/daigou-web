@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSettings } from "@/lib/settings-store";
 
 export async function SiteFooter() {
@@ -10,7 +11,7 @@ export async function SiteFooter() {
           {site.tagline && <p className="mt-2 text-sm text-ink/60">{site.tagline}</p>}
         </div>
 
-        {/* 「品牌介紹」暫時隱藏（連 /about 頁）。要恢復：把這段取消註解，並在檔案最上面加回 import Link from "next/link";
+        {/* 「品牌介紹」暫時隱藏（連 /about 頁）。要恢復：把這段取消註解即可。
         <div>
           <div className="mb-3 text-sm font-semibold">關於我們</div>
           <ul className="space-y-2 text-sm text-ink/60">
@@ -18,6 +19,15 @@ export async function SiteFooter() {
           </ul>
         </div>
         */}
+
+        <div>
+          <div className="mb-3 text-sm font-semibold">顧客服務</div>
+          <ul className="space-y-2 text-sm text-ink/60">
+            <li><Link href="/returns" className="hover:text-brand">退換貨說明</Link></li>
+            <li><Link href="/terms" className="hover:text-brand">服務條款</Link></li>
+            <li><Link href="/privacy" className="hover:text-brand">隱私權政策</Link></li>
+          </ul>
+        </div>
 
         <div>
           <div className="mb-3 text-sm font-semibold">聯絡我們</div>

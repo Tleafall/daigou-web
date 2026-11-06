@@ -60,6 +60,14 @@ export default async function ProductPage({
           {product.description}
         </p>
       </section>
+
+      {/* 購買須知：依法須事先告知不適用七天猶豫期的情形，建議放在商品旁顯眼處 */}
+      <section className="mt-6 rounded-xl bg-muted px-4 py-3 text-sm leading-6 text-ink/60">
+        <b className="text-ink/80">購買須知：</b>
+        已拆封的化妝品、保養品等個人衛生用品，以及食品等保存期限較短的商品，
+        依《通訊交易解除權合理例外情事適用準則》不適用七天猶豫期；商品瑕疵或寄錯仍可退換。
+        <Link href="/returns" className="ml-1 text-brand hover:underline">詳見退換貨說明</Link>
+      </section>
     </div>
   );
 }
