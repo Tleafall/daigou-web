@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "結帳" };
 
 export default async function CheckoutPage() {
   const session = await auth();
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect("/login?next=/checkout");
 
   const userId = session.user.id ?? session.user.email ?? "";
   const profile = await getPickupProfile(userId);

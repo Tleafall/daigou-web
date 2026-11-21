@@ -1,5 +1,6 @@
 "use server";
 
+import { REFERRAL_SOURCES } from "@/lib/referral";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { isBlocked } from "@/lib/customer-store";
@@ -26,6 +27,7 @@ export type CheckoutInput = {
   storeName: string;
   storeAddress: string;
   customerNote?: string;
+  referralSource?: string;
 };
 
 export async function createOrderAction(
@@ -70,6 +72,9 @@ export async function createOrderAction(
     storeName: store.name,
     storeAddress: store.addr,
     customerNote: input.customerNote?.trim() || undefined,
+    referralSource: REFERRAL_SOURCES.includes(input.referralSource ?? "")
+      ? input.referralSource
+      : undefined,
   });
 
   // 下單成功後記住取貨資料，下次結帳自動帶入（不用重打）

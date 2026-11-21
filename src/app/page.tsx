@@ -9,13 +9,16 @@ import { listCategories } from "@/lib/category-store";
 import { countPendingOrders } from "@/lib/store";
 import { ProductCard } from "@/components/product-card";
 import { HeroCarousel } from "@/components/hero-carousel";
+import { getSettings } from "@/lib/settings-store";
+import { siteUrl } from "@/lib/site-url";
 
 export default async function Home() {
-  const [categories, active, latestAll, featuredPicked] = await Promise.all([
+  const [categories, active, latestAll, featuredPicked, settings] = await Promise.all([
     listCategories(),
     listActiveProducts(),
     latestActiveProducts(),
     listFeaturedProducts(),
+    getSettings(),
   ]);
   // 後台有勾選精選就用勾選的；還沒勾選任何商品時，先退回顯示前 5 件，首頁才不會空著
   const featured = featuredPicked.length > 0 ? featuredPicked : active.slice(0, 5);
@@ -26,8 +29,40 @@ export default async function Home() {
   const isAdmin = session?.user?.role === "ADMIN";
   const pendingOrders = isAdmin ? await countPendingOrders() : 0;
 
+  // 讓 Google 搜尋結果顯示正確的網站名稱（結構化資料）
+  const base = siteUrl();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${base}/#website`,
+        url: `${base}/`,
+        name: settings.name,
+        inLanguage: "zh-TW",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${base}/search?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "Organization",
+        "@id": `${base}/#organization`,
+        name: settings.name,
+        url: `${base}/`,
+        logo: `${base}/og-default.jpg`,
+        ...(settings.lineUrl ? { sameAs: [settings.lineUrl] } : {}),
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       {isAdmin && pendingOrders > 0 && (
         <Link
           href="/admin/orders"
@@ -43,6 +78,11 @@ export default async function Home() {
       )}
 
       <HeroCarousel />
+
+      {/* 信任標語：第一次來的客人最在意的兩件事 */}
+      <p className="mt-4 text-center text-sm font-medium text-ink/70">
+        🛡️ 到 7-11 取貨才付款・日韓正品現貨
+      </p>
 
       {/* 特色列 */}
       <section className="mt-4 grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-white py-3 text-center">

@@ -51,6 +51,7 @@ export type Order = {
   storeName: string;
   storeAddress: string;
   customerNote?: string;
+  referralSource?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -81,6 +82,7 @@ type OrderRow = {
   storeName: string;
   storeAddress: string;
   customerNote: string | null;
+  referralSource: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -110,6 +112,7 @@ function toOrder(r: OrderRow): Order {
     storeName: r.storeName,
     storeAddress: r.storeAddress,
     customerNote: r.customerNote ?? undefined,
+    referralSource: r.referralSource ?? undefined,
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
   };
@@ -178,11 +181,13 @@ export async function soldCountForProduct(slug: string): Promise<number> {
 export async function productCountLabel(
   slug: string,
   totalStock: number,
-  soldBase = 0, // 基礎銷售數；顯示＝基礎＋實際賣出
 ): Promise<string | null> {
   const s = await getSettings();
-  if (s.productCountDisplay === "sold")
-    return `已售 ${soldBase + (await soldCountForProduct(slug))}`;
+  if (s.productCountDisplay === "sold") {
+    // 只顯示真實銷量；還沒賣出就不顯示，避免「已售 0」反而扣分
+    const sold = await soldCountForProduct(slug);
+    return sold > 0 ? `已售 ${sold}` : null;
+  }
   if (s.productCountDisplay === "stock") {
     // 只在庫存低於門檻時顯示「僅剩 X 件」催單；庫存充足或 0 都不顯示
     return totalStock > 0 && totalStock <= s.lowStockThreshold
@@ -219,6 +224,7 @@ export type CreateOrderInput = {
   storeName: string;
   storeAddress: string;
   customerNote?: string;
+  referralSource?: string;
 };
 
 export const COD_MAX = 10000; // 取貨付款單筆上限
@@ -286,6 +292,7 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       storeName: input.storeName,
       storeAddress: input.storeAddress,
       customerNote: input.customerNote ?? null,
+      referralSource: input.referralSource ?? null,
     },
   });
 

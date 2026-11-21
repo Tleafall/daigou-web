@@ -115,6 +115,9 @@ export default async function AdminOrderDetailPage({
               </CopyText>
             </div>
             {order.customerNote && <div className="mt-1 text-ink/50">備註：{order.customerNote}</div>}
+            {order.referralSource && (
+              <div className="mt-1 text-ink/50">從哪裡知道我們：{order.referralSource}</div>
+            )}
           </div>
 
           {order.status === "CANCELLED" && (

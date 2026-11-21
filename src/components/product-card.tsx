@@ -3,13 +3,14 @@ import type { Product } from "@/lib/mock-data";
 import { formatTWD } from "@/lib/format";
 import { productCountLabel } from "@/lib/store";
 import { categoryName } from "@/lib/category-store";
+import { cldUrl } from "@/lib/cld";
 
 export async function ProductCard({ product }: { product: Product }) {
   // 只有「不同規格價格不一樣」時才顯示「起」（都同價就直接顯示金額）
   const prices = product.variants.map((v) => v.price);
   const hasPriceRange = prices.length > 0 && Math.max(...prices) > Math.min(...prices);
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
-  const countLabel = await productCountLabel(product.slug, totalStock, product.soldBase);
+  const countLabel = await productCountLabel(product.slug, totalStock);
   const catName = await categoryName(product.categorySlug);
 
   return (
@@ -26,7 +27,7 @@ export async function ProductCard({ product }: { product: Product }) {
         {product.images[0] && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={product.images[0].url}
+            src={cldUrl(product.images[0].url, 600)}
             alt={product.title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />

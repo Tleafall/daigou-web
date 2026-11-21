@@ -113,7 +113,6 @@ export async function updateProductAction(formData: FormData) {
     redirect(`/admin/products/${slug}/edit?error=1`);
   }
 
-  const soldBaseRaw = formData.get("soldBase");
   await updateProduct(slug, {
     title,
     description,
@@ -121,9 +120,6 @@ export async function updateProductAction(formData: FormData) {
     status,
     optionGroups,
     variants,
-    ...(soldBaseRaw !== null && String(soldBaseRaw).trim() !== ""
-      ? { soldBase: toInt(soldBaseRaw, 0) }
-      : {}),
   });
   revalidatePath("/admin/products");
   revalidatePath(`/products/${slug}`);

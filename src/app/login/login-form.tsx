@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "@/lib/auth-actions";
 
-export function LoginForm() {
+export function LoginForm({ next = "/" }: { next?: string }) {
   const [state, action, pending] = useActionState<LoginState, FormData>(
     loginAction,
     undefined,
@@ -11,6 +11,7 @@ export function LoginForm() {
 
   return (
     <form action={action} className="flex flex-col gap-3">
+      <input type="hidden" name="next" value={next} />
       {state?.error && (
         <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
           {state.error}

@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { registerAction, type RegisterState } from "@/lib/auth-actions";
 
-export function RegisterForm() {
+export function RegisterForm({ next = "/" }: { next?: string }) {
   const [state, action, pending] = useActionState<RegisterState, FormData>(
     registerAction,
     undefined,
@@ -14,6 +14,7 @@ export function RegisterForm() {
 
   return (
     <form action={action} className="flex flex-col gap-3">
+      <input type="hidden" name="next" value={next} />
       {state?.error && (
         <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
           {state.error}

@@ -121,7 +121,7 @@ model Product {
   status       String   @default("ACTIVE") // ACTIVE / ARCHIVED / DRAFT
   views        Int      @default(0) // 商品頁被瀏覽次數
   featured     Boolean  @default(false) // 首頁「精選推薦」是否顯示
-  soldBase     Int? // 基礎銷售數（顯示用起始值；null＝依商品編號自動給 0～5）
+  soldBase     Int? // （已停用）舊的基礎銷售數；前台已售只算真實銷量。保留欄位避免資料庫同步刪欄位
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -173,6 +173,7 @@ model Order {
   storeName          String
   storeAddress       String
   customerNote       String?
+  referralSource     String? // 結帳時客人選的「從哪裡知道我們」
   createdAt          DateTime @default(now())
   promoClaimed       Boolean  @default(false) // 這筆訂單是否佔用了促銷名額（取消時補回）
   updatedAt          DateTime @updatedAt

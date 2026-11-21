@@ -7,9 +7,16 @@ import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = { title: "註冊會員" };
 
-export default async function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next: rawNext } = await searchParams;
+  const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+
   const session = await auth();
-  if (session?.user) redirect("/");
+  if (session?.user) redirect(next);
 
   const site = await getSettings();
 
@@ -22,7 +29,7 @@ export default async function RegisterPage() {
         </p>
 
         <div className="mt-6">
-          <RegisterForm />
+          <RegisterForm next={next} />
         </div>
 
         <p className="mt-3 text-center text-xs text-ink/50">
@@ -33,7 +40,10 @@ export default async function RegisterPage() {
 
         <p className="mt-4 text-center text-sm text-ink/60">
           已經有帳號了？{" "}
-          <Link href="/login" className="font-medium text-brand hover:underline">
+          <Link
+            href={next === "/" ? "/login" : `/login?next=${encodeURIComponent(next)}`}
+            className="font-medium text-brand hover:underline"
+          >
             前往登入
           </Link>
         </p>

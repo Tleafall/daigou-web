@@ -10,6 +10,7 @@ import { createOrderAction } from "@/lib/order-actions";
 import { StorePicker } from "@/components/store-picker";
 import type { Store711 } from "@/lib/stores-711";
 import { shippingFeeFor } from "@/lib/shipping";
+import { REFERRAL_SOURCES } from "@/lib/referral";
 
 export function CheckoutForm({
   defaultName,
@@ -29,6 +30,7 @@ export function CheckoutForm({
   const [recipientName, setRecipientName] = useState(defaultName);
   const [recipientPhone, setRecipientPhone] = useState(defaultPhone);
   const [customerNote, setCustomerNote] = useState("");
+  const [referralSource, setReferralSource] = useState("");
   const [store, setStore] = useState<Store711 | null>(defaultStore);
 
   const shippingFee = shippingFeeFor(subtotal, site);
@@ -54,6 +56,7 @@ export function CheckoutForm({
         storeName: store.name,
         storeAddress: store.addr,
         customerNote,
+        referralSource,
       });
       if (result.ok) {
         clear();
@@ -140,6 +143,22 @@ export function CheckoutForm({
               使用 7-ELEVEN 賣貨便，商品寄到您選的門市，到店取貨並付款。
             </p>
           </div>
+
+          <label className="text-sm">
+            <span className="mb-1 block text-ink/70">您從哪裡知道我們？（選填）</span>
+            <select
+              className={inputClass}
+              value={referralSource}
+              onChange={(e) => setReferralSource(e.target.value)}
+            >
+              <option value="">請選擇</option>
+              {REFERRAL_SOURCES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </label>
 
           <label className="text-sm">
             <span className="mb-1 block text-ink/70">訂單備註（選填）</span>

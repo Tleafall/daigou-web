@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ChatProduct } from "@/lib/chat-store";
 import { formatTWD } from "@/lib/format";
+import { cldUrl } from "@/lib/cld";
 
 export function ChatProductCard({ product }: { product: ChatProduct }) {
   return (
@@ -14,7 +15,7 @@ export function ChatProductCard({ product }: { product: ChatProduct }) {
       >
         {product.image && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image} alt="" className="h-full w-full object-cover" />
+          <img src={cldUrl(product.image, 200)} alt="" className="h-full w-full object-cover" />
         )}
       </div>
       <div className="min-w-0">

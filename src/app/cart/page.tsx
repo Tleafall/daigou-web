@@ -6,6 +6,7 @@ import { formatTWD } from "@/lib/format";
 import { useSettings } from "@/lib/settings-context";
 import { EmptyState } from "@/components/empty-state";
 import { hasFreeShippingPromo, shippingFeeFor } from "@/lib/shipping";
+import { cldUrl } from "@/lib/cld";
 
 export default function CartPage() {
   const { items, subtotal, ready, setQty, removeItem } = useCart();
@@ -52,7 +53,7 @@ export default function CartPage() {
                 {it.image && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={it.image}
+                    src={cldUrl(it.image, 200)}
                     alt={it.productTitle}
                     className="h-full w-full object-cover"
                   />
@@ -127,7 +128,9 @@ export default function CartPage() {
           >
             前往結帳
           </Link>
-          <p className="mt-2 text-center text-xs text-ink/40">付款方式：7-11 賣貨便取貨付款</p>
+          <p className="mt-2 text-center text-xs text-ink/40">
+            到 7-11 取貨才付款・可用 LINE 一鍵登入，免註冊
+          </p>
         </div>
       </div>
     </div>

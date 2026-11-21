@@ -10,6 +10,12 @@ export type LoginState = { error?: string } | undefined;
 
 export type RegisterState = { error?: string } | undefined;
 
+// 登入/註冊後要回到的頁面（只接受站內路徑，避免被拿去導到外部網站）
+function safeNext(v: FormDataEntryValue | null): string {
+  const s = typeof v === "string" ? v : "";
+  return s.startsWith("/") && !s.startsWith("//") && !s.includes("\\") ? s : "/";
+}
+
 // Email 直接註冊：建立會員（密碼雜湊）後自動登入
 export async function registerAction(
   _prev: RegisterState,
@@ -35,7 +41,7 @@ export async function registerAction(
   await createCustomer({ email, name, phone, passwordHash });
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/" });
+    await signIn("credentials", { email, password, redirectTo: safeNext(formData.get("next")) });
   } catch (error) {
     if (error instanceof AuthError) return { error: "註冊成功，但自動登入失敗，請手動登入" };
     throw error; // NEXT_REDIRECT：讓導頁生效
@@ -51,7 +57,7 @@ export async function loginAction(
     await signIn("credentials", {
       email: formData.get("email"),
       password: formData.get("password"),
-      redirectTo: "/",
+      redirectTo: safeNext(formData.get("next")),
     });
   } catch (error) {
     // signIn 成功時會丟出 NEXT_REDIRECT，必須重新拋出讓導頁生效
@@ -68,6 +74,6 @@ export async function logoutAction() {
 }
 
 // 用 LINE 登入（導向 LINE 授權頁）
-export async function lineSignInAction() {
-  await signIn("line", { redirectTo: "/" });
+export async function lineSignInAction(formData: FormData) {
+  await signIn("line", { redirectTo: safeNext(formData.get("next")) });
 }

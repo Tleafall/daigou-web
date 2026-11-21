@@ -8,45 +8,76 @@ import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "會員登入" };
 
-export default async function LoginPage() {
-  // 已登入就直接回首頁
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  // 登入後要回去的頁面（只接受站內路徑）
+  const { next: rawNext } = await searchParams;
+  const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+  const fromCheckout = next.startsWith("/checkout");
+
+  // 已登入就直接回原本要去的頁面
   const session = await auth();
-  if (session?.user) redirect("/");
+  if (session?.user) redirect(next);
 
   const site = await getSettings();
+
+  // LINE 登入按鈕（.env 有填金鑰才會出現）
+  const lineButton = lineLoginEnabled && (
+    <form action={lineSignInAction}>
+      <input type="hidden" name="next" value={next} />
+      <button
+        type="submit"
+        className="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
+        style={{ backgroundColor: "#06C755" }}
+      >
+        <span className="grid h-5 w-5 place-items-center rounded bg-white text-[11px] font-bold text-[#06C755]">
+          L
+        </span>
+        使用 LINE 登入{fromCheckout ? "（免註冊）" : ""}
+      </button>
+    </form>
+  );
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-12">
       <div className="w-full rounded-2xl border border-line bg-white p-8 shadow-sm">
         <h1 className="text-center text-xl font-bold text-brand">{site.name}</h1>
         <p className="mt-1 text-center text-sm text-ink/60">
-          登入以查看訂單、加快結帳
+          {fromCheckout ? "登入後會直接回到結帳，購物車內容都還在" : "登入以查看訂單、加快結帳"}
         </p>
 
-        {/* 帳密登入 */}
-        <div className="mt-6">
-          <LoginForm />
-        </div>
-
-        {/* LINE 登入（.env 有填金鑰才會出現） */}
-        {lineLoginEnabled && (
-          <form action={lineSignInAction} className="mt-3">
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#06C755" }}
-            >
-              <span className="grid h-5 w-5 place-items-center rounded bg-white text-[11px] font-bold text-[#06C755]">
-                L
-              </span>
-              使用 LINE 登入
-            </button>
-          </form>
+        {fromCheckout ? (
+          <>
+            {/* 從結帳過來：LINE 一鍵登入放最前面 */}
+            {lineButton && <div className="mt-6">{lineButton}</div>}
+            {lineButton && (
+              <div className="my-4 flex items-center gap-3 text-xs text-ink/40">
+                <span className="h-px flex-1 bg-line" />或用 Email 登入<span className="h-px flex-1 bg-line" />
+              </div>
+            )}
+            <div className={lineButton ? "" : "mt-6"}>
+              <LoginForm next={next} />
+            </div>
+          </>
+        ) : (
+          <>
+            {/* 帳密登入 */}
+            <div className="mt-6">
+              <LoginForm next={next} />
+            </div>
+            {lineButton && <div className="mt-3">{lineButton}</div>}
+          </>
         )}
 
         <p className="mt-4 text-center text-sm text-ink/60">
           還沒有帳號？{" "}
-          <Link href="/register" className="font-medium text-brand hover:underline">
+          <Link
+            href={next === "/" ? "/register" : `/register?next=${encodeURIComponent(next)}`}
+            className="font-medium text-brand hover:underline"
+          >
             註冊會員
           </Link>
         </p>

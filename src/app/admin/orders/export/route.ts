@@ -38,6 +38,7 @@ export async function GET() {
     "合計",
     "付款方式",
     "備註",
+    "從哪裡知道我們",
   ];
 
   const rows = orders.map((o) => [
@@ -56,6 +57,7 @@ export async function GET() {
     o.totalAmount,
     "賣貨便取貨付款",
     o.customerNote ?? "",
+    o.referralSource ?? "",
   ]);
 
   // 前置 BOM 讓 Excel 正確辨識 UTF-8 中文

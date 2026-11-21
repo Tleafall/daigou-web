@@ -30,3 +30,20 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/* 聖誕雪花（FestiveSnow） */
+.festive-flake {
+  position: absolute;
+  top: -12px;
+  border-radius: 9999px;
+  background: #f4f8ff;
+  box-shadow: 0 0 2px 1px rgba(150, 175, 215, 0.8);
+  animation-name: festive-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes festive-fall {
+  to {
+    transform: translate3d(var(--drift, 0), 105vh, 0);
+  }
+}

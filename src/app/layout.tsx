@@ -10,6 +10,8 @@ import { listCategories } from "@/lib/category-store";
 import { countPendingOrders } from "@/lib/store";
 import { getSettings } from "@/lib/settings-store";
 import { SettingsProvider } from "@/lib/settings-context";
+import { siteUrl } from "@/lib/site-url";
+import { FestiveSnow } from "@/components/festive-snow";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,12 +25,24 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
+  const description = `${settings.tagline}。日韓正品現貨，到 7-11 取貨才付款。`;
   return {
+    metadataBase: new URL(siteUrl()),
     title: {
       default: `${settings.name} — ${settings.tagline}`,
       template: `%s — ${settings.name}`,
     },
-    description: settings.tagline,
+    description,
+    // LINE／FB 分享時的預覽卡（商品頁會改用商品圖）
+    openGraph: {
+      type: "website",
+      locale: "zh_TW",
+      siteName: settings.name,
+      title: settings.name,
+      description,
+      images: [{ url: "/og-default.jpg", width: 1200, height: 630, alt: settings.name }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -57,6 +71,7 @@ export default async function RootLayout({
             <PromoBanner />
             <main className="flex-1">{children}</main>
             <SiteFooter />
+            <FestiveSnow />
           </CartProvider>
         </SettingsProvider>
       </body>

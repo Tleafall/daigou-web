@@ -1,6 +1,7 @@
 "use client";
 
 import type { ProductImage } from "@/lib/mock-data";
+import { cldUrl } from "@/lib/cld";
 
 export function ProductGallery({
   images,
@@ -41,7 +42,7 @@ export function ProductGallery({
     <div className="flex flex-col gap-3">
       <div className="aspect-square w-full overflow-hidden rounded-2xl" style={{ background: bg }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={images[active].url} alt={title} className="h-full w-full object-cover" />
+        <img src={cldUrl(images[active].url, 1200)} alt={title} className="h-full w-full object-cover" />
       </div>
       {images.length > 1 && (
         <div className="grid grid-cols-5 gap-3">
@@ -55,7 +56,7 @@ export function ProductGallery({
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img.url} alt="" className="h-full w-full object-cover" />
+              <img src={cldUrl(img.url, 200)} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
         </div>

@@ -14,6 +14,7 @@ import {
   setProductImageTag,
 } from "@/lib/product-image-actions";
 import { shrinkImageFile } from "@/lib/resize-image";
+import { cldUrl } from "@/lib/cld";
 
 const MAX_IMAGES = 6;
 
@@ -92,7 +93,7 @@ export function ProductImageManager({
             <div key={i} className="w-32 rounded-lg border border-line p-2">
               <div className="relative h-28 w-full overflow-hidden rounded-md ring-1 ring-line">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt="" className="h-full w-full object-cover" />
+                <img src={cldUrl(img.url, 300)} alt="" className="h-full w-full object-cover" />
                 {i === 0 && (
                   <span className="absolute left-1 top-1 rounded bg-brand px-1 text-[10px] text-white">
                     封面

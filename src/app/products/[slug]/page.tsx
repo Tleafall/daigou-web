@@ -6,6 +6,9 @@ import { getActiveProduct } from "@/lib/product-store";
 import { productCountLabel } from "@/lib/store";
 import { ProductView } from "@/components/product-view";
 import { ViewTracker } from "@/components/view-tracker";
+import { getSettings } from "@/lib/settings-store";
+import { seoDescription, seoText } from "@/lib/seo";
+import { cldUrl } from "@/lib/cld";
 
 export async function generateMetadata({
   params,
@@ -13,10 +16,27 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getActiveProduct(slug);
+  const [product, settings] = await Promise.all([getActiveProduct(slug), getSettings()]);
+  if (!product) return { title: "商品" };
+
+  // 搜尋結果／分享卡用乾淨標題（拿掉 emoji、效期字），頁面上的商品名稱不變
+  const title = seoText(product.title) || product.title;
+  const description = seoDescription(product.description) || settings.tagline;
+  const cover = product.images[0]?.url;
+  const image = cover && /^https?:\/\//i.test(cover) ? cldUrl(cover, 1200) : "/og-default.jpg";
   return {
-    title: product ? product.title : "商品",
-    description: product?.description,
+    title,
+    description,
+    alternates: { canonical: `/products/${product.slug}` },
+    openGraph: {
+      type: "website",
+      locale: "zh_TW",
+      siteName: settings.name,
+      url: `/products/${product.slug}`,
+      title,
+      description,
+      images: [{ url: image, alt: title }],
+    },
   };
 }
 
@@ -31,7 +51,7 @@ export default async function ProductPage({
 
   const totalStock = product.variants.reduce((s, v) => s + v.stock, 0);
   const [countLabel, catName] = await Promise.all([
-    productCountLabel(product.slug, totalStock, product.soldBase),
+    productCountLabel(product.slug, totalStock),
     categoryName(product.categorySlug),
   ]);
 
