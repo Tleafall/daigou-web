@@ -11,6 +11,7 @@ import { ProductCard } from "@/components/product-card";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { getSettings } from "@/lib/settings-store";
 import { siteUrl } from "@/lib/site-url";
+import { site as siteConfig } from "@/lib/site";
 
 export default async function Home() {
   const [categories, active, latestAll, featuredPicked, settings] = await Promise.all([
@@ -52,7 +53,7 @@ export default async function Home() {
         name: settings.name,
         url: `${base}/`,
         logo: `${base}/og-default.jpg`,
-        ...(settings.lineUrl ? { sameAs: [settings.lineUrl] } : {}),
+        sameAs: [siteConfig.shopeeUrl, ...(settings.lineUrl ? [settings.lineUrl] : [])],
       },
     ],
   };
@@ -81,7 +82,7 @@ export default async function Home() {
 
       {/* 信任標語：第一次來的客人最在意的兩件事 */}
       <p className="mt-4 text-center text-sm font-medium text-ink/70">
-        🛡️ 到 7-11 取貨才付款・日韓正品現貨
+        🛡️ 到 7-11 取貨才付款・日韓正品現貨・快速出貨
       </p>
 
       {/* 特色列 */}

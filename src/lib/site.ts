@@ -10,5 +10,7 @@ export const site = {
   lineId: "@wts2638t", // 官方 LINE 基本 ID（帶訊息詢問用，@ 開頭）
   // 官方 LINE 加入好友連結（電腦/手機皆可用的 lin.ee 短連結）
   lineUrl: "https://lin.ee/v7oEi4m",
+  // 蝦皮賣場（客人可去看評價、銷售紀錄；頁尾/關於我們/Google 結構化資料會用到）
+  shopeeUrl: "https://shopee.tw/momey0712sue",
   email: "hello@example.com", // TODO: 換成實際客服信箱
 };

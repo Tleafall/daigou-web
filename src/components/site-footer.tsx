@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSettings } from "@/lib/settings-store";
+import { site as siteConfig } from "@/lib/site";
 
 export async function SiteFooter() {
   const site = await getSettings();
@@ -41,6 +42,17 @@ export async function SiteFooter() {
                 )}
               </li>
             )}
+            <li>
+              蝦皮：
+              <a
+                href={siteConfig.shopeeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-brand hover:underline"
+              >
+                看賣場評價
+              </a>
+            </li>
             {site.email && <li>Email：{site.email}</li>}
           </ul>
         </div>

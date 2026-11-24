@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSettings } from "@/lib/settings-store";
+import { site as siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "關於我們",
@@ -118,6 +119,14 @@ export default async function AboutPage() {
             加 LINE 問闆娘
           </a>
         )}
+        <a
+          href={siteConfig.shopeeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink/70 hover:border-brand hover:text-brand"
+        >
+          看蝦皮賣場評價
+        </a>
       </section>
     </div>
   );
