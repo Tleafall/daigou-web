@@ -53,6 +53,17 @@ export async function SiteFooter() {
                 看賣場評價
               </a>
             </li>
+            <li>
+              FB：
+              <a
+                href={siteConfig.fbGroupUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-brand hover:underline"
+              >
+                加入社團
+              </a>
+            </li>
             {site.email && <li>Email：{site.email}</li>}
           </ul>
         </div>

@@ -127,6 +127,14 @@ export default async function AboutPage() {
         >
           看蝦皮賣場評價
         </a>
+        <a
+          href={siteConfig.fbGroupUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink/70 hover:border-brand hover:text-brand"
+        >
+          加入 FB 社團
+        </a>
       </section>
     </div>
   );

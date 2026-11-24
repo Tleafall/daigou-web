@@ -12,5 +12,7 @@ export const site = {
   lineUrl: "https://lin.ee/v7oEi4m",
   // 蝦皮賣場（客人可去看評價、銷售紀錄；頁尾/關於我們/Google 結構化資料會用到）
   shopeeUrl: "https://shopee.tw/momey0712sue",
+  // FB 社團（頁尾/關於我們/結構化資料會用到）
+  fbGroupUrl: "https://www.facebook.com/share/g/1Cj2h5ZYha/",
   email: "hello@example.com", // TODO: 換成實際客服信箱
 };

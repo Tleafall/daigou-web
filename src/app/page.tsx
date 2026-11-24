@@ -53,7 +53,7 @@ export default async function Home() {
         name: settings.name,
         url: `${base}/`,
         logo: `${base}/og-default.jpg`,
-        sameAs: [siteConfig.shopeeUrl, ...(settings.lineUrl ? [settings.lineUrl] : [])],
+        sameAs: [siteConfig.shopeeUrl, siteConfig.fbGroupUrl, ...(settings.lineUrl ? [settings.lineUrl] : [])],
       },
     ],
   };
